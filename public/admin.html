@@ -10,7 +10,7 @@
 
   <div class="flex min-h-screen">
 
-    <!-- 左侧 Sidebar -->
+    <!-- 左侧 Sidebar 导航栏 -->
     <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between p-4 flex-shrink-0 border-r border-slate-800">
       <div>
         <div class="flex items-center gap-3 px-3 py-4 mb-6 border-b border-slate-800">
@@ -19,7 +19,7 @@
           </div>
           <div>
             <h1 class="text-white font-bold text-base leading-tight">流量引流后台</h1>
-            <p class="text-slate-500 text-xs mt-0.5">v3.0 Pro Version</p>
+            <p class="text-slate-500 text-xs mt-0.5">v3.1 Expandable Pro</p>
           </div>
         </div>
 
@@ -43,12 +43,12 @@
       </div>
     </aside>
 
-    <!-- 右侧 主内容 -->
+    <!-- 右侧 主内容展示区 -->
     <main class="flex-1 overflow-y-auto bg-slate-50">
       <header class="sticky top-0 bg-white/80 backdrop-blur border-b border-slate-200/80 px-8 py-4 flex justify-between items-center z-10">
         <h2 id="page-title" class="text-xl font-bold text-slate-800">数据报表总览</h2>
         <button onclick="fetchAllData()" class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-lg text-sm font-medium transition">
-          刷新数据
+          🔄 刷新数据
         </button>
       </header>
 
@@ -75,11 +75,11 @@
           </div>
         </section>
 
-        <!-- Tab 2: 用户轨迹与 IP 设备解析 -->
+        <!-- Tab 2: 用户轨迹与 IP (隐藏/展开手风琴样式) -->
         <section id="tab-journeys" class="tab-content hidden space-y-6">
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
-            <h3 class="text-base font-bold text-slate-900 mb-1">👥 访客跨站点点击轨迹与设备 IP</h3>
-            <p class="text-xs text-slate-500 mb-4">包含 Visitor ID、对应 IP 地址、客户端设备信息以及跨卡片点击的完整路径</p>
+            <h3 class="text-base font-bold text-slate-900 mb-1">👥 访客列表与点击轨迹</h3>
+            <p class="text-xs text-slate-500 mb-4">点击任意用户行，可展开/收起该用户的横向点击路径顺序</p>
 
             <div class="overflow-x-auto">
               <table class="w-full text-left border-collapse">
@@ -87,11 +87,11 @@
                   <tr class="border-b border-slate-200 text-slate-500 text-xs uppercase bg-slate-50">
                     <th class="p-3.5">访客 ID</th>
                     <th class="p-3.5">IP 地址</th>
-                    <th class="p-3.5">设备 / 浏览器</th>
+                    <th class="p-3.5">设备与浏览器</th>
                     <th class="p-3.5">渠道 / 活动</th>
                     <th class="p-3.5">点击频次</th>
-                    <th class="p-3.5">点击顺序路径</th>
                     <th class="p-3.5">最后活跃时间</th>
+                    <th class="p-3.5 text-center">点击轨迹</th>
                   </tr>
                 </thead>
                 <tbody id="journeysTable" class="divide-y divide-slate-100 text-sm">
@@ -152,8 +152,6 @@
 
         <!-- Tab 4: 链接生成与直接导入 -->
         <section id="tab-generator" class="tab-content hidden space-y-6">
-          
-          <!-- 快捷导入已有的 UTM 链接 -->
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-200 bg-blue-50/20 max-w-2xl">
             <h3 class="text-base font-bold text-slate-900 mb-1">📥 快捷导入已有 UTM 链接</h3>
             <p class="text-xs text-slate-500 mb-4">在外部生成好的链接直接粘贴到下方，系统将自动拆解 utm_source 并记录在案：</p>
@@ -165,7 +163,6 @@
             </div>
           </div>
 
-          <!-- 系统内部生成生成 UTM 链接 -->
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60 max-w-2xl">
             <h3 class="text-base font-bold text-slate-900 mb-4">🛠️ 手动配置生成新的推广链接</h3>
             <div class="space-y-4">
@@ -190,7 +187,6 @@
               <button onclick="generateAndSaveLink()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition">生成并保存链接</button>
             </div>
           </div>
-
         </section>
 
         <!-- Tab 5: 历史生成与导入记录 -->
@@ -216,7 +212,7 @@
         </section>
 
       </div>
- main
+    </main>
   </div>
 
   <script>
@@ -282,7 +278,7 @@
       }
     }
 
-    // User-Agent 友好解析工具
+    // User-Agent 解析函数
     function parseUserAgent(ua) {
       if (!ua || ua === 'Unknown') return { label: '未知设备', icon: '❓' };
       let os = '未知系统';
@@ -303,7 +299,7 @@
       return { label: `${os} · ${browser}`, icon };
     }
 
-    // 2. 用户点击轨迹与 IP 设备查看
+    // 2. 获取用户轨迹（隐藏/折叠横向展开逻辑）
     async function fetchUserJourneys() {
       const tbody = document.getElementById('journeysTable');
       try {
@@ -314,13 +310,20 @@
             tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">暂无轨迹记录</td></tr>';
             return;
           }
-          tbody.innerHTML = json.data.map(row => {
+
+          tbody.innerHTML = json.data.map((row, index) => {
             const uaInfo = parseUserAgent(row.user_agent);
+            const ipDisplay = row.ip_address || '未记录';
+            const rowId = `path-row-${index}`;
+            const btnId = `path-btn-${index}`;
+            const pathSteps = (row.click_path || '').split(' ➔ ').filter(Boolean);
+
             return `
-              <tr class="hover:bg-slate-50">
+              <!-- 主信息行：点击整行均可展开 -->
+              <tr class="hover:bg-slate-50 cursor-pointer transition-colors" onclick="togglePathRow('${rowId}', '${btnId}')">
                 <td class="p-3.5 font-mono text-xs text-slate-600">${row.visitor_id}</td>
                 <td class="p-3.5 font-mono text-xs text-slate-700">
-                  <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-600 border border-slate-200/60">${row.ip_address || '未记录'}</span>
+                  <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-600 border border-slate-200/60">${ipDisplay}</span>
                 </td>
                 <td class="p-3.5 text-xs text-slate-700">
                   <span class="inline-flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 rounded border border-slate-200/60" title="${row.user_agent || ''}">
@@ -337,18 +340,57 @@
                     ${row.total_clicks} 次点击
                   </span>
                 </td>
-                <td class="p-3.5 text-xs text-slate-800 font-medium">
-                  <div class="bg-slate-50 p-2 rounded-lg border border-slate-200/60 inline-block">
-                    ${(row.click_path || '').split(' ➔ ').map(site => `<span class="inline-block bg-white px-2 py-1 rounded shadow-sm border border-slate-200">${site}</span>`).join(' <span class="text-slate-400 mx-1">➔</span> ')}
+                <td class="p-3.5 text-xs text-slate-500">${new Date(row.last_active).toLocaleString()}</td>
+                <td class="p-3.5 text-center">
+                  <button id="${btnId}" class="px-2.5 py-1 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-medium transition-colors border border-blue-200/60">
+                    展开轨迹 🔽
+                  </button>
+                </td>
+              </tr>
+
+              <!-- 折叠的点击路径展开行（默认 hidden 隐藏） -->
+              <tr id="${rowId}" class="hidden bg-slate-50/80">
+                <td colspan="7" class="p-4 border-b border-slate-200/80">
+                  <div class="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-inner">
+                    <div class="text-xs font-semibold text-slate-500 mb-2 flex items-center gap-1">
+                      <span>🛣️ 访客点击路径顺序 (${pathSteps.length} 个站点)：</span>
+                    </div>
+                    <!-- 横向滚动布局容器 -->
+                    <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+                      ${pathSteps.map((site, i) => `
+                        <div class="flex-shrink-0 flex items-center gap-2">
+                          <span class="px-3 py-1.5 bg-slate-100 text-slate-800 font-medium rounded-lg border border-slate-200 shadow-sm">
+                            <span class="text-slate-400 mr-1 font-mono">${i + 1}.</span>${site}
+                          </span>
+                          ${i < pathSteps.length - 1 ? '<span class="text-slate-400 font-bold">➔</span>' : ''}
+                        </div>
+                      `).join('')}
+                    </div>
                   </div>
                 </td>
-                <td class="p-3.5 text-xs text-slate-500">${new Date(row.last_active).toLocaleString()}</td>
               </tr>
             `;
           }).join('');
         }
       } catch (err) {
         tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-red-500">获取失败: ${err.message}</td></tr>`;
+      }
+    }
+
+    // 控制隐藏/展开手风琴效果
+    function togglePathRow(rowId, btnId) {
+      const row = document.getElementById(rowId);
+      const btn = document.getElementById(btnId);
+      if (!row || !btn) return;
+
+      if (row.classList.contains('hidden')) {
+        row.classList.remove('hidden');
+        btn.innerHTML = '收起轨迹 🔼';
+        btn.className = 'px-2.5 py-1 text-xs bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg font-medium transition-colors border border-amber-200/60';
+      } else {
+        row.classList.add('hidden');
+        btn.innerHTML = '展开轨迹 🔽';
+        btn.className = 'px-2.5 py-1 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-medium transition-colors border border-blue-200/60';
       }
     }
 
