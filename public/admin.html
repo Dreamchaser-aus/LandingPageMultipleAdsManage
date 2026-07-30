@@ -19,7 +19,7 @@
           </div>
           <div>
             <h1 class="text-white font-bold text-base leading-tight">流量引流后台</h1>
-            <p class="text-slate-500 text-xs mt-0.5">v2.7 Enhanced</p>
+            <p class="text-slate-500 text-xs mt-0.5">v3.0 Pro Version</p>
           </div>
         </div>
 
@@ -28,7 +28,7 @@
             数据报表总览
           </button>
           <button id="nav-journeys" onclick="switchTab('journeys')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-            👥 用户点击轨迹
+            👥 用户轨迹与 IP
           </button>
           <button id="nav-websites" onclick="switchTab('websites')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
             🌐 落地页站点管理
@@ -52,7 +52,7 @@
         </button>
       </header>
 
-      <div class="p-8 max-w-6xl space-y-6">
+      <div class="p-8 max-w-7xl space-y-6">
 
         <!-- Tab 1: 数据报表总览 -->
         <section id="tab-stats" class="tab-content space-y-6">
@@ -75,25 +75,27 @@
           </div>
         </section>
 
-        <!-- Tab 2: 用户点击轨迹 -->
+        <!-- Tab 2: 用户轨迹与 IP 设备解析 -->
         <section id="tab-journeys" class="tab-content hidden space-y-6">
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
-            <h3 class="text-base font-bold text-slate-900 mb-1">👥 访客跨站点点击轨迹</h3>
-            <p class="text-xs text-slate-500 mb-4">识别同一个访客在落地页上的多次点击行为与访问路径</p>
+            <h3 class="text-base font-bold text-slate-900 mb-1">👥 访客跨站点点击轨迹与设备 IP</h3>
+            <p class="text-xs text-slate-500 mb-4">包含 Visitor ID、对应 IP 地址、客户端设备信息以及跨卡片点击的完整路径</p>
 
             <div class="overflow-x-auto">
               <table class="w-full text-left border-collapse">
                 <thead>
                   <tr class="border-b border-slate-200 text-slate-500 text-xs uppercase bg-slate-50">
                     <th class="p-3.5">访客 ID</th>
+                    <th class="p-3.5">IP 地址</th>
+                    <th class="p-3.5">设备 / 浏览器</th>
                     <th class="p-3.5">渠道 / 活动</th>
                     <th class="p-3.5">点击频次</th>
-                    <th class="p-3.5">跨站点点击顺序路径</th>
+                    <th class="p-3.5">点击顺序路径</th>
                     <th class="p-3.5">最后活跃时间</th>
                   </tr>
                 </thead>
                 <tbody id="journeysTable" class="divide-y divide-slate-100 text-sm">
-                  <tr><td colspan="5" class="p-6 text-center text-slate-400">加载中...</td></tr>
+                  <tr><td colspan="7" class="p-6 text-center text-slate-400">加载中...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -148,22 +150,22 @@
           </div>
         </section>
 
-        <!-- Tab 4: 生成与导入推广链接 (增强版) -->
+        <!-- Tab 4: 链接生成与直接导入 -->
         <section id="tab-generator" class="tab-content hidden space-y-6">
           
-          <!-- 区域 1：直接粘贴已有 UTM 链接导入 -->
+          <!-- 快捷导入已有的 UTM 链接 -->
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-200 bg-blue-50/20 max-w-2xl">
             <h3 class="text-base font-bold text-slate-900 mb-1">📥 快捷导入已有 UTM 链接</h3>
-            <p class="text-xs text-slate-500 mb-4">如果你已经在外部生成了完整链接，粘贴至下方，系统将自动识别参数并保存到记录。</p>
+            <p class="text-xs text-slate-500 mb-4">在外部生成好的链接直接粘贴到下方，系统将自动拆解 utm_source 并记录在案：</p>
             <div class="space-y-3">
-              <input type="url" id="externalUrlInput" placeholder="例如：https://your-domain.com/?utm_source=tiktok_ads&utm_campaign=summer_2026" class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+              <input type="url" id="externalUrlInput" placeholder="https://your-domain.com/?utm_source=tiktok_ads&utm_campaign=summer_2026" class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
               <button onclick="importExternalUtmLink()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-2">
-                解析并存入历史记录
+                解析并保存导入记录
               </button>
             </div>
           </div>
 
-          <!-- 区域 2：常规拼接生成链接 -->
+          <!-- 系统内部生成生成 UTM 链接 -->
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60 max-w-2xl">
             <h3 class="text-base font-bold text-slate-900 mb-4">🛠️ 手动配置生成新的推广链接</h3>
             <div class="space-y-4">
@@ -191,10 +193,10 @@
 
         </section>
 
-        <!-- Tab 5: 历史生成记录 -->
+        <!-- Tab 5: 历史生成与导入记录 -->
         <section id="tab-history" class="tab-content hidden space-y-6">
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
-            <h3 class="text-base font-bold text-slate-900 mb-4">📋 已生成的推广链接历史</h3>
+            <h3 class="text-base font-bold text-slate-900 mb-4">📋 推广链接历史记录</h3>
             <div class="overflow-x-auto">
               <table class="w-full text-left border-collapse">
                 <thead>
@@ -214,7 +216,7 @@
         </section>
 
       </div>
-    </main>
+ main
   </div>
 
   <script>
@@ -223,7 +225,7 @@
 
     const tabTitles = {
       'stats': '数据报表总览',
-      'journeys': '用户点击轨迹',
+      'journeys': '用户轨迹与 IP 设备',
       'websites': '落地页站点管理',
       'generator': '链接生成与导入',
       'history': '历史生成记录'
@@ -256,7 +258,7 @@
       fetchLinksHistory();
     }
 
-    // 1. 数据报表
+    // 1. 数据报表总览
     async function fetchStats() {
       const tbody = document.getElementById('statsTable');
       try {
@@ -280,7 +282,28 @@
       }
     }
 
-    // 2. 轨迹查看
+    // User-Agent 友好解析工具
+    function parseUserAgent(ua) {
+      if (!ua || ua === 'Unknown') return { label: '未知设备', icon: '❓' };
+      let os = '未知系统';
+      let browser = '未知浏览器';
+      let icon = '💻';
+
+      if (/iphone|ipad|ipod/i.test(ua)) { os = 'iOS'; icon = '📱'; }
+      else if (/android/i.test(ua)) { os = 'Android'; icon = '📱'; }
+      else if (/macintosh|mac os x/i.test(ua)) { os = 'macOS'; icon = '💻'; }
+      else if (/windows/i.test(ua)) { os = 'Windows'; icon = '💻'; }
+
+      if (/micromessenger/i.test(ua)) { browser = '微信'; }
+      else if (/tiktok|bytedance/i.test(ua)) { browser = 'TikTok App'; }
+      else if (/chrome/i.test(ua) && !/edg/i.test(ua)) { browser = 'Chrome'; }
+      else if (/safari/i.test(ua) && !/chrome/i.test(ua)) { browser = 'Safari'; }
+      else if (/edg/i.test(ua)) { browser = 'Edge'; }
+
+      return { label: `${os} · ${browser}`, icon };
+    }
+
+    // 2. 用户点击轨迹与 IP 设备查看
     async function fetchUserJourneys() {
       const tbody = document.getElementById('journeysTable');
       try {
@@ -288,32 +311,44 @@
         const json = await res.json();
         if (json.success) {
           if (!json.data || json.data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">暂无用户轨迹记录</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">暂无轨迹记录</td></tr>';
             return;
           }
-          tbody.innerHTML = json.data.map(row => `
-            <tr class="hover:bg-slate-50">
-              <td class="p-3.5 font-mono text-xs text-slate-600">${row.visitor_id}</td>
-              <td class="p-3.5">
-                <span class="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs font-semibold">${row.source}</span>
-                <span class="text-xs text-slate-400 ml-1">${row.campaign}</span>
-              </td>
-              <td class="p-3.5">
-                <span class="px-2.5 py-1 ${row.total_clicks > 1 ? 'bg-amber-100 text-amber-700 font-bold' : 'bg-slate-100 text-slate-600'} rounded-full text-xs">
-                  ${row.total_clicks} 次点击
-                </span>
-              </td>
-              <td class="p-3.5 text-xs text-slate-800 font-medium">
-                <div class="bg-slate-50 p-2 rounded-lg border border-slate-200/60 inline-block">
-                  ${(row.click_path || '').split(' ➔ ').map(site => `<span class="inline-block bg-white px-2 py-1 rounded shadow-sm border border-slate-200">${site}</span>`).join(' <span class="text-slate-400 mx-1">➔</span> ')}
-                </div>
-              </td>
-              <td class="p-3.5 text-xs text-slate-500">${new Date(row.last_active).toLocaleString()}</td>
-            </tr>
-          `).join('');
+          tbody.innerHTML = json.data.map(row => {
+            const uaInfo = parseUserAgent(row.user_agent);
+            return `
+              <tr class="hover:bg-slate-50">
+                <td class="p-3.5 font-mono text-xs text-slate-600">${row.visitor_id}</td>
+                <td class="p-3.5 font-mono text-xs text-slate-700">
+                  <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-600 border border-slate-200/60">${row.ip_address || '未记录'}</span>
+                </td>
+                <td class="p-3.5 text-xs text-slate-700">
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 rounded border border-slate-200/60" title="${row.user_agent || ''}">
+                    <span>${uaInfo.icon}</span>
+                    <span class="font-medium">${uaInfo.label}</span>
+                  </span>
+                </td>
+                <td class="p-3.5">
+                  <span class="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs font-semibold">${row.source}</span>
+                  <span class="text-xs text-slate-400 ml-1">${row.campaign}</span>
+                </td>
+                <td class="p-3.5">
+                  <span class="px-2.5 py-1 ${row.total_clicks > 1 ? 'bg-amber-100 text-amber-700 font-bold' : 'bg-slate-100 text-slate-600'} rounded-full text-xs">
+                    ${row.total_clicks} 次点击
+                  </span>
+                </td>
+                <td class="p-3.5 text-xs text-slate-800 font-medium">
+                  <div class="bg-slate-50 p-2 rounded-lg border border-slate-200/60 inline-block">
+                    ${(row.click_path || '').split(' ➔ ').map(site => `<span class="inline-block bg-white px-2 py-1 rounded shadow-sm border border-slate-200">${site}</span>`).join(' <span class="text-slate-400 mx-1">➔</span> ')}
+                  </div>
+                </td>
+                <td class="p-3.5 text-xs text-slate-500">${new Date(row.last_active).toLocaleString()}</td>
+              </tr>
+            `;
+          }).join('');
         }
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-500">获取失败: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-red-500">获取失败: ${err.message}</td></tr>`;
       }
     }
 
@@ -413,7 +448,7 @@
       }
     }
 
-    // 4. 新增功能：快捷解析并导入外部 UTM 链接
+    // 4. 解析并导入外部 UTM 链接
     async function importExternalUtmLink() {
       const inputUrl = document.getElementById('externalUrlInput').value.trim();
       if (!inputUrl) return alert('请输入完备的 UTM 链接');
@@ -438,13 +473,11 @@
         if (json.success) {
           document.getElementById('externalUrlInput').value = '';
           fetchLinksHistory();
-          alert(`导入成功！\n识别到渠道(source): ${source}\n识别到活动(campaign): ${campaign}`);
+          alert(`导入成功！\n识别渠道(source): ${source}\n识别活动(campaign): ${campaign}`);
           switchTab('history');
-        } else {
-          alert('导入失败: ' + json.error);
         }
       } catch (err) {
-        alert('链接格式不正确！请输入带有 http:// 或 https:// 的完整 URL');
+        alert('链接格式不正确！请确保包含 http:// 或 https://');
       }
     }
 
@@ -456,11 +489,9 @@
         const json = await res.json();
         if (json.success) {
           renderLinksTable(json.data);
-        } else {
-          tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-red-500">接口返回错误: ${json.error}</td></tr>`;
         }
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-red-500">网络连接异常: ${err.message}</td></tr>`;
+        console.error(err);
       }
     }
 
@@ -512,8 +543,6 @@
           fetchLinksHistory();
           alert('链接生成成功！');
           switchTab('history');
-        } else {
-          alert('生成失败: ' + json.error);
         }
       } catch (err) {
         alert('请输入包含 https:// 的完整网址');
