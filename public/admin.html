@@ -6,158 +6,266 @@
   <title>引流效果管理后台</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen">
+<body class="bg-slate-50 text-slate-800 antialiased font-sans">
 
-  <div class="max-w-6xl mx-auto px-4 py-8">
-    <!-- 头部 -->
-    <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+  <div class="flex min-h-screen">
+
+    <!-- ==================== 左侧 Sidebar 导航栏 ==================== -->
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between p-4 flex-shrink-0 border-r border-slate-800">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900">多渠道引流数据后台</h1>
-        <p class="text-slate-500 text-sm mt-1">支持多站点流量监测与 ROI 效果分析</p>
-      </div>
-      <button onclick="fetchAllData()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">刷新所有数据</button>
-    </header>
-
-    <!-- 1. 落地页展示站点管理 (Logo 与 链接) -->
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-8">
-      <h2 class="text-lg font-bold mb-4 text-slate-900">🌐 落地页展示站点管理 (Logo与链接)</h2>
-      
-      <!-- 表单：新增 / 修改站点 -->
-      <form id="websiteForm" onsubmit="handleWebsiteSubmit(event)" class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
-        <input type="hidden" id="editSiteId">
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">站点名称</label>
-          <input type="text" id="siteName" required placeholder="如：官方商城" class="w-full px-3 py-2 border rounded-lg text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">副标题/描述</label>
-          <input type="text" id="siteDesc" placeholder="如：限时折扣领券中心" class="w-full px-3 py-2 border rounded-lg text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">跳转 URL</label>
-          <input type="url" id="siteUrl" required placeholder="https://..." class="w-full px-3 py-2 border rounded-lg text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Logo图片URL</label>
-          <input type="url" id="siteIcon" placeholder="https://.../logo.png" class="w-full px-3 py-2 border rounded-lg text-sm">
-        </div>
-        <div class="flex items-end gap-2">
-          <button type="submit" id="submitBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg text-sm font-medium transition">添加站点</button>
-          <button type="button" id="cancelBtn" onclick="resetWebsiteForm()" class="hidden bg-slate-300 hover:bg-slate-400 text-slate-700 py-2 px-3 rounded-lg text-sm transition">取消</button>
-        </div>
-      </form>
-
-      <!-- 站点列表表格 -->
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="border-b border-slate-200 text-slate-500 text-xs uppercase bg-slate-50">
-              <th class="p-3">Logo</th>
-              <th class="p-3">站点名称</th>
-              <th class="p-3">描述</th>
-              <th class="p-3">目标链接</th>
-              <th class="p-3">操作</th>
-            </tr>
-          </thead>
-          <tbody id="websiteManageTable" class="divide-y divide-slate-100 text-sm">
-            <tr><td colspan="5" class="p-4 text-center text-slate-400">加载中...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- 2. 下方双列布局 -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      
-      <!-- 左侧：推广链接生成器 -->
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-fit">
-        <h2 class="text-lg font-bold mb-4 text-slate-900">🔗 推广链接生成器</h2>
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">引流目标落地页</label>
-            <input type="text" id="targetUrl" class="w-full px-3 py-2 border rounded-lg text-sm">
+        <!-- 品牌 / 系统标题 -->
+        <div class="flex items-center gap-3 px-3 py-4 mb-6 border-b border-slate-800">
+          <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-500/30">
+            📊
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">引流渠道 (utm_source)</label>
-            <select id="channelSelect" class="w-full px-3 py-2 border rounded-lg text-sm">
-              <option value="tiktok">TikTok 抖音</option>
-              <option value="xiaohongshu">小红书</option>
-              <option value="google_ads">Google 广告</option>
-              <option value="facebook">Facebook</option>
-              <option value="wechat">微信公众号/群</option>
-            </select>
+            <h1 class="text-white font-bold text-base leading-tight">流量引流后台</h1>
+            <p class="text-slate-500 text-xs mt-0.5">v2.0 Dashboard</p>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">活动名称 (utm_campaign)</label>
-            <input type="text" id="campaignInput" placeholder="2026_promo" class="w-full px-3 py-2 border rounded-lg text-sm">
-          </div>
-          <button onclick="generateAndSaveLink()" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-2 rounded-lg text-sm font-medium transition">生成并保存链接</button>
         </div>
+
+        <!-- 导航菜单 -->
+        <nav class="space-y-1.5">
+          <button id="nav-stats" onclick="switchTab('stats')" 
+                  class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-sm shadow-blue-600/20">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            数据报表总览
+          </button>
+
+          <button id="nav-websites" onclick="switchTab('websites')" 
+                  class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+            落地页站点管理
+          </button>
+
+          <button id="nav-generator" onclick="switchTab('generator')" 
+                  class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+            生成推广链接
+          </button>
+
+          <button id="nav-history" onclick="switchTab('history')" 
+                  class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01m-.01 4h.01"></path></svg>
+            历史生成记录
+          </button>
+        </nav>
       </div>
 
-      <!-- 右侧：数据报表 & 历史链接表 -->
-      <div class="lg:col-span-2 space-y-8">
-        
-        <!-- 渠道转化数据明细 -->
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-          <h2 class="text-lg font-bold mb-4 text-slate-900">📊 渠道转化数据明细</h2>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-              <thead>
-                <tr class="border-b border-slate-200 text-slate-500 text-xs uppercase bg-slate-50">
-                  <th class="p-3">目标域名</th>
-                  <th class="p-3">引流渠道</th>
-                  <th class="p-3">浏览量 (PV)</th>
-                  <th class="p-3">转化量 (Leads)</th>
-                </tr>
-              </thead>
-              <tbody id="statsTable" class="divide-y divide-slate-100 text-sm">
-                <tr><td colspan="4" class="p-4 text-center text-slate-400">加载中...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+      <!-- 底部系统状态 -->
+      <div class="pt-4 border-t border-slate-800 text-xs text-slate-500">
+        <p>系统环境: Railway App</p>
+        <p class="mt-1 text-slate-600">数据库: PostgreSQL Connected</p>
+      </div>
+    </aside>
 
-        <!-- 已生成的推广链接历史 (补齐) -->
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-          <h2 class="text-lg font-bold mb-4 text-slate-900">📋 已生成的推广链接历史</h2>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-              <thead>
-                <tr class="border-b border-slate-200 text-slate-500 text-xs uppercase bg-slate-50">
-                  <th class="p-3">渠道</th>
-                  <th class="p-3">活动名</th>
-                  <th class="p-3">完整链接</th>
-                  <th class="p-3">操作</th>
-                </tr>
-              </thead>
-              <tbody id="linksTable" class="divide-y divide-slate-100 text-sm">
-                <tr><td colspan="4" class="p-4 text-center text-slate-400">暂无历史链接记录</td></tr>
-              </tbody>
-            </table>
+    <!-- ==================== 右侧 主内容区域 ==================== -->
+    <main class="flex-1 overflow-y-auto bg-slate-50">
+
+      <!-- 顶栏 -->
+      <header class="sticky top-0 bg-white/80 backdrop-blur border-b border-slate-200/80 px-8 py-4 flex justify-between items-center z-10">
+        <h2 id="page-title" class="text-xl font-bold text-slate-800">数据报表总览</h2>
+        <button onclick="fetchAllData()" class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-lg text-sm font-medium transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          刷新所有数据
+        </button>
+      </header>
+
+      <div class="p-8 max-w-6xl">
+
+        <!-- 区域 1: 数据报表总览 -->
+        <section id="tab-stats" class="tab-content space-y-6">
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
+            <h3 class="text-base font-bold text-slate-900 mb-4">📊 渠道转化效果明细</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-200 text-slate-500 text-xs uppercase bg-slate-50">
+                    <th class="p-3.5">目标域名/站点</th>
+                    <th class="p-3.5">引流渠道 (utm_source)</th>
+                    <th class="p-3.5">浏览量 (PV)</th>
+                    <th class="p-3.5">点击转化 (Leads)</th>
+                  </tr>
+                </thead>
+                <tbody id="statsTable" class="divide-y divide-slate-100 text-sm">
+                  <tr><td colspan="4" class="p-6 text-center text-slate-400">数据加载中...</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        </section>
+
+        <!-- 区域 2: 落地页站点管理 -->
+        <section id="tab-websites" class="tab-content hidden space-y-6">
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
+            <h3 class="text-base font-bold text-slate-900 mb-4">🌐 动态添加 / 编辑落地页卡片</h3>
+            
+            <form id="websiteForm" onsubmit="handleWebsiteSubmit(event)" class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
+              <input type="hidden" id="editSiteId">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">站点名称</label>
+                <input type="text" id="siteName" required placeholder="如：官方商城" class="w-full px-3 py-2 border rounded-lg text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">副标题/描述</label>
+                <input type="text" id="siteDesc" placeholder="如：限时折扣领券" class="w-full px-3 py-2 border rounded-lg text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">跳转 URL</label>
+                <input type="url" id="siteUrl" required placeholder="https://..." class="w-full px-3 py-2 border rounded-lg text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Logo图片 URL</label>
+                <input type="url" id="siteIcon" placeholder="https://.../logo.png" class="w-full px-3 py-2 border rounded-lg text-sm">
+              </div>
+              <div class="flex items-end gap-2">
+                <button type="submit" id="submitBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg text-sm font-medium transition">保存站点</button>
+                <button type="button" id="cancelBtn" onclick="resetWebsiteForm()" class="hidden bg-slate-300 hover:bg-slate-400 text-slate-700 py-2 px-3 rounded-lg text-sm transition">取消</button>
+              </div>
+            </form>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-200 text-slate-500 text-xs uppercase bg-slate-50">
+                    <th class="p-3.5">Logo</th>
+                    <th class="p-3.5">站点名称</th>
+                    <th class="p-3.5">描述</th>
+                    <th class="p-3.5">目标链接</th>
+                    <th class="p-3.5">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="websiteManageTable" class="divide-y divide-slate-100 text-sm">
+                  <tr><td colspan="5" class="p-6 text-center text-slate-400">加载中...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 区域 3: 生成推广链接 -->
+        <section id="tab-generator" class="tab-content hidden space-y-6">
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60 max-w-2xl">
+            <h3 class="text-base font-bold text-slate-900 mb-4">🔗 创建带追踪参数的推广链接</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">引流目标落地页 URL</label>
+                <input type="text" id="targetUrl" class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">引流渠道 (utm_source)</label>
+                <select id="channelSelect" class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  <option value="tiktok">TikTok 抖音</option>
+                  <option value="xiaohongshu">小红书</option>
+                  <option value="google_ads">Google 广告</option>
+                  <option value="facebook">Facebook</option>
+                  <option value="wechat">微信公众号/群</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">活动名称 (utm_campaign)</label>
+                <input type="text" id="campaignInput" placeholder="2026_summer_promo" class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <button onclick="generateAndSaveLink()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition">生成并保存链接</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 区域 4: 历史生成记录 -->
+        <section id="tab-history" class="tab-content hidden space-y-6">
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
+            <h3 class="text-base font-bold text-slate-900 mb-4">📋 已生成的推广链接历史</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-200 text-slate-500 text-xs uppercase bg-slate-50">
+                    <th class="p-3.5">渠道</th>
+                    <th class="p-3.5">活动名</th>
+                    <th class="p-3.5">完整推广链接</th>
+                    <th class="p-3.5">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="linksTable" class="divide-y divide-slate-100 text-sm">
+                  <tr><td colspan="4" class="p-6 text-center text-slate-400">暂无历史链接记录</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
 
       </div>
-    </div>
+    </main>
   </div>
 
+  <!-- ==================== JavaScript 前端逻辑 ==================== -->
   <script>
     const baseUrl = window.location.origin;
     let websitesData = [];
+
+    const tabTitles = {
+      'stats': '数据报表总览',
+      'websites': '落地页站点管理',
+      'generator': '生成推广链接',
+      'history': '历史生成记录'
+    };
 
     window.onload = () => {
       document.getElementById('targetUrl').value = baseUrl;
       fetchAllData();
     };
 
-    function fetchAllData() {
-      fetchManageWebsites();
-      fetchStats();
-      fetchLinksHistory(); // 恢复：获取历史链接
+    // 切换 Sidebar 选项卡逻辑
+    function switchTab(tabId) {
+      // 隐藏所有 Tab
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      // 重置所有 Nav 按钮样式
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.className = "nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all";
+      });
+
+      // 显示选中的 Tab 与设置按钮高亮
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      if (activeNav) {
+        activeNav.className = "nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-sm shadow-blue-600/20";
+      }
+
+      // 更新页眉标题
+      document.getElementById('page-title').innerText = tabTitles[tabId] || '后台管理';
     }
 
-    // ----------------- 1. 落地页站点管理 -----------------
+    function fetchAllData() {
+      fetchStats();
+      fetchManageWebsites();
+      fetchLinksHistory();
+    }
+
+    // 1. 获取统计数据
+    async function fetchStats() {
+      try {
+        const res = await fetch(`${baseUrl}/api/stats`);
+        const json = await res.json();
+        if (json.success) {
+          const tbody = document.getElementById('statsTable');
+          if (!json.data || json.data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400">暂无引流数据</td></tr>';
+            return;
+          }
+          tbody.innerHTML = json.data.map(row => `
+            <tr class="hover:bg-slate-50">
+              <td class="p-3.5 font-medium text-slate-800">${row.domain}</td>
+              <td class="p-3.5"><span class="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-md text-xs font-semibold">${row.source}</span></td>
+              <td class="p-3.5 text-slate-600">${row.views}</td>
+              <td class="p-3.5 font-semibold text-emerald-600">${row.leads}</td>
+            </tr>
+          `).join('');
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // 2. 站点管理 API 交互
     async function fetchManageWebsites() {
       try {
         const res = await fetch(`${baseUrl}/api/websites`);
@@ -174,21 +282,21 @@
     function renderManageWebsitesTable(data) {
       const tbody = document.getElementById('websiteManageTable');
       if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">尚未配置站点，请在上方添加</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">尚未配置站点，请在上方添加</td></tr>';
         return;
       }
 
       tbody.innerHTML = data.map(site => `
         <tr class="hover:bg-slate-50">
-          <td class="p-3">
+          <td class="p-3.5">
             <img src="${site.icon_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + site.id}" class="w-8 h-8 rounded-lg object-cover bg-slate-100">
           </td>
-          <td class="p-3 font-semibold text-slate-800">${site.name}</td>
-          <td class="p-3 text-xs text-slate-500">${site.desc_text || '-'}</td>
-          <td class="p-3 text-xs text-blue-600 max-w-xs truncate"><a href="${site.url}" target="_blank">${site.url}</a></td>
-          <td class="p-3 space-x-2">
-            <button onclick="editSite(${site.id})" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded">修改</button>
-            <button onclick="deleteSite(${site.id})" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1 rounded">删除</button>
+          <td class="p-3.5 font-semibold text-slate-800">${site.name}</td>
+          <td class="p-3.5 text-xs text-slate-500">${site.desc_text || '-'}</td>
+          <td class="p-3.5 text-xs text-blue-600 max-w-xs truncate"><a href="${site.url}" target="_blank">${site.url}</a></td>
+          <td class="p-3.5 space-x-2">
+            <button onclick="editSite(${site.id})" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md font-medium">修改</button>
+            <button onclick="deleteSite(${site.id})" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1 rounded-md font-medium">删除</button>
           </td>
         </tr>
       `).join('');
@@ -238,13 +346,13 @@
     function resetWebsiteForm() {
       document.getElementById('websiteForm').reset();
       document.getElementById('editSiteId').value = '';
-      document.getElementById('submitBtn').innerText = '添加站点';
+      document.getElementById('submitBtn').innerText = '保存站点';
       document.getElementById('submitBtn').className = 'w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg text-sm font-medium transition';
       document.getElementById('cancelBtn').classList.add('hidden');
     }
 
     async function deleteSite(id) {
-      if (!confirm('确定要删除这个站点吗？')) return;
+      if (!confirm('确定删除该站点？')) return;
       try {
         await fetch(`${baseUrl}/api/websites/${id}`, { method: 'DELETE' });
         fetchManageWebsites();
@@ -253,38 +361,13 @@
       }
     }
 
-    // ----------------- 2. 数据报表 -----------------
-    async function fetchStats() {
-      try {
-        const res = await fetch(`${baseUrl}/api/stats`);
-        const json = await res.json();
-        if (json.success) {
-          const tbody = document.getElementById('statsTable');
-          if (!json.data || json.data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">暂无引流数据</td></tr>';
-            return;
-          }
-          tbody.innerHTML = json.data.map(row => `
-            <tr class="hover:bg-slate-50">
-              <td class="p-3 font-medium text-slate-800">${row.domain}</td>
-              <td class="p-3"><span class="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs font-semibold">${row.source}</span></td>
-              <td class="p-3 text-slate-600">${row.views}</td>
-              <td class="p-3 font-semibold text-emerald-600">${row.leads}</td>
-            </tr>
-          `).join('');
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
-    // ----------------- 3. 生成并展示推广链接历史 (补齐) -----------------
+    // 3. 推广链接生成与历史记录
     async function generateAndSaveLink() {
       const targetUrl = document.getElementById('targetUrl').value.trim();
       const channel = document.getElementById('channelSelect').value;
       const campaign = document.getElementById('campaignInput').value.trim() || 'default';
 
-      if (!targetUrl) return alert('请输入目标落地页 URL');
+      if (!targetUrl) return alert('请输入目标 URL');
 
       try {
         const urlObj = new URL(targetUrl);
@@ -305,11 +388,12 @@
 
         const json = await res.json();
         if (json.success) {
-          fetchLinksHistory(); // 重新加载历史表格
-          alert('链接已成功生成并保存到历史列表！');
+          fetchLinksHistory();
+          alert('推广链接已成功生成！已同步保存至【历史生成记录】中。');
+          switchTab('history'); // 自动跳转到历史记录页面查看
         }
       } catch (err) {
-        alert('链接格式不正确，请填写包含 https:// 的完整网址');
+        alert('请输入包含 https:// 的正确网址格式');
       }
     }
 
@@ -317,9 +401,7 @@
       try {
         const res = await fetch(`${baseUrl}/api/links`);
         const json = await res.json();
-        if (json.success) {
-          renderLinksTable(json.data);
-        }
+        if (json.success) renderLinksTable(json.data);
       } catch (err) {
         console.error(err);
       }
@@ -328,17 +410,17 @@
     function renderLinksTable(data) {
       const tbody = document.getElementById('linksTable');
       if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">尚未生成过链接</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400">尚未生成过链接</td></tr>';
         return;
       }
 
       tbody.innerHTML = data.map(row => `
         <tr class="hover:bg-slate-50">
-          <td class="p-3"><span class="px-2 py-1 bg-slate-100 text-slate-700 rounded text-xs font-semibold">${row.source}</span></td>
-          <td class="p-3 text-slate-600">${row.campaign}</td>
-          <td class="p-3 text-xs text-slate-500 max-w-xs truncate" title="${row.full_link}">${row.full_link}</td>
-          <td class="p-3">
-            <button onclick="copyToClipboard('${row.full_link}')" class="text-xs bg-slate-100 hover:bg-blue-50 text-blue-600 px-2.5 py-1 rounded border border-slate-200 font-medium transition">复制</button>
+          <td class="p-3.5"><span class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-md text-xs font-semibold">${row.source}</span></td>
+          <td class="p-3.5 text-slate-600">${row.campaign}</td>
+          <td class="p-3.5 text-xs text-slate-500 max-w-xs truncate" title="${row.full_link}">${row.full_link}</td>
+          <td class="p-3.5">
+            <button onclick="copyToClipboard('${row.full_link}')" class="text-xs bg-slate-100 hover:bg-blue-50 text-blue-600 px-3 py-1.5 rounded-md border border-slate-200 font-medium transition">一键复制</button>
           </td>
         </tr>
       `).join('');
@@ -346,7 +428,7 @@
 
     function copyToClipboard(text) {
       navigator.clipboard.writeText(text).then(() => {
-        alert('链接已复制到剪贴板！');
+        alert('链接已成功复制到剪贴板！');
       });
     }
   </script>
