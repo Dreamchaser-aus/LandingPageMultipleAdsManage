@@ -79,8 +79,8 @@
     // 初始化默认数据与读取
     const defaultData = {
       companies: [
-        { id: 1, name: "MegaWin Casino Malaysia", url: "#", desc_text: "Top-tier verified gaming platform offering safe entertainment and instant bonuses.", icon_url: "" },
-        { id: 2, name: "Lucky4D Partner Hub", url: "#", desc_text: "Trusted insights and smart play guides curated for professional enthusiasts.", icon_url: "" }
+        { id: 1, name: "MegaWin Casino Malaysia", url: "https://google.com", desc_text: "Top-tier verified gaming platform offering safe entertainment and instant bonuses.", icon_url: "" },
+        { id: 2, name: "Lucky4D Partner Hub", url: "https://google.com", desc_text: "Trusted insights and smart play guides curated for professional enthusiasts.", icon_url: "" }
       ],
       slides: [
         { badge: "Hot Bonuses 2026", title: "Expert Reviews & Smart Play Guidance", desc: "Discover trusted platform insights, verified ratings, and responsible play strategies curated by industry professionals.", btnText: "Explore Casinos" },
@@ -222,6 +222,7 @@
       return { source, campaign };
     }
 
+    // 追踪与跳转处理函数（API: /track）
     function trackAndRedirect(siteId, siteName, targetUrl) {
       const visitorId = getVisitorId();
       const { source, campaign } = captureAndGetUtm();
@@ -230,21 +231,26 @@
         visitor_id: visitorId,
         site_id: siteId,
         site_name: siteName,
-        target_domain: targetUrl,
+        target_url: targetUrl,
         source: source,
         campaign: campaign,
+        user_agent: navigator.userAgent,
         timestamp: new Date().toISOString()
       };
 
-      fetch('https://your-backend-api.com/api/track', {
+      // 发送到后台 /track 接口
+      fetch('/track', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        keepalive: true
+        keepalive: true // 保证跳转时，请求仍可在后台成功传输
       }).catch(err => console.error('Tracking failed:', err));
 
-      if(targetUrl && targetUrl !== '#') {
-        window.open(targetUrl, '_blank');
+      // 执行页面跳转
+      if (targetUrl && targetUrl !== '#') {
+        window.location.href = targetUrl;
+      } else {
+        alert('该平台暂未配置有效的跳转目标链接。');
       }
     }
 
