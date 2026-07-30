@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>专属优惠 - 立即领取</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script>
+    // ⚠️ 请在此处替换为你的 Railway API 域名 (末尾不要带斜杠)
+    const RAILWAY_API_URL = window.location.origin;
+
+    function getUTMParams() {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        source: params.get('utm_source') || 'organic',
+        campaign: params.get('utm_campaign') || 'none'
+      };
+    }
+
+    const trafficData = getUTMParams();
+
+    // 1. 页面加载自动上报 PV
+    window.addEventListener('DOMContentLoaded', () => {
+      if (RAILWAY_API_URL.includes("your-app.up.railway.app")) {
+        console.warn("提示: 请在 index.html 中将 RAILWAY_API_URL 替换为你自己的 Railway 真实域名！");
+        return;
+      }
+      fetch(`${RAILWAY_API_URL}/track/view`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          website_domain: window.location.hostname || 'localhost',
+          source: trafficData.source,
+          campaign: trafficData.campaign,
+          user_agent: navigator.userAgent
+        })
+      }).catch(err => console.error('Tracking Error:', err));
+    });
+
+    // 2. 提交表单时上报 Lead (转化)
+    async function submitForm(event) {
+      event.preventDefault();
+      const email = document.getElementById('emailInput').value;
+
+      if (RAILWAY_API_URL.includes("your-app.up.railway.app")) {
+        alert("请先用记事本或编辑器打开 index.html，把里面的 RAILWAY_API_URL 替换为你自己的 Railway 域名！");
+        return;
+      }
+
+      try {
+        await fetch(`${RAILWAY_API_URL}/track/lead`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            website_domain: window.location.hostname || 'localhost',
+            source: trafficData.source,
+            campaign: trafficData.campaign,
+            user_agent: navigator.userAgent,
+            extra_data: { email }
+          })
+        });
+
+        document.getElementById('formContainer').innerHTML = `
+          <div class="text-center py-6">
+            <div class="text-emerald-500 text-5xl mb-3">✓</div>
+            <h3 class="text-xl font-bold text-slate-800">领取成功！</h3>
+            <p class="text-slate-500 text-sm mt-1">资料已发送至您的邮箱，请注意查收。</p>
+          </div>
+        `;
+      } catch (err) {
+        alert('提交失败，请稍后重试');
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-4">
+
+  <div class="max-w-md w-full bg-slate-800 rounded-2xl p-8 shadow-2xl border border-slate-700">
+    <div class="text-center mb-6">
+      <span class="bg-blue-500/10 text-blue-400 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">限时福利</span>
+      <h1 class="text-2xl font-extrabold mt-3 text-white">获取 2026 最新行业实战指南</h1>
+      <p class="text-slate-400 text-sm mt-2">免费获取内部引流与转化策略手册，助你快速实现流量爆发。</p>
+    </div>
+
+    <div id="formContainer">
+      <form onsubmit="submitForm(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">您的工作邮箱</label>
+          <input type="email" id="emailInput" required placeholder="name@company.com" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+        </div>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition duration-200 shadow-lg shadow-blue-600/30 text-sm">
+          免费立即下载
+        </button>
+      </form>
+    </div>
+  </div>
+
+</body>
+</html>
