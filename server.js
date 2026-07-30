@@ -1,134 +1,117 @@
-require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
-const path = require('path');
 const { Pool } = require('pg');
+const path = require('path');
 
 const app = express();
-app.use(cors()); 
-app.use(express.json());
-
 const PORT = process.env.PORT || 3000;
 
+// PostgreSQL 数据库连接
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
 });
 
-// 自动初始化数据表（增加 websites 站点管理表）
-async function initDatabase() {
-  const createLogsTable = `
-    CREATE TABLE IF NOT EXISTS traffic_logs (
-      id SERIAL PRIMARY KEY,
-      domain VARCHAR(255) NOT NULL,
-      source VARCHAR(100) DEFAULT 'organic',
-      campaign VARCHAR(255) DEFAULT 'none',
-      ip_address VARCHAR(45),
-      device TEXT,
-      event_type VARCHAR(50) NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-  `;
-
-  const createLinksTable = `
-    CREATE TABLE IF NOT EXISTS tracking_links (
-      id SERIAL PRIMARY KEY,
-      target_url TEXT NOT NULL,
-      source VARCHAR(100) NOT NULL,
-      campaign VARCHAR(255) NOT NULL,
-      full_link TEXT NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-  `;
-
-  const createWebsitesTable = `
-    CREATE TABLE IF NOT EXISTS websites (
-      id SERIAL PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      desc_text TEXT,
-      url TEXT NOT NULL,
-      icon_url TEXT,
-      sort_order INT DEFAULT 0,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-  `;
-
-  try {
-    await pool.query(createLogsTable);
-    await pool.query(createLinksTable);
-    await pool.query(createWebsitesTable);
-    console.log('Database initialized: All tables are ready.');
-
-    // 检查是否有数据，若没有则插入示例数据
-    const checkRes = await pool.query(`SELECT COUNT(*) FROM websites`);
-    if (parseInt(checkRes.rows[0].count) === 0) {
-      await pool.query(`
-        INSERT INTO websites (name, desc_text, url, icon_url, sort_order) VALUES
-        ('官方主站', '获取最新产品资讯与核心服务', 'https://example.com', 'https://api.dicebear.com/7.x/identicon/svg?seed=site1', 1),
-        ('优惠商城', '限时特惠产品与领券中心', 'https://example.com', 'https://api.dicebear.com/7.x/identicon/svg?seed=site2', 2);
-      `);
-      console.log('Initial sample websites added.');
-    }
-  } catch (err) {
-    console.error('Error initializing database:', err);
-  }
-}
-
-if (process.env.DATABASE_URL) {
-  initDatabase();
-}
-
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+// 数据库建表初始化
+async function initDB() {
+  try {
+    // 1. 落地页站点表
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS websites (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        desc_text VARCHAR(255),
+        url TEXT NOT NULL,
+        icon_url TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
 
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
+    // 2. 推广链接历史表
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS links (
+        id SERIAL PRIMARY KEY,
+        target_url TEXT NOT NULL,
+        source VARCHAR(50) NOT NULL,
+        campaign VARCHAR(50) NOT NULL,
+        full_link TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
 
-// ------------------- 站点配置 API (新增) -------------------
+    // 3. 统计报表表
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS stats (
+        id SERIAL PRIMARY KEY,
+        domain VARCHAR(255) NOT NULL,
+        source VARCHAR(50) NOT NULL,
+        views INT DEFAULT 0,
+        leads INT DEFAULT 0,
+        CONSTRAINT unique_domain_source UNIQUE(domain, source)
+      );
+    `);
 
-// 获取所有站点配置
+    // 4. 用户点击日志轨迹表 (新增)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS click_logs (
+        id SERIAL PRIMARY KEY,
+        visitor_id VARCHAR(100) NOT NULL,
+        website_id INT,
+        website_name VARCHAR(100),
+        source VARCHAR(50),
+        campaign VARCHAR(50),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    console.log('数据库初始化/检查完成');
+  } catch (err) {
+    console.error('数据库初始化错误:', err);
+  }
+}
+
+initDB();
+
+// ------------------- API 路由 -------------------
+
+// 1. 获取所有落地页站点
 app.get('/api/websites', async (req, res) => {
   try {
-    const result = await pool.query(`SELECT * FROM websites ORDER BY sort_order ASC, id ASC`);
-    res.status(200).json({ success: true, data: result.rows });
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'Database error' });
+    const result = await pool.query('SELECT * FROM websites ORDER BY id ASC');
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// 添加新站点
+// 新增站点
 app.post('/api/websites', async (req, res) => {
   const { name, desc_text, url, icon_url } = req.body;
   try {
-    const query = `
-      INSERT INTO websites (name, desc_text, url, icon_url)
-      VALUES ($1, $2, $3, $4) RETURNING *
-    `;
-    const result = await pool.query(query, [name, desc_text, url, icon_url]);
-    res.status(200).json({ success: true, data: result.rows[0] });
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'Database error' });
+    const result = await pool.query(
+      'INSERT INTO websites (name, desc_text, url, icon_url) VALUES ($1, $2, $3, $4) RETURNING *',
+      [name, desc_text, url, icon_url]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// 编辑已有站点
+// 修改站点
 app.put('/api/websites/:id', async (req, res) => {
   const { id } = req.params;
   const { name, desc_text, url, icon_url } = req.body;
   try {
-    const query = `
-      UPDATE websites 
-      SET name = $1, desc_text = $2, url = $3, icon_url = $4
-      WHERE id = $5 RETURNING *
-    `;
-    const result = await pool.query(query, [name, desc_text, url, icon_url, id]);
-    res.status(200).json({ success: true, data: result.rows[0] });
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'Database error' });
+    const result = await pool.query(
+      'UPDATE websites SET name=$1, desc_text=$2, url=$3, icon_url=$4 WHERE id=$5 RETURNING *',
+      [name, desc_text, url, icon_url, id]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
@@ -136,76 +119,96 @@ app.put('/api/websites/:id', async (req, res) => {
 app.delete('/api/websites/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    await pool.query(`DELETE FROM websites WHERE id = $1`, [id]);
-    res.status(200).json({ success: true });
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'Database error' });
+    await pool.query('DELETE FROM websites WHERE id=$1', [id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// ------------------- 打点与统计 API -------------------
-
-app.post('/track/view', async (req, res) => {
-  const { website_domain, source, campaign, user_agent } = req.body;
-  const ip_address = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-
+// 2. 推广链接生成与查询
+app.get('/api/links', async (req, res) => {
   try {
-    const query = `INSERT INTO traffic_logs (domain, source, campaign, ip_address, device, event_type) VALUES ($1, $2, $3, $4, $5, 'view')`;
-    await pool.query(query, [website_domain, source, campaign, ip_address, user_agent]);
-    res.status(200).json({ success: true });
-  } catch (error) {
-    res.status(500).json({ success: false });
-  }
-});
-
-app.post('/track/lead', async (req, res) => {
-  const { website_domain, source, campaign, user_agent } = req.body;
-  const ip_address = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-
-  try {
-    const query = `INSERT INTO traffic_logs (domain, source, campaign, ip_address, device, event_type) VALUES ($1, $2, $3, $4, $5, 'lead')`;
-    await pool.query(query, [website_domain, source, campaign, ip_address, user_agent]);
-    res.status(200).json({ success: true });
-  } catch (error) {
-    res.status(500).json({ success: false });
-  }
-});
-
-app.get('/api/stats', async (req, res) => {
-  try {
-    const query = `
-      SELECT domain, source, 
-        COUNT(*) FILTER (WHERE event_type = 'view') as views,
-        COUNT(*) FILTER (WHERE event_type = 'lead') as leads
-      FROM traffic_logs GROUP BY domain, source ORDER BY views DESC
-    `;
-    const result = await pool.query(query);
-    res.status(200).json({ success: true, data: result.rows });
-  } catch (error) {
-    res.status(500).json({ success: false });
+    const result = await pool.query('SELECT * FROM links ORDER BY created_at DESC');
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
 app.post('/api/links', async (req, res) => {
   const { target_url, source, campaign, full_link } = req.body;
   try {
-    const query = `INSERT INTO tracking_links (target_url, source, campaign, full_link) VALUES ($1, $2, $3, $4) RETURNING *`;
-    const result = await pool.query(query, [target_url, source, campaign, full_link]);
-    res.status(200).json({ success: true, data: result.rows[0] });
-  } catch (error) {
-    res.status(500).json({ success: false });
+    const result = await pool.query(
+      'INSERT INTO links (target_url, source, campaign, full_link) VALUES ($1, $2, $3, $4) RETURNING *',
+      [target_url, source, campaign, full_link]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
-app.get('/api/links', async (req, res) => {
+// 3. 数据报表统计
+app.get('/api/stats', async (req, res) => {
   try {
-    const result = await pool.query(`SELECT * FROM tracking_links ORDER BY created_at DESC`);
-    res.status(200).json({ success: true, data: result.rows });
-  } catch (error) {
-    res.status(500).json({ success: false });
+    const result = await pool.query('SELECT * FROM stats ORDER BY views DESC');
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 4. 记录用户跨站点点击轨迹 (新增)
+app.post('/api/track-click', async (req, res) => {
+  const { visitor_id, website_id, website_name, source, campaign } = req.body;
+  try {
+    // 写入细粒度点击日志
+    await pool.query(
+      `INSERT INTO click_logs (visitor_id, website_id, website_name, source, campaign) 
+       VALUES ($1, $2, $3, $4, $5)`,
+      [visitor_id, website_id, website_name, source || 'direct', campaign || 'none']
+    );
+
+    // 更新全局 Stats 汇总表
+    await pool.query(
+      `INSERT INTO stats (domain, source, views, leads) 
+       VALUES ($1, $2, 0, 1)
+       ON CONFLICT (domain, source) 
+       DO UPDATE SET leads = stats.leads + 1`,
+      [website_name, source || 'direct']
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Track Click Error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 5. 获取用户点击轨迹聚合列表 (新增)
+app.get('/api/user-journeys', async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        visitor_id,
+        source,
+        campaign,
+        COUNT(*) as total_clicks,
+        STRING_AGG(website_name, ' ➔ ' ORDER BY created_at ASC) as click_path,
+        MAX(created_at) as last_active
+      FROM click_logs
+      GROUP BY visitor_id, source, campaign
+      ORDER BY last_active DESC
+      LIMIT 100;
+    `;
+    const result = await pool.query(query);
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`服务启动成功，端口: ${PORT}`);
 });
