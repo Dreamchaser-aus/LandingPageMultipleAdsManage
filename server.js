@@ -9,17 +9,41 @@ const PORT = process.env.PORT || 3000;
 // 中间件配置
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// 托管 public 静态目录（前端页面）
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 数据库初始化
-const db = new sqlite3.Database('./tracker.db', (err) => {
-  if (err) console.error('数据库连接失败:', err.message);
-  else console.log('已成功连接到 SQLite 数据库 (tracker.db)');
+// ================= 1. 数据库初始化 =================
+const dbPath = path.join(__dirname, 'analytics.db');
+const db = new sqlite3.Database(dbPath, (err) => {
+  if (err) {
+    console.error('❌ 连接 SQLite 数据库失败:', err.message);
+  } else {
+    console.log('⚡ 已成功连接至 SQLite 数据库:', dbPath);
+  }
 });
 
 // 建表逻辑
 db.serialize(() => {
-  // 1. 落地页卡片站点表
+  // 用户轨迹表 (Track Log)
+  db.run(`
+    CREATE TABLE IF NOT EXISTS user_tracks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      visitor_id TEXT NOT NULL,
+      ip_address TEXT,
+      user_agent TEXT,
+      source TEXT DEFAULT 'direct',
+      campaign TEXT DEFAULT 'none',
+      target_domain TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // 创建联合索引提升分页与分组查询性能
+  db.run(`CREATE INDEX IF NOT EXISTS idx_visitor_active ON user_tracks(visitor_id, created_at)`);
+
+  // 落地页站点卡片表
   db.run(`
     CREATE TABLE IF NOT EXISTS websites (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,22 +55,7 @@ db.serialize(() => {
     )
   `);
 
-  // 2. 点击与用户轨迹日志表 (含 IP 与 User-Agent)
-  db.run(`
-    CREATE TABLE IF NOT EXISTS click_logs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      visitor_id TEXT NOT NULL,
-      website_id INTEGER,
-      website_name TEXT NOT NULL,
-      source TEXT DEFAULT 'direct',
-      campaign TEXT DEFAULT 'none',
-      ip_address TEXT,
-      user_agent TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-  // 3. 推广链接历史记录表
+  // 推广链接生成与导入记录表
   db.run(`
     CREATE TABLE IF NOT EXISTS generated_links (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,144 +66,186 @@ db.serialize(() => {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
-});
 
-// ==================== 路由接口 API ====================
-
-// 后台入口重定向
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
-// 1. 获取所有配置卡片
-app.get('/api/websites', (req, res) => {
-  db.all(`SELECT * FROM websites ORDER BY id DESC`, [], (err, rows) => {
-    if (err) return res.status(500).json({ success: false, error: err.message });
-    res.json({ success: true, data: rows });
+  // 初始化默认的落地页数据（如果表为空）
+  db.get(`SELECT COUNT(*) AS count FROM websites`, (err, row) => {
+    if (!err && row.count === 0) {
+      const stmt = db.prepare(`INSERT INTO websites (name, desc_text, url, icon_url) VALUES (?, ?, ?, ?)`);
+      stmt.run('官方主商城', '全场限时折扣包邮', 'https://example.com/shop', 'https://api.dicebear.com/7.x/identicon/svg?seed=shop');
+      stmt.run('客服咨询领卷', '一对一专属客服支持', 'https://example.com/support', 'https://api.dicebear.com/7.x/identicon/svg?seed=support');
+      stmt.finalize();
+      console.log('💡 已初始化默认落地页卡片数据');
+    }
   });
 });
 
-// 2. 新增卡片
-app.post('/api/websites', (req, res) => {
-  const { name, desc_text, url, icon_url } = req.body;
-  if (!name || !url) return res.status(400).json({ success: false, error: '名称和 URL 不能为空' });
+// ================= 2. API 路由接口 =================
 
-  db.run(
-    `INSERT INTO websites (name, desc_text, url, icon_url) VALUES (?, ?, ?, ?)`,
-    [name, desc_text, url, icon_url],
-    function (err) {
-      if (err) return res.status(500).json({ success: false, error: err.message });
-      res.json({ success: true, id: this.lastID });
+/**
+ * 轨迹打点 API：前端用户点击卡片时调用
+ */
+app.post('/api/track', (req, res) => {
+  const { visitor_id, target_domain, source, campaign } = req.body;
+  
+  // 获取客户端真实 IP 与 User-Agent
+  const ip_address = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+  const user_agent = req.headers['user-agent'] || 'Unknown';
+
+  if (!visitor_id || !target_domain) {
+    return res.status(400).json({ success: false, message: '缺少必要参数 visitor_id 或 target_domain' });
+  }
+
+  const sql = `
+    INSERT INTO user_tracks (visitor_id, ip_address, user_agent, source, campaign, target_domain)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `;
+  const params = [visitor_id, ip_address, user_agent, source || 'direct', campaign || 'none', target_domain];
+
+  db.run(sql, params, function (err) {
+    if (err) {
+      console.error('❌ 记录轨迹失败:', err.message);
+      return res.status(500).json({ success: false, message: err.message });
     }
-  );
-});
-
-// 3. 编辑卡片
-app.put('/api/websites/:id', (req, res) => {
-  const { name, desc_text, url, icon_url } = req.body;
-  const { id } = req.params;
-
-  db.run(
-    `UPDATE websites SET name = ?, desc_text = ?, url = ?, icon_url = ? WHERE id = ?`,
-    [name, desc_text, url, icon_url, id],
-    function (err) {
-      if (err) return res.status(500).json({ success: false, error: err.message });
-      res.json({ success: true, changes: this.changes });
-    }
-  );
-});
-
-// 4. 删除卡片
-app.delete('/api/websites/:id', (req, res) => {
-  const { id } = req.params;
-  db.run(`DELETE FROM websites WHERE id = ?`, [id], function (err) {
-    if (err) return res.status(500).json({ success: false, error: err.message });
-    res.json({ success: true, changes: this.changes });
+    res.json({ success: true, track_id: this.lastID });
   });
 });
 
-// 5. 点击轨迹上报接口 (自动提取 IP 与 User-Agent)
-app.post('/api/track-click', (req, res) => {
-  const { visitor_id, website_id, website_name, source, campaign } = req.body;
+/**
+ * [核心优化] 用户轨迹列表 API（传统偏移量分页 Offset-based Pagination）
+ * GET /api/user-journeys?page=1&limit=20
+ */
+app.get('/api/user-journeys', (req, res) => {
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const limit = Math.max(1, parseInt(req.query.limit, 10) || 20);
+  const offset = (page - 1) * limit;
 
-  // 提取 IP (兼容反向代理与 CDN，如 Nginx 或 Cloudflare)
-  const clientIp = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() ||
-                   req.ip ||
-                   req.socket.remoteAddress ||
-                   'Unknown';
+  // 第一步：获取独立访客总数 (COUNT)
+  const countSql = `SELECT COUNT(DISTINCT visitor_id) AS total FROM user_tracks`;
 
-  // 提取 User-Agent
-  const userAgent = req.headers['user-agent'] || 'Unknown';
-
-  db.run(
-    `INSERT INTO click_logs (visitor_id, website_id, website_name, source, campaign, ip_address, user_agent)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [visitor_id, website_id, website_name, source || 'direct', campaign || 'none', clientIp, userAgent],
-    function (err) {
-      if (err) return res.status(500).json({ success: false, error: err.message });
-      res.json({ success: true });
+  db.get(countSql, [], (err, countRow) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: err.message });
     }
-  );
+
+    const total = countRow ? countRow.total : 0;
+    const totalPages = Math.ceil(total / limit) || 1;
+
+    // 第二步：执行 LIMIT ? OFFSET ? 分页查询
+    // 聚合同一 visitor_id 的所有点击记录，拼成点击路径 click_path
+    const dataSql = `
+      SELECT 
+        visitor_id, 
+        ip_address, 
+        user_agent, 
+        source, 
+        campaign, 
+        COUNT(*) AS total_clicks,
+        MAX(created_at) AS last_active,
+        GROUP_CONCAT(target_domain, ' ➔ ') AS click_path
+      FROM user_tracks
+      GROUP BY visitor_id
+      ORDER BY last_active DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    db.all(dataSql, [limit, offset], (err, rows) => {
+      if (err) {
+        return res.status(500).json({ success: false, message: err.message });
+      }
+
+      // 返回带有分页元数据的标准 JSON 响应
+      res.json({
+        success: true,
+        data: rows,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages
+        }
+      });
+    });
+  });
 });
 
-// 6. 统计数据总览 API
+/**
+ * 报表总览 API：统计各站点与渠道的引流转化数 (Leads)
+ */
 app.get('/api/stats', (req, res) => {
   const sql = `
-    SELECT website_name as domain, source, COUNT(*) as leads
-    FROM click_logs
-    GROUP BY website_name, source
+    SELECT 
+      target_domain AS domain,
+      source,
+      COUNT(*) AS leads
+    FROM user_tracks
+    GROUP BY target_domain, source
     ORDER BY leads DESC
   `;
+
   db.all(sql, [], (err, rows) => {
-    if (err) return res.status(500).json({ success: false, error: err.message });
+    if (err) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
     res.json({ success: true, data: rows });
   });
 });
 
-// 7. 用户点击轨迹与设备 IP 明细 API
-app.get('/api/user-journeys', (req, res) => {
-  const sql = `
-    SELECT 
-      visitor_id,
-      source,
-      campaign,
-      COUNT(*) as total_clicks,
-      GROUP_CONCAT(website_name, ' ➔ ') as click_path,
-      MAX(created_at) as last_active,
-      ip_address,
-      user_agent
-    FROM click_logs
-    GROUP BY visitor_id
-    ORDER BY last_active DESC
-  `;
-  db.all(sql, [], (err, rows) => {
-    if (err) return res.status(500).json({ success: false, error: err.message });
+/**
+ * 落地页站点 API（查/增/改/删）
+ */
+app.get('/api/websites', (req, res) => {
+  db.all(`SELECT * FROM websites ORDER BY id DESC`, [], (err, rows) => {
+    if (err) return res.status(500).json({ success: false, message: err.message });
     res.json({ success: true, data: rows });
   });
 });
 
-// 8. 获取与新增推广链接
+app.post('/api/websites', (req, res) => {
+  const { name, desc_text, url, icon_url } = req.body;
+  const sql = `INSERT INTO websites (name, desc_text, url, icon_url) VALUES (?, ?, ?, ?)`;
+  db.run(sql, [name, desc_text, url, icon_url], function (err) {
+    if (err) return res.status(500).json({ success: false, message: err.message });
+    res.json({ success: true, id: this.lastID });
+  });
+});
+
+app.put('/api/websites/:id', (req, res) => {
+  const { name, desc_text, url, icon_url } = req.body;
+  const sql = `UPDATE websites SET name = ?, desc_text = ?, url = ?, icon_url = ? WHERE id = ?`;
+  db.run(sql, [name, desc_text, url, icon_url, req.params.id], function (err) {
+    if (err) return res.status(500).json({ success: false, message: err.message });
+    res.json({ success: true });
+  });
+});
+
+app.delete('/api/websites/:id', (req, res) => {
+  db.run(`DELETE FROM websites WHERE id = ?`, [req.params.id], function (err) {
+    if (err) return res.status(500).json({ success: false, message: err.message });
+    res.json({ success: true });
+  });
+});
+
+/**
+ * 推广链接历史记录 API（查/增）
+ */
 app.get('/api/links', (req, res) => {
   db.all(`SELECT * FROM generated_links ORDER BY id DESC`, [], (err, rows) => {
-    if (err) return res.status(500).json({ success: false, error: err.message });
+    if (err) return res.status(500).json({ success: false, message: err.message });
     res.json({ success: true, data: rows });
   });
 });
 
 app.post('/api/links', (req, res) => {
   const { target_url, source, campaign, full_link } = req.body;
-  db.run(
-    `INSERT INTO generated_links (target_url, source, campaign, full_link) VALUES (?, ?, ?, ?)`,
-    [target_url, source, campaign, full_link],
-    function (err) {
-      if (err) return res.status(500).json({ success: false, error: err.message });
-      res.json({ success: true, id: this.lastID });
-    }
-  );
+  const sql = `INSERT INTO generated_links (target_url, source, campaign, full_link) VALUES (?, ?, ?, ?)`;
+  db.run(sql, [target_url, source, campaign, full_link], function (err) {
+    if (err) return res.status(500).json({ success: false, message: err.message });
+    res.json({ success: true, id: this.lastID });
+  });
 });
 
-// 启动服务器
+// ================= 3. 启动服务器 =================
 app.listen(PORT, () => {
-  console.log(`🚀 服务已启动，访问端口: http://localhost:${PORT}`);
-  console.log(`📊 管理后台地址: http://localhost:${PORT}/admin`);
+  console.log(`🚀 服务已成功启动：http://localhost:${PORT}`);
+  console.log(`📊 后台管理面板：http://localhost:${PORT}/admin.html`);
 });
