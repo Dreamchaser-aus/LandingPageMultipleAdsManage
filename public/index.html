@@ -3,13 +3,106 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>专属优惠 - 立即领取</title>
+  <title>精选站点导航推荐</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  
+</head>
+<body class="bg-slate-900 text-white min-h-screen py-10 px-4">
+
+  <div class="max-w-4xl mx-auto">
+    <!-- 1. 头部标题区 -->
+    <header class="text-center mb-10">
+      <div class="inline-block p-2 bg-blue-500/10 rounded-2xl mb-3">
+        <span class="text-3xl">🚀</span>
+      </div>
+      <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">我的官方站点与服务导航</h1>
+      <p class="text-slate-400 mt-2 text-sm sm:text-base">点击下方任意站点即可直接跳转访问，获取最新资讯与福利。</p>
+    </header>
+
+    <!-- 2. 10个网站的网格列表卡片容器 -->
+    <div id="websiteGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+      <!-- 网页列表将通过 JavaScript 动态渲染 -->
+    </div>
+  </div>
+
   <script>
-    // ⚠️ 请在此处替换为你的 Railway API 域名 (末尾不要带斜杠)
+    // 自动获取当前 Railway 后端地址
     const RAILWAY_API_URL = window.location.origin;
 
+    // 1. ⚙️ 配置你的 10 个网站信息 (在此处修改网址、名称、描述和图标)
+    const websites = [
+      {
+        id: 1,
+        name: "官方主站",
+        desc: "获取最新产品资讯与官方核心服务",
+        url: "https://example1.com",
+        icon: "https://api.dicebear.com/7.x/identicon/svg?seed=site1"
+      },
+      {
+        id: 2,
+        name: "优惠商城",
+        desc: "限时特惠产品与专属折扣领券中心",
+        url: "https://example2.com",
+        icon: "https://api.dicebear.com/7.x/identicon/svg?seed=site2"
+      },
+      {
+        id: 3,
+        name: "客户支持社区",
+        desc: "在线文档、常见问题与技术支持社群",
+        url: "https://example3.com",
+        icon: "https://api.dicebear.com/7.x/identicon/svg?seed=site3"
+      },
+      {
+        id: 4,
+        name: "知识付费专栏",
+        desc: "2026 最新行业干货与实战教程分享",
+        url: "https://example4.com",
+        icon: "https://api.dicebear.com/7.x/identicon/svg?seed=site4"
+      },
+      {
+        id: 5,
+        name: "工具箱平台",
+        desc: "高效免费在线实用小工具集合",
+        url: "https://example5.com",
+        icon: "https://api.dicebear.com/7.x/identicon/svg?seed=site5"
+      },
+      {
+        id: 6,
+        name: "会员专属中心",
+        desc: "VIP 权益领取与个人账号管理",
+        url: "https://example6.com",
+        icon: "https://api.dicebear.com/7.x/identicon/svg?seed=site6"
+      },
+      {
+        id: 7,
+        name: "海外代购/跨境站",
+        desc: "正品直邮，海外优质商品选购平台",
+        url: "https://example7.com",
+        icon: "https://api.dicebear.com/7.x/identicon/svg?seed=site7"
+      },
+      {
+        id: 8,
+        name: "活动报名入口",
+        desc: "最新线下沙龙与线上直播报名通道",
+        url: "https://example8.com",
+        icon: "https://api.dicebear.com/7.x/identicon/svg?seed=site8"
+      },
+      {
+        id: 9,
+        name: "合作伙伴门户",
+        desc: "加盟合作、渠道分销与商务洽谈",
+        url: "https://example9.com",
+        icon: "https://api.dicebear.com/7.x/identicon/svg?seed=site9"
+      },
+      {
+        id: 10,
+        name: "博客与新闻",
+        desc: "品牌动态、创始人故事与行业解读",
+        url: "https://example10.com",
+        icon: "https://api.dicebear.com/7.x/identicon/svg?seed=site10"
+      }
+    ];
+
+    // 2. 解析 URL 中的推广参数 (utm_source & utm_campaign)
     function getUTMParams() {
       const params = new URLSearchParams(window.location.search);
       return {
@@ -20,12 +113,12 @@
 
     const trafficData = getUTMParams();
 
-    // 1. 页面加载自动上报 PV
+    // 3. 页面加载自动上报 PV
     window.addEventListener('DOMContentLoaded', () => {
-      if (RAILWAY_API_URL.includes("your-app.up.railway.app")) {
-        console.warn("提示: 请在 index.html 中将 RAILWAY_API_URL 替换为你自己的 Railway 真实域名！");
-        return;
-      }
+      // 渲染 10 个网站列表卡片
+      renderWebsites();
+
+      // 发送页面浏览事件给 Railway 后端
       fetch(`${RAILWAY_API_URL}/track/view`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -38,63 +131,59 @@
       }).catch(err => console.error('Tracking Error:', err));
     });
 
-    // 2. 提交表单时上报 Lead (转化)
-    async function submitForm(event) {
-      event.preventDefault();
-      const email = document.getElementById('emailInput').value;
+    // 4. 动态渲染 10 个网站卡片
+    function renderWebsites() {
+      const grid = document.getElementById('websiteGrid');
+      grid.innerHTML = websites.map(site => `
+        <div onclick="goToSite('${site.url}', '${site.name}')" 
+             class="group relative bg-slate-800/80 hover:bg-slate-800 border border-slate-700/60 hover:border-blue-500/50 rounded-2xl p-4 flex items-center gap-4 cursor-pointer transition-all duration-200 shadow-lg hover:shadow-blue-500/10 hover:-translate-y-0.5">
+          
+          <!-- 头像/图标 -->
+          <img src="${site.icon}" alt="${site.name}" class="w-14 h-14 rounded-xl bg-slate-700/50 p-1 flex-shrink-0 object-cover border border-slate-600/30">
+          
+          <!-- 站点信息 -->
+          <div class="flex-1 min-w-0">
+            <h3 class="text-base font-bold text-white group-hover:text-blue-400 transition-colors truncate flex items-center gap-2">
+              ${site.name}
+              <svg class="w-4 h-4 text-slate-500 group-hover:text-blue-400 transition-colors opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </h3>
+            <p class="text-slate-400 text-xs mt-1 truncate">${site.desc}</p>
+          </div>
 
-      if (RAILWAY_API_URL.includes("your-app.up.railway.app")) {
-        alert("请先用记事本或编辑器打开 index.html，把里面的 RAILWAY_API_URL 替换为你自己的 Railway 域名！");
-        return;
-      }
+          <!-- 跳转按钮提示 -->
+          <div class="px-3 py-1.5 bg-slate-700/50 group-hover:bg-blue-600 text-slate-300 group-hover:text-white rounded-lg text-xs font-medium transition-colors flex-shrink-0">
+            访问
+          </div>
+        </div>
+      `).join('');
+    }
 
+    // 5. 点击卡片：上报点击事件并拼接 UTM 参数跳转
+    async function goToSite(targetUrl, siteName) {
+      // 在目标 URL 上拼接当前渠道参数，让目标网站也能识别引流来源
+      const destination = new URL(targetUrl);
+      destination.searchParams.set('utm_source', trafficData.source);
+      destination.searchParams.set('utm_campaign', trafficData.campaign);
+
+      // (可选) 异步向 Railway 发送一次转化点击事件
       try {
-        await fetch(`${RAILWAY_API_URL}/track/lead`, {
+        fetch(`${RAILWAY_API_URL}/track/lead`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            website_domain: window.location.hostname || 'localhost',
+            website_domain: `${window.location.hostname} -> ${siteName}`,
             source: trafficData.source,
             campaign: trafficData.campaign,
-            user_agent: navigator.userAgent,
-            extra_data: { email }
+            user_agent: navigator.userAgent
           })
         });
-
-        document.getElementById('formContainer').innerHTML = `
-          <div class="text-center py-6">
-            <div class="text-emerald-500 text-5xl mb-3">✓</div>
-            <h3 class="text-xl font-bold text-slate-800">领取成功！</h3>
-            <p class="text-slate-500 text-sm mt-1">资料已发送至您的邮箱，请注意查收。</p>
-          </div>
-        `;
       } catch (err) {
-        alert('提交失败，请稍后重试');
+        console.error(err);
       }
+
+      // 在新标签页打开目标网站
+      window.open(destination.toString(), '_blank');
     }
   </script>
-</head>
-<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-4">
-
-  <div class="max-w-md w-full bg-slate-800 rounded-2xl p-8 shadow-2xl border border-slate-700">
-    <div class="text-center mb-6">
-      <span class="bg-blue-500/10 text-blue-400 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">限时福利</span>
-      <h1 class="text-2xl font-extrabold mt-3 text-white">获取 2026 最新行业实战指南</h1>
-      <p class="text-slate-400 text-sm mt-2">免费获取内部引流与转化策略手册，助你快速实现流量爆发。</p>
-    </div>
-
-    <div id="formContainer">
-      <form onsubmit="submitForm(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-medium text-slate-300 mb-1">您的工作邮箱</label>
-          <input type="email" id="emailInput" required placeholder="name@company.com" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-        </div>
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition duration-200 shadow-lg shadow-blue-600/30 text-sm">
-          免费立即下载
-        </button>
-      </form>
-    </div>
-  </div>
-
 </body>
 </html>
