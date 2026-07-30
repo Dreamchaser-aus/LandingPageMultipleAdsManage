@@ -1,435 +1,165 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4D Gang Malaysia - Advanced Admin Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>多站点渠道引流管理后台</title>
+  <!-- 引入 Tailwind CSS CDN 用于精美布局 -->
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-[#0b0f19] text-slate-100 min-h-screen font-sans antialiased">
+<body class="bg-gray-50 text-gray-800 min-h-screen">
 
   <!-- 顶部导航 -->
-  <header class="border-b border-slate-800 bg-[#111827] sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <span class="font-bold text-lg text-amber-400">4D Gang Admin</span>
-        <span class="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded">Management & Tracking Hub</span>
+  <header class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold text-gray-900 flex items-center">
+        📊 多渠道引流效果分析系统
+      </h1>
+      <div class="flex items-center space-x-2">
+        <span class="text-sm text-gray-500">Railway 接口地址:</span>
+        <input type="text" id="apiBaseUrl" class="border border-gray-300 rounded px-2 py-1 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://xxx.up.railway.app">
+        <button onclick="refreshData()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded font-medium transition">刷新数据</button>
       </div>
-      <a href="index.html" target="_blank" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-700 transition-colors flex items-center space-x-1.5">
-        <span>View Live Site</span>
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-      </a>
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
     
-    <!-- 状态提示栏 -->
-    <div id="toast" class="hidden fixed top-20 right-4 z-50 bg-emerald-500 text-white text-xs px-4 py-3 rounded-xl shadow-2xl transition-all duration-300">
-      Settings saved successfully!
-    </div>
-
-    <!-- 选项卡导航 -->
-    <div class="flex space-x-2 border-b border-slate-800 pb-4 overflow-x-auto">
-      <button onclick="switchTab('companies')" id="btn-companies" class="tab-btn px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-amber-500 text-white shadow-lg shrink-0">Partner Companies</button>
-      <button onclick="switchTab('slideshow')" id="btn-slideshow" class="tab-btn px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-slate-800 text-slate-400 hover:text-white shrink-0">Slideshow Content</button>
-      <button onclick="switchTab('about')" id="btn-about" class="tab-btn px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-slate-800 text-slate-400 hover:text-white shrink-0">About Us & Stats</button>
-      <button onclick="switchTab('tracking')" id="btn-tracking" class="tab-btn px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-slate-800 text-slate-400 hover:text-white shrink-0">Tracking & Analytics</button>
-    </div>
-
-    <!-- 1. 合作伙伴公司管理面板 -->
-    <section id="tab-companies" class="tab-content space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <!-- 第一部分：推广链接生成器 (Link Builder) -->
+    <section class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">🔗 推广链接生成器 (多站点/多渠道)</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
-          <h2 class="text-xl font-bold text-white">Manage Partner Companies</h2>
-          <p class="text-xs text-slate-400 mt-1">Add, edit, or remove casino/navigation partners displayed on the front page.</p>
+          <label class="block text-sm font-medium text-gray-700 mb-1">落地页实际网址 (Domain)</label>
+          <input type="text" id="targetDomain" placeholder="例如: https://mysite1.com" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
         </div>
-        <button onclick="openModal()" class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-red-600 text-white text-xs font-semibold rounded-xl shadow-lg hover:opacity-90 transition-opacity flex items-center justify-center space-x-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-          <span>Add New Company</span>
-        </button>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">引流渠道 (utm_source)</label>
+          <select id="linkSource" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <option value="tiktok">TikTok (抖音海外版)</option>
+            <option value="facebook">Facebook Ads</option>
+            <option value="google">Google Ads</option>
+            <option value="xiaohongshu">小红书</option>
+            <option value="instagram">Instagram</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">广告计划/活动 (utm_campaign)</label>
+          <input type="text" id="linkCampaign" placeholder="例如: 2026_summer_sale" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
       </div>
-
-      <div id="adminCompanyList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-    </section>
-
-    <!-- 2. 轮播图管理面板 -->
-    <section id="tab-slideshow" class="tab-content space-y-6 hidden">
-      <div>
-        <h2 class="text-xl font-bold text-white">Manage Slideshow Content</h2>
-        <p class="text-xs text-slate-400 mt-1">Customize the sliding banners shown at the top of your homepage.</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="slidesFormContainer"></div>
-    </section>
-
-    <!-- 3. 关于我们与统计数据管理面板 -->
-    <section id="tab-about" class="tab-content space-y-6 hidden">
-      <div>
-        <h2 class="text-xl font-bold text-white">Manage About Us & Stats</h2>
-        <p class="text-xs text-slate-400 mt-1">Edit your company narrative and the achievement numbers.</p>
-      </div>
-
-      <div class="bg-[#111827] p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6 max-w-3xl">
-        <div class="space-y-2">
-          <label class="text-xs font-semibold text-slate-300">About Section Badge</label>
-          <input type="text" id="aboutBadge" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
-        </div>
-        <div class="space-y-2">
-          <label class="text-xs font-semibold text-slate-300">Main Title</label>
-          <input type="text" id="aboutTitle" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
-        </div>
-        <div class="space-y-2">
-          <label class="text-xs font-semibold text-slate-300">Description Narrative</label>
-          <textarea id="aboutDesc" rows="4" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500"></textarea>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-800">
-          <div>
-            <label class="text-[11px] font-semibold text-slate-400">Stat 1 Value</label>
-            <input type="text" id="stat1Val" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
-            <label class="text-[11px] font-semibold text-slate-400 mt-2 block">Stat 1 Label</label>
-            <input type="text" id="stat1Label" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
-          </div>
-          <div>
-            <label class="text-[11px] font-semibold text-slate-400">Stat 2 Value</label>
-            <input type="text" id="stat2Val" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
-            <label class="text-[11px] font-semibold text-slate-400 mt-2 block">Stat 2 Label</label>
-            <input type="text" id="stat2Label" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
-          </div>
-          <div>
-            <label class="text-[11px] font-semibold text-slate-400">Stat 3 Value</label>
-            <input type="text" id="stat3Val" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
-            <label class="text-[11px] font-semibold text-slate-400 mt-2 block">Stat 3 Label</label>
-            <input type="text" id="stat3Label" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
-          </div>
-        </div>
-
-        <button onclick="saveAboutUs()" class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-red-600 text-white text-xs font-semibold rounded-xl shadow-lg hover:opacity-90 transition-opacity">Save About Us Changes</button>
+      <button onclick="generateLink()" class="bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded text-sm font-medium transition">生成推广链接</button>
+      
+      <!-- 生成结果展示 -->
+      <div id="resultBox" class="mt-4 hidden p-3 bg-gray-50 border border-gray-200 rounded flex justify-between items-center">
+        <span id="generatedUrl" class="text-sm font-mono text-blue-600 break-all select-all"></span>
+        <button onclick="copyLink()" class="text-xs bg-white border border-gray-300 px-2 py-1 rounded hover:bg-gray-100 ml-2 shrink-0">复制</button>
       </div>
     </section>
 
-    <!-- 4. 追踪设置与点击日志分析面板 -->
-    <section id="tab-tracking" class="tab-content space-y-6 hidden">
-      <div>
-        <h2 class="text-xl font-bold text-white">Tracking & UTM Analytics</h2>
-        <p class="text-xs text-slate-400 mt-1">Configure your backend API endpoint and view real-time click logs.</p>
+    <!-- 第二部分：多站点效果分类看板 (Analytics) -->
+    <section class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-semibold text-gray-900">📈 多渠道引流 ROI 效果报表</h2>
+        <span class="text-xs text-gray-400">自动根据域名与渠道分类统计</span>
       </div>
-
-      <div class="bg-[#111827] p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-4 max-w-3xl">
-        <h3 class="font-bold text-white text-sm">Backend API Endpoint Configuration</h3>
-        <p class="text-slate-400 text-xs">Set the URL where front-end click tracking data will be sent via `fetch`.</p>
-        <div class="flex gap-3">
-          <input type="text" id="apiEndpointInput" class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500" placeholder="https://your-backend-api.com">
-          <button onclick="saveApiEndpoint()" class="px-5 py-2.5 bg-amber-500 text-white text-xs font-semibold rounded-xl shadow-lg">Save URL</button>
-        </div>
-      </div>
-
-      <div class="bg-[#111827] p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-4">
-        <div class="flex items-center justify-between">
-          <h3 class="font-bold text-white text-sm">Recent Click & Traffic Logs (Local Buffer)</h3>
-          <button onclick="clearLogs()" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs rounded-xl border border-red-500/20">Clear Logs</button>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-slate-300">
-            <thead class="bg-slate-900/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
-              <tr>
-                <th class="p-3">Time</th>
-                <th class="p-3">Visitor ID</th>
-                <th class="p-3">Target Partner</th>
-                <th class="p-3">Source (UTM)</th>
-                <th class="p-3">Campaign</th>
-              </tr>
-            </thead>
-            <tbody id="trackingLogsTable" class="divide-y divide-slate-800/60">
-              <!-- 动态加载日志 -->
-            </tbody>
-          </table>
-        </div>
+      
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase text-gray-500 tracking-wider">
+              <th class="py-3 px-4">目标站点 (Domain)</th>
+              <th class="py-3 px-4">引流渠道 (Source)</th>
+              <th class="py-3 px-4">独立访问量 (Views / PV)</th>
+              <th class="py-3 px-4">留资/转化量 (Leads)</th>
+              <th class="py-3 px-4">综合转化率 (CVR)</th>
+            </tr>
+          </thead>
+          <tbody id="statsTableBody" class="divide-y divide-gray-100 text-sm">
+            <tr>
+              <td colspan="5" class="py-8 text-center text-gray-400">请先在顶部配置 Railway 地址并点击刷新数据...</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
   </main>
 
-  <!-- 添加/编辑公司弹窗 -->
-  <div id="companyModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-[#111827] border border-slate-800 w-full max-w-lg rounded-3xl p-6 sm:p-8 space-y-5 shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 id="modalTitle" class="font-bold text-white text-base">Add New Company</h3>
-        <button onclick="closeModal()" class="text-slate-400 hover:text-white">&times;</button>
-      </div>
-      <input type="hidden" id="editIndex" value="-1">
-      <div class="space-y-4">
-        <div>
-          <label class="text-xs font-semibold text-slate-300">Company Name</label>
-          <input type="text" id="cName" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-slate-300">Target URL (Redirect Link)</label>
-          <input type="text" id="cUrl" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500" placeholder="https://...">
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-slate-300">Description text</label>
-          <textarea id="cDesc" rows="3" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500"></textarea>
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-slate-300">Icon Image URL (Optional)</label>
-          <input type="text" id="cIcon" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500" placeholder="Leave empty for auto-generated avatar">
-        </div>
-      </div>
-      <div class="flex justify-end space-x-3 pt-4 border-t border-slate-800">
-        <button onclick="closeModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">Cancel</button>
-        <button onclick="saveCompany()" class="px-6 py-2 rounded-xl bg-amber-500 text-white text-xs font-semibold shadow-lg">Save Company</button>
-      </div>
-    </div>
-  </div>
-
   <script>
-    const defaultData = {
-      companies: [
-        { id: 1, name: "MegaWin Casino Malaysia", url: "https://example.com", desc_text: "Top-tier verified gaming platform offering safe entertainment and instant bonuses.", icon_url: "" },
-        { id: 2, name: "Lucky4D Partner Hub", url: "https://example.com", desc_text: "Trusted insights and smart play guides curated for professional enthusiasts.", icon_url: "" },
-        { id: 3, name: "Royal Star Gaming", url: "https://example.com", desc_text: "Comprehensive game testing reports and secure navigation channels.", icon_url: "" },
-        { id: 4, name: "Gold Coast 4D Club", url: "https://example.com", desc_text: "Unbiased reviews, transparent bonus ratings, and responsible play support.", icon_url: "" }
-      ],
-      slides: [
-        { badge: "Hot Bonuses 2026", title: "Expert Reviews & Smart Play Guidance", desc: "Discover trusted platform insights, verified ratings, and responsible play strategies curated by industry professionals.", btnText: "Explore Casinos" },
-        { badge: "100% Verified Partners", title: "Tested Games & Transparent Ratings", desc: "Over 1,380+ games tested and 680+ casino sites reviewed monthly to ensure a safer navigation experience.", btnText: "Learn More About Us" }
-      ],
-      about: {
-        badge: "About 4D Gang Malaysia",
-        title: "Dedicated to Safer & Smarter Play",
-        desc: "4D Gang Malaysia is built by a team of veteran researchers and analysts. Our mission is to cut through the noise of online platforms, delivering transparent, unbiased information and robust guidance. We believe in playing with confidence, prioritizing recreation and safety over chasing unrealistic financial returns.",
-        stats: [
-          { val: "680+", label: "Casino Sites Reviewed" },
-          { val: "1,380+", label: "Games Tested" },
-          { val: "376+ Hrs", label: "Monthly Research" }
-        ]
-      }
-    };
+    // 从 localStorage 自动读取之前配置过的 Railway 地址，方便使用
+    document.getElementById('apiBaseUrl').value = localStorage.getItem('rw_api_url') || '';
 
-    function getAppData() {
-      const data = localStorage.getItem('gang_site_content');
-      if (!data) {
-        localStorage.setItem('gang_site_content', JSON.stringify(defaultData));
-        return defaultData;
-      }
-      return JSON.parse(data);
-    }
+    // 1. 生成推广短链
+    function generateLink() {
+      let domain = document.getElementById('targetDomain').value.trim();
+      const source = document.getElementById('linkSource').value;
+      const campaign = document.getElementById('linkCampaign').value.trim() || 'none';
 
-    function saveAppData(data) {
-      localStorage.setItem('gang_site_content', JSON.stringify(data));
-      showToast();
-    }
-
-    function showToast() {
-      const t = document.getElementById('toast');
-      t.classList.remove('hidden');
-      setTimeout(() => t.classList.add('hidden'), 2500);
-    }
-
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.querySelectorAll('.tab-btn').forEach(el => {
-        el.classList.remove('bg-amber-500', 'text-white', 'shadow-lg');
-        el.classList.add('bg-slate-800', 'text-slate-400');
-      });
-
-      document.getElementById('tab-' + tabName).classList.remove('hidden');
-      const activeBtn = document.getElementById('btn-' + tabName);
-      activeBtn.classList.remove('bg-slate-800', 'text-slate-400');
-      activeBtn.classList.add('bg-amber-500', 'text-white', 'shadow-lg');
-
-      if(tabName === 'companies') renderAdminCompanies();
-      if(tabName === 'slideshow') renderAdminSlides();
-      if(tabName === 'about') loadAboutUsForm();
-      if(tabName === 'tracking') loadTrackingSettingsAndLogs();
-    }
-
-    function renderAdminCompanies() {
-      const data = getAppData();
-      const container = document.getElementById('adminCompanyList');
-      container.innerHTML = data.companies.map((c, index) => `
-        <div class="bg-[#111827] p-4.5 rounded-2xl border border-slate-800 flex items-center justify-between space-x-4">
-          <div class="flex items-center space-x-3.5 min-w-0">
-            <img src="${c.icon_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + c.id}" class="w-10 h-10 rounded-xl bg-slate-800 p-1 shrink-0 border border-slate-700">
-            <div class="min-w-0">
-              <h4 class="font-bold text-white text-xs truncate">${c.name}</h4>
-              <p class="text-slate-400 text-[11px] truncate mt-0.5">${c.url}</p>
-            </div>
-          </div>
-          <div class="flex items-center space-x-2 shrink-0">
-            <button onclick="editCompany(${index})" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-xl border border-slate-700">Edit</button>
-            <button onclick="deleteCompany(${index})" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs rounded-xl border border-red-500/20">Delete</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function openModal(index = -1) {
-      document.getElementById('editIndex').value = index;
-      if (index >= 0) {
-        const data = getAppData();
-        const c = data.companies[index];
-        document.getElementById('modalTitle').innerText = "Edit Company";
-        document.getElementById('cName').value = c.name;
-        document.getElementById('cUrl').value = c.url;
-        document.getElementById('cDesc').value = c.desc_text;
-        document.getElementById('cIcon').value = c.icon_url || '';
-      } else {
-        document.getElementById('modalTitle').innerText = "Add New Company";
-        document.getElementById('cName').value = '';
-        document.getElementById('cUrl').value = '';
-        document.getElementById('cDesc').value = '';
-        document.getElementById('cIcon').value = '';
-      }
-      document.getElementById('companyModal').classList.remove('hidden');
-    }
-
-    function closeModal() {
-      document.getElementById('companyModal').classList.add('hidden');
-    }
-
-    function saveCompany() {
-      const index = parseInt(document.getElementById('editIndex').value);
-      const name = document.getElementById('cName').value.trim();
-      const url = document.getElementById('cUrl').value.trim();
-      const desc_text = document.getElementById('cDesc').value.trim();
-      const icon_url = document.getElementById('cIcon').value.trim();
-
-      if (!name || !url) {
-        alert('Please fill in company name and target URL.');
+      if (!domain) {
+        alert('请输入你的落地页实际网址！');
         return;
       }
-
-      const data = getAppData();
-      if (index >= 0) {
-        data.companies[index] = { ...data.companies[index], name, url, desc_text, icon_url };
-      } else {
-        const newId = Date.now();
-        data.companies.push({ id: newId, name, url, desc_text, icon_url });
-      }
-
-      saveAppData(data);
-      closeModal();
-      renderAdminCompanies();
-    }
-
-    function editCompany(index) {
-      openModal(index);
-    }
-
-    function deleteCompany(index) {
-      if (confirm('Are you sure you want to delete this company partner?')) {
-        const data = getAppData();
-        data.companies.splice(index, 1);
-        saveAppData(data);
-        renderAdminCompanies();
-      }
-    }
-
-    function renderAdminSlides() {
-      const data = getAppData();
-      const container = document.getElementById('slidesFormContainer');
-      container.innerHTML = data.slides.map((s, idx) => `
-        <div class="bg-[#111827] p-6 rounded-3xl border border-slate-800 space-y-4">
-          <h3 class="font-bold text-white text-sm">Slide Banner #${idx + 1}</h3>
-          <div>
-            <label class="text-[11px] font-semibold text-slate-400">Badge Text</label>
-            <input type="text" id="slideBadge_${idx}" value="${s.badge}" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
-          </div>
-          <div>
-            <label class="text-[11px] font-semibold text-slate-400">Main Headline</label>
-            <input type="text" id="slideTitle_${idx}" value="${s.title}" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
-          </div>
-          <div>
-            <label class="text-[11px] font-semibold text-slate-400">Description</label>
-            <textarea id="slideDesc_${idx}" rows="2" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">${s.desc}</textarea>
-          </div>
-          <button onclick="saveSlide(${idx})" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700">Save Slide #${idx + 1}</button>
-        </div>
-      `).join('');
-    }
-
-    function saveSlide(idx) {
-      const data = getAppData();
-      data.slides[idx] = {
-        badge: document.getElementById(`slideBadge_${idx}`).value,
-        title: document.getElementById(`slideTitle_${idx}`).value,
-        desc: document.getElementById(`slideDesc_${idx}`).value,
-        btnText: data.slides[idx].btnText
-      };
-      saveAppData(data);
-    }
-
-    function loadAboutUsForm() {
-      const data = getAppData();
-      const a = data.about;
-      document.getElementById('aboutBadge').value = a.badge;
-      document.getElementById('aboutTitle').value = a.title;
-      document.getElementById('aboutDesc').value = a.desc;
       
-      document.getElementById('stat1Val').value = a.stats[0].val;
-      document.getElementById('stat1Label').value = a.stats[0].label;
-      document.getElementById('stat2Val').value = a.stats[1].val;
-      document.getElementById('stat2Label').value = a.stats[1].label;
-      document.getElementById('stat3Val').value = a.stats[2].val;
-      document.getElementById('stat3Label').value = a.stats[2].label;
+      // 规范化域名格式
+      if (!/^https?:\/\//i.test(domain)) {
+        domain = 'https://' + domain;
+      }
+
+      const finalUrl = `${domain}/?utm_source=${source}&utm_campaign=${campaign}`;
+      document.getElementById('generatedUrl').innerText = finalUrl;
+      document.getElementById('resultBox').classList.remove('hidden');
     }
 
-    function saveAboutUs() {
-      const data = getAppData();
-      data.about = {
-        badge: document.getElementById('aboutBadge').value,
-        title: document.getElementById('aboutTitle').value,
-        desc: document.getElementById('aboutDesc').value,
-        stats: [
-          { val: document.getElementById('stat1Val').value, label: document.getElementById('stat1Label').value },
-          { val: document.getElementById('stat2Val').value, label: document.getElementById('stat2Label').value },
-          { val: document.getElementById('stat3Val').value, label: document.getElementById('stat3Label').value }
-        ]
-      };
-      saveAppData(data);
+    function copyLink() {
+      const text = document.getElementById('generatedUrl').innerText;
+      navigator.clipboard.writeText(text).then(() => alert('链接已复制到剪贴板！'));
     }
 
-    function loadTrackingSettingsAndLogs() {
-      const savedUrl = localStorage.getItem('gang_api_backend_url') || 'https://your-backend-api.com';
-      document.getElementById('apiEndpointInput').value = savedUrl;
+    // 2. 从 Railway 后端拉取多站点渠道统计数据
+    async function refreshData() {
+      let baseUrl = document.getElementById('apiBaseUrl').value.trim();
+      if (!baseUrl) {
+        alert('请先填写 Railway 接口地址！');
+        return;
+      }
+      baseUrl = baseUrl.replace(/\/+$/, "");
+      localStorage.setItem('rw_api_url', baseUrl); // 记住地址
 
-      const logs = JSON.parse(localStorage.getItem('gang_tracking_logs') || '[]');
-      const tbody = document.getElementById('trackingLogsTable');
-      if (logs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">No tracking logs recorded yet.</td></tr>`;
-      } else {
-        tbody.innerHTML = logs.reverse().map(l => `
-          <tr class="hover:bg-slate-900/40">
-            <td class="p-3 text-slate-400">${new Date(l.timestamp).toLocaleString()}</td>
-            <td class="p-3 font-mono text-amber-400">${l.visitor_id}</td>
-            <td class="p-3 font-semibold text-white">${l.site_name}</td>
-            <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px]">${l.source}</span></td>
-            <td class="p-3 text-slate-400">${l.campaign}</td>
-          </tr>
-        `).join('');
+      const tbody = document.getElementById('statsTableBody');
+      tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-gray-500">正在从 Railway 加载最新转化数据...</td></tr>`;
+
+      try {
+        const response = await fetch(`${baseUrl}/api/stats`);
+        const result = await response.json();
+
+        if (result.success && result.data.length > 0) {
+          tbody.innerHTML = '';
+          result.data.forEach(row => {
+            const views = parseInt(row.views || 0);
+            const leads = parseInt(row.leads || 0);
+            // 计算转化率
+            const cvr = views > 0 ? ((leads / views) * 100).toFixed(2) + '%' : '0.00%';
+
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-gray-50 transition";
+            tr.innerHTML = `
+              <td class="py-3 px-4 font-medium text-gray-900">${row.domain}</td>
+              <td class="py-3 px-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">${row.source}</span></td>
+              <td class="py-3 px-4 text-gray-600">${views}</td>
+              <td class="py-3 px-4 text-gray-600 font-semibold">${leads}</td>
+              <td class="py-3 px-4 text-green-600 font-medium">${cvr}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        } else {
+          tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-gray-400">暂无引流数据，快去生成链接推广吧！</td></tr>`;
+        }
+      } catch (error) {
+        console.error(error);
+        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-red-500 font-medium">连接 Railway 失败，请检查 API 地址是否正确或是否允许跨域。</td></tr>`;
       }
     }
-
-    function saveApiEndpoint() {
-      const url = document.getElementById('apiEndpointInput').value.trim();
-      localStorage.setItem('gang_api_backend_url', url);
-      showToast();
-    }
-
-    function clearLogs() {
-      if (confirm('Are you sure you want to clear all tracking records?')) {
-        localStorage.removeItem('gang_tracking_logs');
-        loadTrackingSettingsAndLogs();
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      getAppData();
-      renderAdminCompanies();
-    });
   </script>
 </body>
 </html>
