@@ -3,229 +3,128 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>用户流量与行为轨迹管理后台</title>
-  <style>
-    /* 页面全局基础样式 */
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background-color: #f4f6f9;
-      margin: 0;
-      padding: 30px 20px;
-      color: #333;
-    }
-
-    /* 核心卡片容器 */
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-      background: #ffffff;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      padding: 24px;
-    }
-
-    h2 {
-      margin-top: 0;
-      margin-bottom: 20px;
-      font-size: 20px;
-      color: #1f2937;
-    }
-
-    /* 用户表格样式 */
-    .user-table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-    }
-
-    .user-table th {
-      background-color: #f8fafc;
-      padding: 12px 16px;
-      font-weight: 600;
-      color: #64748b;
-      font-size: 14px;
-      border-bottom: 2px solid #e2e8f0;
-    }
-
-    .user-table td {
-      padding: 14px 16px;
-      border-bottom: 1px solid #edf2f7;
-      font-size: 14px;
-    }
-
-    /* 可点击的行 hover 效果 */
-    .user-row {
-      cursor: pointer;
-      transition: background-color 0.15s ease;
-    }
-
-    .user-row:hover {
-      background-color: #f1f5f9;
-    }
-
-    /* 折叠展开的轨迹行样式 */
-    .path-details-row {
-      background-color: #f8fafc;
-    }
-
-    .path-details-cell {
-      padding: 16px 20px !important;
-      border-bottom: 1px solid #e2e8f0;
-    }
-
-    .path-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: #64748b;
-      margin-bottom: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    /* 横向流式路径卡片列表 */
-    .path-container {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      overflow-x: auto; /* 内容超出时自动支持横向滚动 */
-      padding-bottom: 6px;
-    }
-
-    /* 单个点击路径胶囊 */
-    .path-step {
-      display: inline-flex;
-      align-items: center;
-      white-space: nowrap;
-      padding: 8px 14px;
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      font-size: 13px;
-      color: #0f172a;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-    }
-
-    .path-step .time {
-      font-size: 11px;
-      color: #94a3b8;
-      margin-left: 8px;
-    }
-
-    /* 流程箭头 */
-    .arrow {
-      color: #94a3b8;
-      font-weight: bold;
-      font-size: 14px;
-      user-select: none;
-    }
-
-    /* 状态与展开按钮样式 */
-    .toggle-btn {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 6px;
-      background-color: #e0f2fe;
-      color: #0284c7;
-      font-size: 12px;
-      font-weight: 500;
-      transition: all 0.2s ease;
-    }
-
-    .user-row:hover .toggle-btn {
-      background-color: #bae6fd;
-    }
-  </style>
+  <title>精选导航推荐</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-slate-100 min-h-screen flex flex-col items-center p-4 sm:p-6 text-slate-800">
 
-  <div class="container">
-    <h2>📊 访问用户行为追踪列表</h2>
+  <div class="w-full max-w-md bg-white rounded-3xl shadow-xl p-6 my-auto border border-slate-200/60">
+    <div class="text-center mb-6">
+      <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl mx-auto shadow-lg shadow-blue-500/30 mb-3">
+        🚀
+      </div>
+      <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">为您推荐的精选服务</h1>
+      <p class="text-xs text-slate-400 mt-1">点击下方卡片即可直接跳转官方链接</p>
+    </div>
 
-    <table class="user-table">
-      <thead>
-        <tr>
-          <th>用户 ID</th>
-          <th>IP 地址</th>
-          <th>来源渠道</th>
-          <th>最近访问时间</th>
-          <th>轨迹操作</th>
-        </tr>
-      </thead>
-      <tbody>
-
-        <!-- ==================== 用户 101 行 ==================== -->
-        <tr class="user-row" onclick="togglePath('101')">
-          <td><strong>#101</strong></td>
-          <td>192.168.1.102</td>
-          <td>Google 搜索</td>
-          <td>2026-07-30 14:20:15</td>
-          <td><span class="toggle-btn" id="btn-101">展开路径 🔽</span></td>
-        </tr>
-        <!-- 用户 101 的横向点击路径展开行 (默认隐藏) -->
-        <tr id="path-row-101" class="path-details-row" style="display: none;">
-          <td colspan="5" class="path-details-cell">
-            <div class="path-title">🛣️ 用户完整点击轨迹顺序：</div>
-            <div class="path-container">
-              <div class="path-step">🏠 首页 (/home) <span class="time">14:20:15</span></div>
-              <span class="arrow">➔</span>
-              <div class="path-step">🛍️ 产品列表 (/products) <span class="time">14:20:30</span></div>
-              <span class="arrow">➔</span>
-              <div class="path-step">🔍 商品详情 (/item/99) <span class="time">14:21:05</span></div>
-              <span class="arrow">➔</span>
-              <div class="path-step">🛒 购物车 (/cart) <span class="time">14:22:10</span></div>
-              <span class="arrow">➔</span>
-              <div class="path-step">💳 收银台 (/checkout) <span class="time">14:23:00</span></div>
-              <span class="arrow">➔</span>
-              <div class="path-step">✅ 支付成功 (/success) <span class="time">14:23:45</span></div>
-            </div>
-          </td>
-        </tr>
-
-        <!-- ==================== 用户 102 行 ==================== -->
-        <tr class="user-row" onclick="togglePath('102')">
-          <td><strong>#102</strong></td>
-          <td>114.240.88.12</td>
-          <td>小红书引流</td>
-          <td>2026-07-30 15:05:00</td>
-          <td><span class="toggle-btn" id="btn-102">展开路径 🔽</span></td>
-        </tr>
-        <!-- 用户 102 的横向点击路径展开行 (默认隐藏) -->
-        <tr id="path-row-102" class="path-details-row" style="display: none;">
-          <td colspan="5" class="path-details-cell">
-            <div class="path-title">🛣️ 用户完整点击轨迹顺序：</div>
-            <div class="path-container">
-              <div class="path-step">🎯 活动落地页 (/landing) <span class="time">15:05:00</span></div>
-              <span class="arrow">➔</span>
-              <div class="path-step">📖 关于我们 (/about) <span class="time">15:05:40</span></div>
-              <span class="arrow">➔</span>
-              <div class="path-step">❌ 离场 (页面关闭) <span class="time">15:06:12</span></div>
-            </div>
-          </td>
-        </tr>
-
-      </tbody>
-    </table>
+    <!-- 动态渲染的站点列表容器 -->
+    <div id="siteList" class="space-y-3.5">
+      <div class="text-center text-slate-400 py-8 text-sm">正在获取站点列表...</div>
+    </div>
   </div>
 
   <script>
-    /**
-     * 切换展示/隐藏用户路径展开框
-     * @param {string} userId 用户唯一标识 ID
-     */
-    function togglePath(userId) {
-      const pathRow = document.getElementById(`path-row-${userId}`);
-      const btn = document.getElementById(`btn-${userId}`);
+    const baseUrl = window.location.origin;
 
-      // 切换 display 状态
-      if (pathRow.style.display === 'none') {
-        pathRow.style.display = 'table-row';
-        btn.innerText = '收起路径 🔼';
-        btn.style.backgroundColor = '#bae6fd'; // 选中时的高亮色
-      } else {
-        pathRow.style.display = 'none';
-        btn.innerText = '展开路径 🔽';
-        btn.style.backgroundColor = '#e0f2fe'; // 恢复原色
+    // 1. 获取或生成唯一的 Visitor ID
+    function getVisitorId() {
+      let vid = localStorage.getItem('user_visitor_id');
+      if (!vid) {
+        vid = 'vid_' + Math.random().toString(36).substr(2, 8) + '_' + Date.now().toString().slice(-6);
+        localStorage.setItem('user_visitor_id', vid);
       }
+      return vid;
+    }
+
+    // 2. 抓取与锁定 UTM 渠道参数（带 Session 缓存防丢失）
+    function captureAndGetUtm() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlSource = urlParams.get('utm_source');
+      const urlCampaign = urlParams.get('utm_campaign');
+
+      if (urlSource) sessionStorage.setItem('current_utm_source', urlSource);
+      if (urlCampaign) sessionStorage.setItem('current_utm_campaign', urlCampaign);
+
+      const source = urlSource || sessionStorage.getItem('current_utm_source') || 'direct';
+      const campaign = urlCampaign || sessionStorage.getItem('current_utm_campaign') || 'none';
+
+      return { source, campaign };
+    }
+
+    // 3. 页面初始化
+    window.onload = () => {
+      captureAndGetUtm();
+      fetchWebsites();
+    };
+
+    async function fetchWebsites() {
+      try {
+        const res = await fetch(`${baseUrl}/api/websites`);
+        const json = await res.json();
+        if (json.success && json.data.length > 0) {
+          renderSites(json.data);
+        } else {
+          document.getElementById('siteList').innerHTML = '<div class="text-center text-slate-400 py-6 text-sm">暂无配置站点</div>';
+        }
+      } catch (err) {
+        document.getElementById('siteList').innerHTML = '<div class="text-center text-red-400 py-6 text-sm">加载失败，请刷新重试</div>';
+      }
+    }
+
+    function renderSites(sites) {
+      const container = document.getElementById('siteList');
+      container.innerHTML = sites.map(site => `
+        <div data-id="${site.id}" 
+             data-name="${encodeURIComponent(site.name)}" 
+             data-url="${encodeURIComponent(site.url)}" 
+             class="site-card group bg-slate-50 hover:bg-blue-50/50 p-4 rounded-2xl border border-slate-200/80 hover:border-blue-400 transition-all cursor-pointer flex items-center justify-between">
+          <div class="flex items-center space-x-3.5">
+            <img src="${site.icon_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + site.id}" 
+                 class="w-11 h-11 rounded-xl object-cover bg-white shadow-sm">
+            <div>
+              <h3 class="font-bold text-slate-800 text-sm group-hover:text-blue-600 transition-colors">${site.name}</h3>
+              <p class="text-slate-500 text-xs mt-0.5 line-clamp-1">${site.desc_text || '点击进入官方网站'}</p>
+            </div>
+          </div>
+          <div class="w-8 h-8 rounded-full bg-white group-hover:bg-blue-600 flex items-center justify-center text-slate-400 group-hover:text-white transition-all shadow-sm">
+            ➔
+          </div>
+        </div>
+      `).join('');
+
+      // 点击事件注册
+      document.querySelectorAll('.site-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const id = card.getAttribute('data-id');
+          const name = decodeURIComponent(card.getAttribute('data-name'));
+          const url = decodeURIComponent(card.getAttribute('data-url'));
+          trackAndRedirect(id, name, url);
+        });
+      });
+    }
+
+    // 4. 点击记录与无感跳转
+    function trackAndRedirect(siteId, siteName, targetUrl) {
+      const visitorId = getVisitorId();
+      const { source, campaign } = captureAndGetUtm();
+
+      const payload = {
+        visitor_id: visitorId,
+        website_id: parseInt(siteId),
+        website_name: siteName,
+        source: source,
+        campaign: campaign
+      };
+
+      // 利用 keepalive 实现后台异步发送，不阻塞跳转
+      fetch(`${baseUrl}/api/track-click`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true
+      }).catch(err => console.error('Track error:', err));
+
+      window.open(targetUrl, '_blank');
     }
   </script>
 </body>
