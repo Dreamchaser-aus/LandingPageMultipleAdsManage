@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>4D Gang Malaysia - Expert Reviews & Smart Play Hub</title>
-    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 Swiper CSS（用于轮播图效果） -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
       @keyframes fadeIn {
@@ -18,7 +16,7 @@
 </head>
 <body class="bg-[#0b0f19] text-slate-100 min-h-screen font-sans antialiased">
 
-  <!-- 1. 顶部导航栏 -->
+  <!-- 顶部导航栏 -->
   <header class="border-b border-slate-800 bg-[#111827]/80 backdrop-blur-md sticky top-0 z-50">
     <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
       <div class="flex items-center space-x-3">
@@ -36,43 +34,17 @@
 
   <main class="max-w-5xl mx-auto px-4 py-8 space-y-12">
 
-    <!-- 2. Slideshow (轮播图区块) -->
+    <!-- 1. Slideshow 动态轮播图 -->
     <section id="Slideshow" class="pt-4">
       <div class="swiper mySwiper rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
-        <div class="swiper-wrapper">
-          <!-- 轮播图 Item 1 -->
-          <div class="swiper-slide bg-gradient-to-r from-slate-900 via-amber-950/40 to-slate-900 p-8 sm:p-12 md:p-16 flex flex-col justify-center min-h-[280px] sm:min-h-[340px] relative">
-            <div class="absolute right-10 top-10 opacity-10 hidden md:block">
-              <svg class="w-48 h-48 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
-            </div>
-            <span class="px-3 py-1 text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full w-max mb-3 font-semibold">Hot Bonuses 2026</span>
-            <h2 class="text-2xl sm:text-4xl font-black text-white mb-3 max-w-xl">Expert Reviews & Smart Play Guidance</h2>
-            <p class="text-slate-300 text-xs sm:text-sm max-w-lg mb-6 leading-relaxed">Discover trusted platform insights, verified ratings, and responsible play strategies curated by industry professionals.</p>
-            <div>
-              <a href="#Casino" class="inline-flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-red-600 text-white font-semibold text-xs sm:text-sm shadow-lg hover:opacity-90 transition-opacity">
-                <span>Explore Casinos</span>
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-              </a>
-            </div>
-          </div>
-          <!-- 轮播图 Item 2 -->
-          <div class="swiper-slide bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 p-8 sm:p-12 md:p-16 flex flex-col justify-center min-h-[280px] sm:min-h-[340px] relative">
-            <span class="px-3 py-1 text-xs bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-full w-max mb-3 font-semibold">100% Verified Partners</span>
-            <h2 class="text-2xl sm:text-4xl font-black text-white mb-3 max-w-xl">Tested Games & Transparent Ratings</h2>
-            <p class="text-slate-300 text-xs sm:text-sm max-w-lg mb-6 leading-relaxed">Over 1,380+ games tested and 680+ casino sites reviewed monthly to ensure a safer navigation experience.</p>
-            <div>
-              <a href="#AboutUs" class="inline-flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs sm:text-sm border border-slate-700 transition-colors">
-                <span>Learn More About Us</span>
-              </a>
-            </div>
-          </div>
+        <div class="swiper-wrapper" id="dynamicSlidesWrapper">
+          <!-- 动态加载 -->
         </div>
-        <!-- 轮播图分页指示器 -->
         <div class="swiper-pagination"></div>
       </div>
     </section>
 
-    <!-- 3. Multiple Companies (多个公司/平台展示区 - 动态加载) -->
+    <!-- 2. Multiple Companies 多个公司/平台区 -->
     <section id="Casino" class="space-y-6 pt-4">
       <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-slate-800/80 pb-4">
         <div>
@@ -84,204 +56,202 @@
 
       <div id="gang-portal-hub">
         <div id="siteList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- 数据加载态占位 -->
-          <div class="col-span-full text-center text-slate-400 py-16 text-sm bg-slate-900/60 rounded-2xl border border-slate-800 flex flex-col items-center justify-center space-y-3">
-            <svg class="animate-spin h-6 w-6 text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span>Loading Partner Companies...</span>
-          </div>
+          <!-- 动态加载 -->
         </div>
       </div>
     </section>
 
-    <!-- 4. About Us (关于我们内容区块) -->
+    <!-- 3. About Us 关于我们区 -->
     <section id="AboutUs" class="bg-[#111827] rounded-3xl p-6 sm:p-10 border border-slate-800 shadow-xl space-y-6">
-      <div class="max-w-2xl">
-        <span class="px-3 py-1 text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-semibold">About 4D Gang Malaysia</span>
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3 mb-2">Dedicated to Safer & Smarter Play</h2>
-        <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">
-          4D Gang Malaysia is built by a team of veteran researchers and analysts. Our mission is to cut through the noise of online platforms, delivering transparent, unbiased information and robust guidance. We believe in playing with confidence, prioritizing recreation and safety over chasing unrealistic financial returns.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-800">
-        <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80">
-          <div class="text-amber-400 font-bold text-lg mb-1">680+</div>
-          <div class="text-slate-300 font-semibold text-xs mb-1">Casino Sites Reviewed</div>
-          <p class="text-slate-400 text-[11px]">Strict verification metrics applied to every platform listed.</p>
-        </div>
-        <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80">
-          <div class="text-amber-400 font-bold text-lg mb-1">1,380+</div>
-          <div class="text-slate-300 font-semibold text-xs mb-1">Games Tested</div>
-          <p class="text-slate-400 text-[11px]">Thorough hand-on technical analysis across major releases.</p>
-        </div>
-        <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80">
-          <div class="text-amber-400 font-bold text-lg mb-1">376+ Hrs</div>
-          <div class="text-slate-300 font-semibold text-xs mb-1">Monthly Research</div>
-          <p class="text-slate-400 text-[11px]">Continuous data tracking to maintain absolute freshness.</p>
-        </div>
+      <div class="max-w-2xl" id="aboutContentArea">
+        <!-- 动态加载 -->
       </div>
     </section>
 
   </main>
 
-  <!-- 页脚版权 -->
   <footer class="border-t border-slate-800 bg-[#111827] mt-16 py-8 text-center text-xs text-slate-500">
     <p>&copy; 2026 4D Gang Malaysia. All Rights Reserved. Play Responsibly.</p>
   </footer>
 
-  <!-- 引入 Swiper JS 脚本 -->
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script>
-    // 初始化轮播图
-    const swiper = new Swiper(".mySwiper", {
-      loop: true,
-      autoplay: {
-        delay: 4500,
-        disableOnInteraction: false,
-      },
-      pagination: {
-        el: ".swiper-pagination",
-        clickable: true,
-      },
-    });
-
-    // 核心打点与动态拉取逻辑
-    (function() {
-      const apiBackendUrl = 'https://your-backend-api.com';
-
-      // 1. 生成或获取跨页面的唯一访客 ID
-      function getVisitorId() {
-        let vid = localStorage.getItem('gang_visitor_id');
-        if (!vid) {
-          vid = 'vid_' + Math.random().toString(36).substr(2, 8) + '_' + Date.now().toString().slice(-6);
-          localStorage.setItem('gang_visitor_id', vid);
-        }
-        return vid;
+    // 初始化默认数据与读取
+    const defaultData = {
+      companies: [
+        { id: 1, name: "MegaWin Casino Malaysia", url: "#", desc_text: "Top-tier verified gaming platform offering safe entertainment and instant bonuses.", icon_url: "" },
+        { id: 2, name: "Lucky4D Partner Hub", url: "#", desc_text: "Trusted insights and smart play guides curated for professional enthusiasts.", icon_url: "" }
+      ],
+      slides: [
+        { badge: "Hot Bonuses 2026", title: "Expert Reviews & Smart Play Guidance", desc: "Discover trusted platform insights, verified ratings, and responsible play strategies curated by industry professionals.", btnText: "Explore Casinos" },
+        { badge: "100% Verified Partners", title: "Tested Games & Transparent Ratings", desc: "Over 1,380+ games tested and 680+ casino sites reviewed monthly to ensure a safer navigation experience.", btnText: "Learn More About Us" }
+      ],
+      about: {
+        badge: "About 4D Gang Malaysia",
+        title: "Dedicated to Safer & Smarter Play",
+        desc: "4D Gang Malaysia is built by a team of veteran researchers and analysts. Our mission is to cut through the noise of online platforms, delivering transparent, unbiased information and robust guidance.",
+        stats: [
+          { val: "680+", label: "Casino Sites Reviewed" },
+          { val: "1,380+", label: "Games Tested" },
+          { val: "376+ Hrs", label: "Monthly Research" }
+        ]
       }
+    };
 
-      // 2. 捕获并存储 UTM 渠道参数
-      function captureAndGetUtm() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlSource = urlParams.get('source') || urlParams.get('utm_source');
-        const urlCampaign = urlParams.get('campaign') || urlParams.get('utm_campaign');
+    function loadSiteContent() {
+      const dataStr = localStorage.getItem('gang_site_content');
+      return dataStr ? JSON.parse(dataStr) : defaultData;
+    }
 
-        if (urlSource) sessionStorage.setItem('gang_utm_source', urlSource);
-        if (urlCampaign) sessionStorage.setItem('gang_utm_campaign', urlCampaign);
+    // 渲染动态内容
+    function renderFrontend() {
+      const data = loadSiteContent();
 
-        const source = urlSource || sessionStorage.getItem('gang_utm_source') || 'direct';
-        const campaign = urlCampaign || sessionStorage.getItem('gang_utm_campaign') || 'none';
+      // 1. 渲染轮播图
+      const slideWrapper = document.getElementById('dynamicSlidesWrapper');
+      slideWrapper.innerHTML = data.slides.map(s => `
+        <div class="swiper-slide bg-gradient-to-r from-slate-900 via-amber-950/40 to-slate-900 p-8 sm:p-12 md:p-16 flex flex-col justify-center min-h-[280px] sm:min-h-[340px] relative">
+          <span class="px-3 py-1 text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full w-max mb-3 font-semibold">${s.badge}</span>
+          <h2 class="text-2xl sm:text-4xl font-black text-white mb-3 max-w-xl">${s.title}</h2>
+          <p class="text-slate-300 text-xs sm:text-sm max-w-lg mb-6 leading-relaxed">${s.desc}</p>
+          <div>
+            <a href="#Casino" class="inline-flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-red-600 text-white font-semibold text-xs sm:text-sm shadow-lg">
+              <span>${s.btnText}</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </a>
+          </div>
+        </div>
+      `).join('');
 
-        return { source, campaign };
+      // 初始化 Swiper
+      if (window.mySwiperInstance) {
+        window.mySwiperInstance.destroy(true, true);
       }
+      window.mySwiperInstance = new Swiper(".mySwiper", {
+        loop: true,
+        autoplay: { delay: 4500, disableOnInteraction: false },
+        pagination: { el: ".swiper-pagination", clickable: true },
+      });
 
-      // 3. 从后端异步拉取平台公司卡片数据
-      async function fetchSites() {
-        try {
-          const res = await fetch(`${apiBackendUrl}/api/websites`);
-          const json = await res.json();
-          if (json.success && json.data.length > 0) {
-            renderSites(json.data);
-          } else {
-            document.getElementById('siteList').innerHTML = '<div class="col-span-full text-center text-slate-400 py-12 text-sm bg-slate-900/60 rounded-2xl border border-slate-800">No channels available at the moment.</div>';
-          }
-        } catch (err) {
-          // 如果未配置真实后端 API，这里提供一套模拟演示数据，确保页面能直接呈现多个公司卡片的效果
-          const mockData = [
-            { id: 1, name: "MegaWin Casino Malaysia", url: "#", desc_text: "Top-tier verified gaming platform offering safe entertainment and instant bonuses.", icon_url: "" },
-            { id: 2, name: "Lucky4D Partner Hub", url: "#", desc_text: "Trusted insights and smart play guides curated for professional enthusiasts.", icon_url: "" },
-            { id: 3, name: "Royal Star Gaming", url: "#", desc_text: "Comprehensive game testing reports and secure navigation channels.", icon_url: "" },
-            { id: 4, name: "Gold Coast 4D Club", url: "#", desc_text: "Unbiased reviews, transparent bonus ratings, and responsible play support.", icon_url: "" }
-          ];
-          renderSites(mockData);
-        }
-      }
+      // 2. 渲染公司列表
+      const siteList = document.getElementById('siteList');
+      siteList.innerHTML = data.companies.map((site, index) => `
+        <div data-id="${site.id}" 
+             data-name="${encodeURIComponent(site.name)}" 
+             data-url="${encodeURIComponent(site.url)}" 
+             style="animation-delay: ${index * 0.05}s"
+             class="fade-in group bg-[#111827] hover:bg-[#1f2937] p-4.5 sm:p-5 rounded-2xl border border-slate-800 hover:border-amber-500/55 transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-xl relative overflow-hidden">
+          
+          <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-500 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
-      // 4. 渲染平台卡片列表
-      function renderSites(sites) {
-        const container = document.getElementById('siteList');
-        container.innerHTML = sites.map((site, index) => `
-          <div data-id="${site.id}" 
-               data-name="${encodeURIComponent(site.name)}" 
-               data-url="${encodeURIComponent(site.url)}" 
-               style="animation-delay: ${index * 0.05}s"
-               class="fade-in group bg-[#111827] hover:bg-[#1f2937] p-4.5 sm:p-5 rounded-2xl border border-slate-800 hover:border-amber-500/55 transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-xl relative overflow-hidden">
-            
-            <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-500 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-            <div class="flex items-start space-x-3.5 mb-4">
-              <img src="${site.icon_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + site.id}" 
-                   class="w-12 h-12 rounded-xl object-cover bg-slate-800 p-1 shrink-0 border border-slate-700/60 group-hover:scale-105 transition-transform">
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center justify-between">
-                  <h3 class="font-bold text-slate-100 text-sm group-hover:text-amber-400 transition-colors truncate">${site.name}</h3>
-                  <span class="px-2 py-0.5 text-[9px] bg-amber-500/15 text-amber-400 border border-amber-500/20 rounded font-semibold shrink-0">Verified</span>
-                </div>
-                <p class="text-slate-400 text-xs mt-1.5 line-clamp-2 leading-relaxed">${site.desc_text || 'Official safe navigation channel & trusted review.'}</p>
+          <div class="flex items-start space-x-3.5 mb-4">
+            <img src="${site.icon_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + site.id}" 
+                 class="w-12 h-12 rounded-xl object-cover bg-slate-800 p-1 shrink-0 border border-slate-700/60 group-hover:scale-105 transition-transform">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center justify-between">
+                <h3 class="font-bold text-slate-100 text-sm group-hover:text-amber-400 transition-colors truncate">${site.name}</h3>
+                <span class="px-2 py-0.5 text-[9px] bg-amber-500/15 text-amber-400 border border-amber-500/20 rounded font-semibold shrink-0">Verified</span>
               </div>
-            </div>
-
-            <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-xs font-medium">
-              <span class="text-slate-400 text-[11px] flex items-center space-x-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                <span>Tracking Active</span>
-              </span>
-              <div class="px-3 py-1.5 rounded-xl bg-slate-800 group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-red-600 text-slate-300 group-hover:text-white transition-all shadow-sm flex items-center space-x-1">
-                <span>Visit Site</span>
-                <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
-                </svg>
-              </div>
+              <p class="text-slate-400 text-xs mt-1.5 line-clamp-2 leading-relaxed">${site.desc_text || 'Official safe navigation channel & trusted review.'}</p>
             </div>
           </div>
-        `).join('');
 
-        // 绑定点击事件，处理统计打点与跳转
-        document.querySelectorAll('#siteList > div').forEach(card => {
-          card.addEventListener('click', () => {
-            const id = card.getAttribute('data-id');
-            const name = decodeURIComponent(card.getAttribute('data-name'));
-            const url = decodeURIComponent(card.getAttribute('data-url'));
-            trackAndRedirect(id, name, url);
-          });
+          <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-xs font-medium">
+            <span class="text-slate-400 text-[11px] flex items-center space-x-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <span>Tracking Active</span>
+            </span>
+            <div class="px-3 py-1.5 rounded-xl bg-slate-800 group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-red-600 text-slate-300 group-hover:text-white transition-all shadow-sm flex items-center space-x-1">
+              <span>Visit Site</span>
+              <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // 绑定点击事件及打点
+      document.querySelectorAll('#siteList > div').forEach(card => {
+        card.addEventListener('click', () => {
+          const id = card.getAttribute('data-id');
+          const name = decodeURIComponent(card.getAttribute('data-name'));
+          const url = decodeURIComponent(card.getAttribute('data-url'));
+          trackAndRedirect(id, name, url);
         });
-      }
-
-      // 5. 核心打点与跳转函数
-      function trackAndRedirect(siteId, siteName, targetUrl) {
-        const visitorId = getVisitorId();
-        const { source, campaign } = captureAndGetUtm();
-
-        const payload = {
-          visitor_id: visitorId,
-          site_id: siteId,
-          site_name: siteName,
-          target_domain: targetUrl,
-          source: source,
-          campaign: campaign,
-          timestamp: new Date().toISOString()
-        };
-
-        fetch(`${apiBackendUrl}/api/track`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-          keepalive: true
-        }).catch(err => console.error('Tracking failed:', err));
-
-        if(targetUrl && targetUrl !== '#') {
-          window.open(targetUrl, '_blank');
-        }
-      }
-
-      // 初始化执行
-      document.addEventListener('DOMContentLoaded', () => {
-        captureAndGetUtm();
-        fetchSites();
       });
-    })();
+
+      // 3. 渲染关于我们
+      const aboutArea = document.getElementById('aboutContentArea');
+      aboutArea.innerHTML = `
+        <span class="px-3 py-1 text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-semibold">${data.about.badge}</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3 mb-2">${data.about.title}</h2>
+        <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">${data.about.desc}</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-slate-800 mt-6">
+          ${data.about.stats.map(st => `
+            <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80">
+              <div class="text-amber-400 font-bold text-lg mb-1">${st.val}</div>
+              <div class="text-slate-300 font-semibold text-xs mb-1">${st.label}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // UTM 与打点跳转核心函数
+    function getVisitorId() {
+      let vid = localStorage.getItem('gang_visitor_id');
+      if (!vid) {
+        vid = 'vid_' + Math.random().toString(36).substr(2, 8) + '_' + Date.now().toString().slice(-6);
+        localStorage.setItem('gang_visitor_id', vid);
+      }
+      return vid;
+    }
+
+    function captureAndGetUtm() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlSource = urlParams.get('source') || urlParams.get('utm_source');
+      const urlCampaign = urlParams.get('campaign') || urlParams.get('utm_campaign');
+
+      if (urlSource) sessionStorage.setItem('gang_utm_source', urlSource);
+      if (urlCampaign) sessionStorage.setItem('gang_utm_campaign', urlCampaign);
+
+      const source = urlSource || sessionStorage.getItem('gang_utm_source') || 'direct';
+      const campaign = urlCampaign || sessionStorage.getItem('gang_utm_campaign') || 'none';
+
+      return { source, campaign };
+    }
+
+    function trackAndRedirect(siteId, siteName, targetUrl) {
+      const visitorId = getVisitorId();
+      const { source, campaign } = captureAndGetUtm();
+
+      const payload = {
+        visitor_id: visitorId,
+        site_id: siteId,
+        site_name: siteName,
+        target_domain: targetUrl,
+        source: source,
+        campaign: campaign,
+        timestamp: new Date().toISOString()
+      };
+
+      fetch('https://your-backend-api.com/api/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true
+      }).catch(err => console.error('Tracking failed:', err));
+
+      if(targetUrl && targetUrl !== '#') {
+        window.open(targetUrl, '_blank');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      captureAndGetUtm();
+      renderFrontend();
+    });
   </script>
 </body>
 </html>
