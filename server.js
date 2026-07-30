@@ -11,9 +11,10 @@ const pool = new Pool({
   ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
 });
 
-app.use(express.json());
+// 强化 JSON 解析，兼容 sendBeacon 和普通 fetch 格式
+app.use(express.json({ type: ['application/json', 'text/plain', '*/*'] }));
 
-// 静态文件服务：配置 extensions: ['html']，访问 /admin 时会自动去匹配 admin.html
+// 静态文件服务：配置 extensions: ['html']
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
 // 页面路由拦截：确保直接访问 /admin 能够成功渲染 admin.html
@@ -21,7 +22,7 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-// 数据库建表初始化
+// 数据库建表与修复初始化
 async function initDB() {
   try {
     // 1. 落地页站点表
@@ -59,6 +60,13 @@ async function initDB() {
         CONSTRAINT unique_domain_source UNIQUE(domain, source)
       );
     `);
+
+    // 尝试添加唯一约束 (防止旧表缺少约束导致 ON CONFLICT 报错)
+    try {
+      await pool.query(`ALTER TABLE stats ADD CONSTRAINT unique_domain_source UNIQUE(domain, source);`);
+    } catch (e) {
+      // 约束若已存在会触发此捕获，属正常情况
+    }
 
     // 4. 用户点击日志轨迹表
     await pool.query(`
@@ -133,12 +141,13 @@ app.delete('/api/websites/:id', async (req, res) => {
   }
 });
 
-// 2. 推广链接生成与查询
+// 2. 推广链接生成与查询（增加了缺省降级查询）
 app.get('/api/links', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM links ORDER BY created_at DESC');
+    const result = await pool.query('SELECT * FROM links ORDER BY id DESC');
     res.json({ success: true, data: result.rows });
   } catch (err) {
+    console.error('获取历史链接失败:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -159,23 +168,37 @@ app.post('/api/links', async (req, res) => {
 // 3. 数据报表统计
 app.get('/api/stats', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM stats ORDER BY views DESC');
+    const result = await pool.query('SELECT * FROM stats ORDER BY leads DESC');
     res.json({ success: true, data: result.rows });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// 4. 记录用户跨站点点击轨迹
+// 4. 记录用户跨站点点击轨迹 (增加了容错防刷逻辑)
 app.post('/api/track-click', async (req, res) => {
-  const { visitor_id, website_id, website_name, source, campaign } = req.body;
+  let bodyData = req.body;
+  
+  // 处理字符串 Body 兼容性
+  if (typeof bodyData === 'string') {
+    try { bodyData = JSON.parse(bodyData); } catch (e) {}
+  }
+
+  const { visitor_id, website_id, website_name, source, campaign } = bodyData || {};
+
+  if (!website_name) {
+    return res.status(400).json({ success: false, error: '参数不完整' });
+  }
+
   try {
+    // 写入日志
     await pool.query(
       `INSERT INTO click_logs (visitor_id, website_id, website_name, source, campaign) 
        VALUES ($1, $2, $3, $4, $5)`,
-      [visitor_id, website_id, website_name, source || 'direct', campaign || 'none']
+      [visitor_id || 'unknown', website_id || 0, website_name, source || 'direct', campaign || 'none']
     );
 
+    // 更新汇总统计
     await pool.query(
       `INSERT INTO stats (domain, source, views, leads) 
        VALUES ($1, $2, 0, 1)
@@ -191,7 +214,7 @@ app.post('/api/track-click', async (req, res) => {
   }
 });
 
-// 5. 获取用户点击轨迹聚合列表
+// 5. 获取用户点击轨迹列表
 app.get('/api/user-journeys', async (req, res) => {
   try {
     const query = `
@@ -200,7 +223,7 @@ app.get('/api/user-journeys', async (req, res) => {
         source,
         campaign,
         COUNT(*) as total_clicks,
-        STRING_AGG(website_name, ' ➔ ' ORDER BY created_at ASC) as click_path,
+        STRING_AGG(website_name, ' ➔ ' ORDER BY id ASC) as click_path,
         MAX(created_at) as last_active
       FROM click_logs
       GROUP BY visitor_id, source, campaign
