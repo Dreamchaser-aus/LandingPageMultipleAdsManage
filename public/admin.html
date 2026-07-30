@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>引流数据与行为追踪后台</title>
+  <title>引流数据与内容管理后台</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased font-sans">
@@ -19,20 +19,32 @@
           </div>
           <div>
             <h1 class="text-white font-bold text-base leading-tight">流量引流后台</h1>
-            <p class="text-slate-500 text-xs mt-0.5">v3.2 Pagination Pro</p>
+            <p class="text-slate-500 text-xs mt-0.5">v3.5 CMS Pro</p>
           </div>
         </div>
 
         <nav class="space-y-1.5">
           <button id="nav-stats" onclick="switchTab('stats')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-sm shadow-blue-600/20">
-            数据报表总览
+            📊 数据报表总览
           </button>
           <button id="nav-journeys" onclick="switchTab('journeys')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
             👥 用户轨迹与 IP
           </button>
+
+          <div class="pt-2 pb-1 px-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">前端内容管理 (index.html)</div>
+
           <button id="nav-websites" onclick="switchTab('websites')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-            🌐 落地页站点管理
+            🌐 落地页与平台卡片
           </button>
+          <button id="nav-slides" onclick="switchTab('slides')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
+            🖼️ 首页轮播图管理
+          </button>
+          <button id="nav-about" onclick="switchTab('about')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
+            ℹ️ 关于我们面板配置
+          </button>
+
+          <div class="pt-2 pb-1 px-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">推广工具</div>
+
           <button id="nav-generator" onclick="switchTab('generator')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
             🔗 链接生成与导入
           </button>
@@ -48,7 +60,7 @@
       <header class="sticky top-0 bg-white/80 backdrop-blur border-b border-slate-200/80 px-8 py-4 flex justify-between items-center z-10">
         <h2 id="page-title" class="text-xl font-bold text-slate-800">数据报表总览</h2>
         <button onclick="fetchAllData()" class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-lg text-sm font-medium transition">
-          🔄 刷新数据
+          🔄 刷新数据与缓存
         </button>
       </header>
 
@@ -75,7 +87,7 @@
           </div>
         </section>
 
-        <!-- Tab 2: 用户轨迹与 IP (支持传统偏移量分页) -->
+        <!-- Tab 2: 用户轨迹与 IP -->
         <section id="tab-journeys" class="tab-content hidden space-y-6">
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
@@ -84,7 +96,6 @@
                 <p class="text-xs text-slate-500 mt-0.5">点击任意用户行可查看点击路径顺序</p>
               </div>
               
-              <!-- 每页显示条数切换 -->
               <div class="flex items-center gap-2 text-xs text-slate-600">
                 <span>每页显示:</span>
                 <select id="pageSizeSelect" onchange="changePageSize(this.value)" class="border border-slate-200 rounded-lg px-2 py-1 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -95,7 +106,6 @@
               </div>
             </div>
 
-            <!-- 数据表格 -->
             <div class="overflow-x-auto">
               <table class="w-full text-left border-collapse">
                 <thead>
@@ -115,7 +125,6 @@
               </table>
             </div>
 
-            <!-- 传统分页控制器工具栏 -->
             <div class="mt-5 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600">
               <div id="pageInfoText">共 0 条数据，显示第 0-0 条</div>
               
@@ -128,7 +137,6 @@
                 <button id="btnNext" onclick="changePage(1)" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">下一页</button>
                 <button id="btnLast" onclick="goToLastPage()" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">尾页</button>
                 
-                <!-- 跳转指定页 -->
                 <div class="flex items-center gap-1 ml-3 pl-3 border-l border-slate-200">
                   <span>跳至</span>
                   <input type="number" id="jumpPageInput" min="1" class="w-12 px-2 py-1 border border-slate-200 rounded-md text-center focus:outline-none" placeholder="1">
@@ -141,24 +149,24 @@
           </div>
         </section>
 
-        <!-- Tab 3: 落地页站点管理 -->
+        <!-- Tab 3: 落地页与平台卡片管理 -->
         <section id="tab-websites" class="tab-content hidden space-y-6">
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
-            <h3 class="text-base font-bold text-slate-900 mb-4">🌐 动态添加 / 编辑落地页卡片</h3>
+            <h3 class="text-base font-bold text-slate-900 mb-4">🌐 动态添加 / 编辑 index.html 平台卡片</h3>
             
             <form id="websiteForm" onsubmit="handleWebsiteSubmit(event)" class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
               <input type="hidden" id="editSiteId">
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">站点名称</label>
-                <input type="text" id="siteName" required placeholder="官方商城" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="text" id="siteName" required placeholder="MegaWin Casino" class="w-full px-3 py-2 border rounded-lg text-sm">
               </div>
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">描述/副标题</label>
-                <input type="text" id="siteDesc" placeholder="限时优惠" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="text" id="siteDesc" placeholder="Top-tier gaming platform" class="w-full px-3 py-2 border rounded-lg text-sm">
               </div>
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">跳转 URL</label>
-                <input type="url" id="siteUrl" required placeholder="https://..." class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="text" id="siteUrl" required placeholder="https://..." class="w-full px-3 py-2 border rounded-lg text-sm">
               </div>
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">Logo URL</label>
@@ -189,7 +197,110 @@
           </div>
         </section>
 
-        <!-- Tab 4: 链接生成与直接导入 -->
+        <!-- Tab 4: 首页轮播图管理 (NEW) -->
+        <section id="tab-slides" class="tab-content hidden space-y-6">
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
+            <h3 class="text-base font-bold text-slate-900 mb-4">🖼️ 动态管理 index.html 轮播图 (Slideshow)</h3>
+
+            <form id="slideForm" onsubmit="handleSlideSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
+              <input type="hidden" id="editSlideId">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">标签/角标 (Badge)</label>
+                <input type="text" id="slideBadge" required placeholder="Hot Bonuses 2026" class="w-full px-3 py-2 border rounded-lg text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">按钮文字 (Button Text)</label>
+                <input type="text" id="slideBtnText" required placeholder="Explore Casinos" class="w-full px-3 py-2 border rounded-lg text-sm">
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">轮播主标题 (Title)</label>
+                <input type="text" id="slideTitle" required placeholder="Expert Reviews & Smart Play Guidance" class="w-full px-3 py-2 border rounded-lg text-sm">
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">轮播详细描述 (Description)</label>
+                <textarea id="slideDesc" rows="2" required placeholder="Discover trusted platform insights..." class="w-full px-3 py-2 border rounded-lg text-sm"></textarea>
+              </div>
+              <div class="md:col-span-2 flex justify-end gap-2">
+                <button type="button" id="cancelSlideBtn" onclick="resetSlideForm()" class="hidden bg-slate-300 text-slate-700 py-2 px-4 rounded-lg text-sm">取消修改</button>
+                <button type="submit" id="submitSlideBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition">添加轮播图</button>
+              </div>
+            </form>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-200 text-slate-500 text-xs uppercase bg-slate-50">
+                    <th class="p-3.5">角标</th>
+                    <th class="p-3.5">主标题</th>
+                    <th class="p-3.5">描述</th>
+                    <th class="p-3.5">按钮文字</th>
+                    <th class="p-3.5">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="slidesManageTable" class="divide-y divide-slate-100 text-sm">
+                  <tr><td colspan="5" class="p-6 text-center text-slate-400">加载中...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tab 5: 关于我们配置 (NEW) -->
+        <section id="tab-about" class="tab-content hidden space-y-6">
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60 max-w-4xl">
+            <h3 class="text-base font-bold text-slate-900 mb-4">ℹ️ 自定义 index.html 关于我们板块 (About Us)</h3>
+
+            <form id="aboutForm" onsubmit="handleAboutSubmit(event)" class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">板块角标 (Badge)</label>
+                  <input type="text" id="aboutBadge" required class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">大标题 (Title)</label>
+                  <input type="text" id="aboutTitle" required class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">主体介绍文字 (Description)</label>
+                <textarea id="aboutDesc" rows="3" required class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+              </div>
+
+              <div class="border-t border-slate-100 pt-4">
+                <h4 class="text-sm font-bold text-slate-800 mb-3">📊 核心数据指标 (Stats)</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <!-- Indicator 1 -->
+                  <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+                    <span class="text-xs font-bold text-amber-600">指标 1</span>
+                    <input type="text" id="statVal1" placeholder="例如: 680+" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white" required>
+                    <input type="text" id="statLabel1" placeholder="例如: Casino Sites Reviewed" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white" required>
+                  </div>
+                  <!-- Indicator 2 -->
+                  <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+                    <span class="text-xs font-bold text-amber-600">指标 2</span>
+                    <input type="text" id="statVal2" placeholder="例如: 1,380+" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white" required>
+                    <input type="text" id="statLabel2" placeholder="例如: Games Tested" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white" required>
+                  </div>
+                  <!-- Indicator 3 -->
+                  <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+                    <span class="text-xs font-bold text-amber-600">指标 3</span>
+                    <input type="text" id="statVal3" placeholder="例如: 376+ Hrs" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white" required>
+                    <input type="text" id="statLabel3" placeholder="例如: Monthly Research" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white" required>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-2 flex justify-end">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition shadow-md shadow-blue-500/20">
+                  💾 保存“关于我们”配置
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- Tab 6: 链接生成与直接导入 -->
         <section id="tab-generator" class="tab-content hidden space-y-6">
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-200 bg-blue-50/20 max-w-2xl">
             <h3 class="text-base font-bold text-slate-900 mb-1">📥 快捷导入已有 UTM 链接</h3>
@@ -228,7 +339,7 @@
           </div>
         </section>
 
-        <!-- Tab 5: 历史生成与导入记录 -->
+        <!-- Tab 7: 历史生成与导入记录 -->
         <section id="tab-history" class="tab-content hidden space-y-6">
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
             <h3 class="text-base font-bold text-slate-900 mb-4">📋 推广链接历史记录</h3>
@@ -256,7 +367,48 @@
 
   <script>
     const baseUrl = window.location.origin;
-    let websitesData = [];
+    const STORAGE_KEY = 'gang_site_content';
+
+    // 默认基础数据结构，与 index.html 匹配
+    const defaultSiteContent = {
+      companies: [
+        { id: 1, name: "MegaWin Casino Malaysia", url: "#", desc_text: "Top-tier verified gaming platform offering safe entertainment and instant bonuses.", icon_url: "" },
+        { id: 2, name: "Lucky4D Partner Hub", url: "#", desc_text: "Trusted insights and smart play guides curated for professional enthusiasts.", icon_url: "" }
+      ],
+      slides: [
+        { id: 1, badge: "Hot Bonuses 2026", title: "Expert Reviews & Smart Play Guidance", desc: "Discover trusted platform insights, verified ratings, and responsible play strategies curated by industry professionals.", btnText: "Explore Casinos" },
+        { id: 2, badge: "100% Verified Partners", title: "Tested Games & Transparent Ratings", desc: "Over 1,380+ games tested and 680+ casino sites reviewed monthly to ensure a safer navigation experience.", btnText: "Learn More About Us" }
+      ],
+      about: {
+        badge: "About 4D Gang Malaysia",
+        title: "Dedicated to Safer & Smarter Play",
+        desc: "4D Gang Malaysia is built by a team of veteran researchers and analysts. Our mission is to cut through the noise of online platforms, delivering transparent, unbiased information and robust guidance.",
+        stats: [
+          { val: "680+", label: "Casino Sites Reviewed" },
+          { val: "1,380+", label: "Games Tested" },
+          { val: "376+ Hrs", label: "Monthly Research" }
+        ]
+      }
+    };
+
+    // 获取 LocalStorage 中的最新全局数据
+    function getSiteContent() {
+      const dataStr = localStorage.getItem(STORAGE_KEY);
+      if (!dataStr) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultSiteContent));
+        return defaultSiteContent;
+      }
+      try {
+        return JSON.parse(dataStr);
+      } catch(e) {
+        return defaultSiteContent;
+      }
+    }
+
+    // 保存至 LocalStorage 供 index.html 实时渲染
+    function saveSiteContent(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
 
     // ================= 分页全局变量管理 =================
     let currentPage = 1;
@@ -267,7 +419,9 @@
     const tabTitles = {
       'stats': '数据报表总览',
       'journeys': '用户轨迹与 IP 设备',
-      'websites': '落地页站点管理',
+      'websites': '落地页与平台卡片管理',
+      'slides': '首页轮播图管理',
+      'about': '关于我们面板配置',
       'generator': '链接生成与导入',
       'history': '历史生成记录'
     };
@@ -296,6 +450,8 @@
       fetchStats();
       fetchUserJourneys();
       fetchManageWebsites();
+      fetchManageSlides();
+      loadAboutForm();
       fetchLinksHistory();
     }
 
@@ -323,7 +479,7 @@
       }
     }
 
-    // User-Agent 解析函数
+    // UA 解析
     function parseUserAgent(ua) {
       if (!ua || ua === 'Unknown') return { label: '未知设备', icon: '❓' };
       let os = '未知系统';
@@ -344,25 +500,21 @@
       return { label: `${os} · ${browser}`, icon };
     }
 
-    // ================= 2. 用户轨迹（带传统偏移量分页） =================
+    // 2. 用户轨迹
     async function fetchUserJourneys() {
       const tbody = document.getElementById('journeysTable');
       tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">加载中...</td></tr>';
 
       try {
-        // 请求后台接口，携带 page 与 limit 参数
         const res = await fetch(`${baseUrl}/api/user-journeys?page=${currentPage}&limit=${pageSize}`);
         const json = await res.json();
 
         if (json.success) {
           const list = json.data || [];
-          
-          // 如果后端传回了总记录数，更新全局变量；如果未传，兼容全量前端切片模式
           if (json.pagination) {
             totalRecords = json.pagination.total || list.length;
             totalPages = json.pagination.totalPages || Math.ceil(totalRecords / pageSize);
           } else {
-            // 前端兼容模式：如果后端尚未实现 SQL 分页
             totalRecords = list.length;
             totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
           }
@@ -375,7 +527,6 @@
       }
     }
 
-    // 渲染轨迹表格行
     function renderJourneysTable(pageData) {
       const tbody = document.getElementById('journeysTable');
       if (!pageData || pageData.length === 0) {
@@ -419,7 +570,6 @@
             </td>
           </tr>
 
-          <!-- 折叠展开的横向路径卡片 -->
           <tr id="${rowId}" class="hidden bg-slate-50/80">
             <td colspan="7" class="p-4 border-b border-slate-200/80">
               <div class="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-inner">
@@ -443,7 +593,6 @@
       }).join('');
     }
 
-    // 折叠展开点击路径
     function togglePathRow(rowId, btnId) {
       const row = document.getElementById(rowId);
       const btn = document.getElementById(btnId);
@@ -460,7 +609,7 @@
       }
     }
 
-    // ================= 分页控制逻辑 =================
+    // 分页控制逻辑
     function updatePaginationUI() {
       const startRecord = totalRecords === 0 ? 0 : (currentPage - 1) * pageSize + 1;
       const endRecord = Math.min(currentPage * pageSize, totalRecords);
@@ -468,33 +617,24 @@
       document.getElementById('pageInfoText').innerText = `共 ${totalRecords} 条数据，显示第 ${startRecord}-${endRecord} 条`;
       document.getElementById('currentPageTag').innerText = `第 ${currentPage} / ${totalPages || 1} 页`;
 
-      // 按钮可点击状态判断
       document.getElementById('btnFirst').disabled = (currentPage <= 1);
       document.getElementById('btnPrev').disabled = (currentPage <= 1);
       document.getElementById('btnNext').disabled = (currentPage >= totalPages || totalPages === 0);
       document.getElementById('btnLast').disabled = (currentPage >= totalPages || totalPages === 0);
     }
 
-    function changePage(delta) {
-      goToPage(currentPage + delta);
-    }
-
+    function changePage(delta) { goToPage(currentPage + delta); }
     function goToPage(targetPage) {
       if (targetPage < 1 || targetPage > totalPages || targetPage === currentPage) return;
       currentPage = targetPage;
       fetchUserJourneys();
     }
-
-    function goToLastPage() {
-      goToPage(totalPages);
-    }
-
+    function goToLastPage() { goToPage(totalPages); }
     function changePageSize(newSize) {
       pageSize = parseInt(newSize, 10);
-      currentPage = 1; // 切换每页大小时重置回第一页
+      currentPage = 1;
       fetchUserJourneys();
     }
-
     function handleJumpPage() {
       const val = parseInt(document.getElementById('jumpPageInput').value, 10);
       if (val && val >= 1 && val <= totalPages) {
@@ -504,15 +644,11 @@
       }
     }
 
-    // 3. 落地页卡片管理
+    // ================= 3. 落地页与平台卡片管理 (对应 index.html companies) =================
     async function fetchManageWebsites() {
       try {
-        const res = await fetch(`${baseUrl}/api/websites`);
-        const json = await res.json();
-        if (json.success) {
-          websitesData = json.data;
-          renderManageWebsitesTable(json.data);
-        }
+        const content = getSiteContent();
+        renderManageWebsitesTable(content.companies || []);
       } catch (err) {
         console.error(err);
       }
@@ -541,7 +677,7 @@
       `).join('');
     }
 
-    async function handleWebsiteSubmit(e) {
+    function handleWebsiteSubmit(e) {
       e.preventDefault();
       const id = document.getElementById('editSiteId').value;
       const name = document.getElementById('siteName').value.trim();
@@ -549,28 +685,36 @@
       const url = document.getElementById('siteUrl').value.trim();
       const icon_url = document.getElementById('siteIcon').value.trim();
 
-      const method = id ? 'PUT' : 'POST';
-      const apiUrl = id ? `${baseUrl}/api/websites/${id}` : `${baseUrl}/api/websites`;
+      const content = getSiteContent();
+      let companies = content.companies || [];
 
-      try {
-        const res = await fetch(apiUrl, {
-          method: method,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, desc_text, url, icon_url })
-        });
-        const json = await res.json();
-        if (json.success) {
-          resetWebsiteForm();
-          fetchManageWebsites();
-        }
-      } catch (err) {
-        alert('操作失败');
+      if (id) {
+        companies = companies.map(s => s.id == id ? { ...s, name, desc_text, url, icon_url } : s);
+      } else {
+        const newId = Date.now();
+        companies.push({ id: newId, name, desc_text, url, icon_url });
       }
+
+      content.companies = companies;
+      saveSiteContent(content);
+
+      // 可同时推送至后端 API (兼容现有逻辑)
+      fetch(`${baseUrl}/api/websites${id ? '/' + id : ''}`, {
+        method: id ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, desc_text, url, icon_url })
+      }).catch(() => {});
+
+      resetWebsiteForm();
+      fetchManageWebsites();
+      alert('落地页/平台卡片保存成功！已同步至 index.html');
     }
 
     function editSite(id) {
-      const site = websitesData.find(s => s.id === id);
+      const content = getSiteContent();
+      const site = (content.companies || []).find(s => s.id == id);
       if (!site) return;
+
       document.getElementById('editSiteId').value = site.id;
       document.getElementById('siteName').value = site.name;
       document.getElementById('siteDesc').value = site.desc_text || '';
@@ -590,17 +734,153 @@
       document.getElementById('cancelBtn').classList.add('hidden');
     }
 
-    async function deleteSite(id) {
-      if (!confirm('确定删除该站点？')) return;
-      try {
-        await fetch(`${baseUrl}/api/websites/${id}`, { method: 'DELETE' });
-        fetchManageWebsites();
-      } catch (err) {
-        alert('删除失败');
+    function deleteSite(id) {
+      if (!confirm('确定删除该站点卡片？')) return;
+      const content = getSiteContent();
+      content.companies = (content.companies || []).filter(s => s.id != id);
+      saveSiteContent(content);
+
+      fetch(`${baseUrl}/api/websites/${id}`, { method: 'DELETE' }).catch(() => {});
+      fetchManageWebsites();
+    }
+
+    // ================= 4. 首页轮播图管理 (对应 index.html slides) =================
+    function fetchManageSlides() {
+      const content = getSiteContent();
+      renderSlidesManageTable(content.slides || []);
+    }
+
+    function renderSlidesManageTable(slides) {
+      const tbody = document.getElementById('slidesManageTable');
+      if (!slides || slides.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">暂无轮播图，请在上方添加</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = slides.map(slide => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-3.5"><span class="px-2 py-1 bg-amber-50 text-amber-700 rounded text-xs font-semibold">${slide.badge}</span></td>
+          <td class="p-3.5 font-bold text-slate-800 max-w-xs truncate">${slide.title}</td>
+          <td class="p-3.5 text-xs text-slate-500 max-w-sm truncate">${slide.desc}</td>
+          <td class="p-3.5 text-xs text-slate-600">${slide.btnText}</td>
+          <td class="p-3.5 space-x-2">
+            <button onclick="editSlide(${slide.id})" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md font-medium">修改</button>
+            <button onclick="deleteSlide(${slide.id})" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1 rounded-md font-medium">删除</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function handleSlideSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('editSlideId').value;
+      const badge = document.getElementById('slideBadge').value.trim();
+      const title = document.getElementById('slideTitle').value.trim();
+      const desc = document.getElementById('slideDesc').value.trim();
+      const btnText = document.getElementById('slideBtnText').value.trim();
+
+      const content = getSiteContent();
+      let slides = content.slides || [];
+
+      if (id) {
+        slides = slides.map(s => s.id == id ? { ...s, badge, title, desc, btnText } : s);
+      } else {
+        slides.push({ id: Date.now(), badge, title, desc, btnText });
+      }
+
+      content.slides = slides;
+      saveSiteContent(content);
+
+      resetSlideForm();
+      fetchManageSlides();
+      alert('轮播图保存成功！已更新 index.html');
+    }
+
+    function editSlide(id) {
+      const content = getSiteContent();
+      const slide = (content.slides || []).find(s => s.id == id);
+      if (!slide) return;
+
+      document.getElementById('editSlideId').value = slide.id;
+      document.getElementById('slideBadge').value = slide.badge;
+      document.getElementById('slideTitle').value = slide.title;
+      document.getElementById('slideDesc').value = slide.desc;
+      document.getElementById('slideBtnText').value = slide.btnText;
+
+      document.getElementById('submitSlideBtn').innerText = '保存修改';
+      document.getElementById('submitSlideBtn').className = 'bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition';
+      document.getElementById('cancelSlideBtn').classList.remove('hidden');
+    }
+
+    function resetSlideForm() {
+      document.getElementById('slideForm').reset();
+      document.getElementById('editSlideId').value = '';
+      document.getElementById('submitSlideBtn').innerText = '添加轮播图';
+      document.getElementById('submitSlideBtn').className = 'bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition';
+      document.getElementById('cancelSlideBtn').classList.add('hidden');
+    }
+
+    function deleteSlide(id) {
+      if (!confirm('确定删除该轮播图？')) return;
+      const content = getSiteContent();
+      content.slides = (content.slides || []).filter(s => s.id != id);
+      saveSiteContent(content);
+      fetchManageSlides();
+    }
+
+    // ================= 5. 关于我们配置 (对应 index.html about) =================
+    function loadAboutForm() {
+      const content = getSiteContent();
+      const about = content.about || defaultSiteContent.about;
+
+      document.getElementById('aboutBadge').value = about.badge || '';
+      document.getElementById('aboutTitle').value = about.title || '';
+      document.getElementById('aboutDesc').value = about.desc || '';
+
+      const stats = about.stats || [];
+      if (stats[0]) {
+        document.getElementById('statVal1').value = stats[0].val || '';
+        document.getElementById('statLabel1').value = stats[0].label || '';
+      }
+      if (stats[1]) {
+        document.getElementById('statVal2').value = stats[1].val || '';
+        document.getElementById('statLabel2').value = stats[1].label || '';
+      }
+      if (stats[2]) {
+        document.getElementById('statVal3').value = stats[2].val || '';
+        document.getElementById('statLabel3').value = stats[2].label || '';
       }
     }
 
-    // 4. 解析并导入外部 UTM 链接
+    function handleAboutSubmit(e) {
+      e.preventDefault();
+      const content = getSiteContent();
+
+      content.about = {
+        badge: document.getElementById('aboutBadge').value.trim(),
+        title: document.getElementById('aboutTitle').value.trim(),
+        desc: document.getElementById('aboutDesc').value.trim(),
+        stats: [
+          {
+            val: document.getElementById('statVal1').value.trim(),
+            label: document.getElementById('statLabel1').value.trim()
+          },
+          {
+            val: document.getElementById('statVal2').value.trim(),
+            label: document.getElementById('statLabel2').value.trim()
+          },
+          {
+            val: document.getElementById('statVal3').value.trim(),
+            label: document.getElementById('statLabel3').value.trim()
+          }
+        ]
+      };
+
+      saveSiteContent(content);
+      alert('“关于我们”信息更新成功！已同步至 index.html');
+    }
+
+    // ================= 6. 解析与导入外部 UTM 链接 =================
     async function importExternalUtmLink() {
       const inputUrl = document.getElementById('externalUrlInput').value.trim();
       if (!inputUrl) return alert('请输入完备的 UTM 链接');
@@ -633,7 +913,7 @@
       }
     }
 
-    // 5. 历史推广链接
+    // ================= 7. 历史推广链接 =================
     async function fetchLinksHistory() {
       const tbody = document.getElementById('linksTable');
       try {
