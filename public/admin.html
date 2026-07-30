@@ -19,7 +19,7 @@
           </div>
           <div>
             <h1 class="text-white font-bold text-base leading-tight">流量引流后台</h1>
-            <p class="text-slate-500 text-xs mt-0.5">v3.1 Expandable Pro</p>
+            <p class="text-slate-500 text-xs mt-0.5">v3.2 Pagination Pro</p>
           </div>
         </div>
 
@@ -75,12 +75,27 @@
           </div>
         </section>
 
-        <!-- Tab 2: 用户轨迹与 IP (隐藏/展开手风琴样式) -->
+        <!-- Tab 2: 用户轨迹与 IP (支持传统偏移量分页) -->
         <section id="tab-journeys" class="tab-content hidden space-y-6">
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
-            <h3 class="text-base font-bold text-slate-900 mb-1">👥 访客列表与点击轨迹</h3>
-            <p class="text-xs text-slate-500 mb-4">点击任意用户行，可展开/收起该用户的横向点击路径顺序</p>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+              <div>
+                <h3 class="text-base font-bold text-slate-900">👥 访客列表与点击轨迹</h3>
+                <p class="text-xs text-slate-500 mt-0.5">点击任意用户行可查看点击路径顺序</p>
+              </div>
+              
+              <!-- 每页显示条数切换 -->
+              <div class="flex items-center gap-2 text-xs text-slate-600">
+                <span>每页显示:</span>
+                <select id="pageSizeSelect" onchange="changePageSize(this.value)" class="border border-slate-200 rounded-lg px-2 py-1 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="10">10 条</option>
+                  <option value="20" selected>20 条</option>
+                  <option value="50">50 条</option>
+                </select>
+              </div>
+            </div>
 
+            <!-- 数据表格 -->
             <div class="overflow-x-auto">
               <table class="w-full text-left border-collapse">
                 <thead>
@@ -90,7 +105,7 @@
                     <th class="p-3.5">设备与浏览器</th>
                     <th class="p-3.5">渠道 / 活动</th>
                     <th class="p-3.5">点击频次</th>
-                    <th class="p-3.5">最后活跃时间</th>
+                    <th class="p-3.5">最近活跃时间</th>
                     <th class="p-3.5 text-center">点击轨迹</th>
                   </tr>
                 </thead>
@@ -99,6 +114,30 @@
                 </tbody>
               </table>
             </div>
+
+            <!-- 传统分页控制器工具栏 -->
+            <div class="mt-5 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600">
+              <div id="pageInfoText">共 0 条数据，显示第 0-0 条</div>
+              
+              <div class="flex items-center gap-1.5">
+                <button id="btnFirst" onclick="goToPage(1)" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">首页</button>
+                <button id="btnPrev" onclick="changePage(-1)" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">上一页</button>
+                
+                <span class="px-3 py-1 bg-slate-100 text-slate-700 font-semibold rounded-lg" id="currentPageTag">第 1 / 1 页</span>
+                
+                <button id="btnNext" onclick="changePage(1)" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">下一页</button>
+                <button id="btnLast" onclick="goToLastPage()" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">尾页</button>
+                
+                <!-- 跳转指定页 -->
+                <div class="flex items-center gap-1 ml-3 pl-3 border-l border-slate-200">
+                  <span>跳至</span>
+                  <input type="number" id="jumpPageInput" min="1" class="w-12 px-2 py-1 border border-slate-200 rounded-md text-center focus:outline-none" placeholder="1">
+                  <span>页</span>
+                  <button onclick="handleJumpPage()" class="px-2 py-1 bg-slate-800 text-white rounded-md hover:bg-slate-700">GO</button>
+                </div>
+              </div>
+            </div>
+
           </div>
         </section>
 
@@ -219,6 +258,12 @@
     const baseUrl = window.location.origin;
     let websitesData = [];
 
+    // ================= 分页全局变量管理 =================
+    let currentPage = 1;
+    let pageSize = 20;
+    let totalRecords = 0;
+    let totalPages = 1;
+
     const tabTitles = {
       'stats': '数据报表总览',
       'journeys': '用户轨迹与 IP 设备',
@@ -299,85 +344,106 @@
       return { label: `${os} · ${browser}`, icon };
     }
 
-    // 2. 获取用户轨迹（隐藏/折叠横向展开逻辑）
+    // ================= 2. 用户轨迹（带传统偏移量分页） =================
     async function fetchUserJourneys() {
       const tbody = document.getElementById('journeysTable');
+      tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">加载中...</td></tr>';
+
       try {
-        const res = await fetch(`${baseUrl}/api/user-journeys`);
+        // 请求后台接口，携带 page 与 limit 参数
+        const res = await fetch(`${baseUrl}/api/user-journeys?page=${currentPage}&limit=${pageSize}`);
         const json = await res.json();
+
         if (json.success) {
-          if (!json.data || json.data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">暂无轨迹记录</td></tr>';
-            return;
+          const list = json.data || [];
+          
+          // 如果后端传回了总记录数，更新全局变量；如果未传，兼容全量前端切片模式
+          if (json.pagination) {
+            totalRecords = json.pagination.total || list.length;
+            totalPages = json.pagination.totalPages || Math.ceil(totalRecords / pageSize);
+          } else {
+            // 前端兼容模式：如果后端尚未实现 SQL 分页
+            totalRecords = list.length;
+            totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
           }
 
-          tbody.innerHTML = json.data.map((row, index) => {
-            const uaInfo = parseUserAgent(row.user_agent);
-            const ipDisplay = row.ip_address || '未记录';
-            const rowId = `path-row-${index}`;
-            const btnId = `path-btn-${index}`;
-            const pathSteps = (row.click_path || '').split(' ➔ ').filter(Boolean);
-
-            return `
-              <!-- 主信息行：点击整行均可展开 -->
-              <tr class="hover:bg-slate-50 cursor-pointer transition-colors" onclick="togglePathRow('${rowId}', '${btnId}')">
-                <td class="p-3.5 font-mono text-xs text-slate-600">${row.visitor_id}</td>
-                <td class="p-3.5 font-mono text-xs text-slate-700">
-                  <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-600 border border-slate-200/60">${ipDisplay}</span>
-                </td>
-                <td class="p-3.5 text-xs text-slate-700">
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 rounded border border-slate-200/60" title="${row.user_agent || ''}">
-                    <span>${uaInfo.icon}</span>
-                    <span class="font-medium">${uaInfo.label}</span>
-                  </span>
-                </td>
-                <td class="p-3.5">
-                  <span class="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs font-semibold">${row.source}</span>
-                  <span class="text-xs text-slate-400 ml-1">${row.campaign}</span>
-                </td>
-                <td class="p-3.5">
-                  <span class="px-2.5 py-1 ${row.total_clicks > 1 ? 'bg-amber-100 text-amber-700 font-bold' : 'bg-slate-100 text-slate-600'} rounded-full text-xs">
-                    ${row.total_clicks} 次点击
-                  </span>
-                </td>
-                <td class="p-3.5 text-xs text-slate-500">${new Date(row.last_active).toLocaleString()}</td>
-                <td class="p-3.5 text-center">
-                  <button id="${btnId}" class="px-2.5 py-1 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-medium transition-colors border border-blue-200/60">
-                    展开轨迹 🔽
-                  </button>
-                </td>
-              </tr>
-
-              <!-- 折叠的点击路径展开行（默认 hidden 隐藏） -->
-              <tr id="${rowId}" class="hidden bg-slate-50/80">
-                <td colspan="7" class="p-4 border-b border-slate-200/80">
-                  <div class="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-inner">
-                    <div class="text-xs font-semibold text-slate-500 mb-2 flex items-center gap-1">
-                      <span>🛣️ 访客点击路径顺序 (${pathSteps.length} 个站点)：</span>
-                    </div>
-                    <!-- 横向滚动布局容器 -->
-                    <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-                      ${pathSteps.map((site, i) => `
-                        <div class="flex-shrink-0 flex items-center gap-2">
-                          <span class="px-3 py-1.5 bg-slate-100 text-slate-800 font-medium rounded-lg border border-slate-200 shadow-sm">
-                            <span class="text-slate-400 mr-1 font-mono">${i + 1}.</span>${site}
-                          </span>
-                          ${i < pathSteps.length - 1 ? '<span class="text-slate-400 font-bold">➔</span>' : ''}
-                        </div>
-                      `).join('')}
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            `;
-          }).join('');
+          renderJourneysTable(json.pagination ? list : list.slice((currentPage - 1) * pageSize, currentPage * pageSize));
+          updatePaginationUI();
         }
       } catch (err) {
         tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-red-500">获取失败: ${err.message}</td></tr>`;
       }
     }
 
-    // 控制隐藏/展开手风琴效果
+    // 渲染轨迹表格行
+    function renderJourneysTable(pageData) {
+      const tbody = document.getElementById('journeysTable');
+      if (!pageData || pageData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">当前页无轨迹数据</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = pageData.map((row, index) => {
+        const uaInfo = parseUserAgent(row.user_agent);
+        const ipDisplay = row.ip_address || '未记录';
+        const rowId = `path-row-${index}`;
+        const btnId = `path-btn-${index}`;
+        const pathSteps = (row.click_path || '').split(' ➔ ').filter(Boolean);
+
+        return `
+          <tr class="hover:bg-slate-50 cursor-pointer transition-colors" onclick="togglePathRow('${rowId}', '${btnId}')">
+            <td class="p-3.5 font-mono text-xs text-slate-600">${row.visitor_id}</td>
+            <td class="p-3.5 font-mono text-xs text-slate-700">
+              <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-600 border border-slate-200/60">${ipDisplay}</span>
+            </td>
+            <td class="p-3.5 text-xs text-slate-700">
+              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 rounded border border-slate-200/60" title="${row.user_agent || ''}">
+                <span>${uaInfo.icon}</span>
+                <span class="font-medium">${uaInfo.label}</span>
+              </span>
+            </td>
+            <td class="p-3.5">
+              <span class="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs font-semibold">${row.source}</span>
+              <span class="text-xs text-slate-400 ml-1">${row.campaign}</span>
+            </td>
+            <td class="p-3.5">
+              <span class="px-2.5 py-1 ${row.total_clicks > 1 ? 'bg-amber-100 text-amber-700 font-bold' : 'bg-slate-100 text-slate-600'} rounded-full text-xs">
+                ${row.total_clicks} 次点击
+              </span>
+            </td>
+            <td class="p-3.5 text-xs text-slate-500">${new Date(row.last_active).toLocaleString()}</td>
+            <td class="p-3.5 text-center">
+              <button id="${btnId}" class="px-2.5 py-1 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-medium transition-colors border border-blue-200/60">
+                展开轨迹 🔽
+              </button>
+            </td>
+          </tr>
+
+          <!-- 折叠展开的横向路径卡片 -->
+          <tr id="${rowId}" class="hidden bg-slate-50/80">
+            <td colspan="7" class="p-4 border-b border-slate-200/80">
+              <div class="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-inner">
+                <div class="text-xs font-semibold text-slate-500 mb-2 flex items-center gap-1">
+                  <span>🛣️ 访客点击路径顺序 (${pathSteps.length} 个站点)：</span>
+                </div>
+                <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+                  ${pathSteps.map((site, i) => `
+                    <div class="flex-shrink-0 flex items-center gap-2">
+                      <span class="px-3 py-1.5 bg-slate-100 text-slate-800 font-medium rounded-lg border border-slate-200 shadow-sm">
+                        <span class="text-slate-400 mr-1 font-mono">${i + 1}.</span>${site}
+                      </span>
+                      ${i < pathSteps.length - 1 ? '<span class="text-slate-400 font-bold">➔</span>' : ''}
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // 折叠展开点击路径
     function togglePathRow(rowId, btnId) {
       const row = document.getElementById(rowId);
       const btn = document.getElementById(btnId);
@@ -391,6 +457,50 @@
         row.classList.add('hidden');
         btn.innerHTML = '展开轨迹 🔽';
         btn.className = 'px-2.5 py-1 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-medium transition-colors border border-blue-200/60';
+      }
+    }
+
+    // ================= 分页控制逻辑 =================
+    function updatePaginationUI() {
+      const startRecord = totalRecords === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+      const endRecord = Math.min(currentPage * pageSize, totalRecords);
+
+      document.getElementById('pageInfoText').innerText = `共 ${totalRecords} 条数据，显示第 ${startRecord}-${endRecord} 条`;
+      document.getElementById('currentPageTag').innerText = `第 ${currentPage} / ${totalPages || 1} 页`;
+
+      // 按钮可点击状态判断
+      document.getElementById('btnFirst').disabled = (currentPage <= 1);
+      document.getElementById('btnPrev').disabled = (currentPage <= 1);
+      document.getElementById('btnNext').disabled = (currentPage >= totalPages || totalPages === 0);
+      document.getElementById('btnLast').disabled = (currentPage >= totalPages || totalPages === 0);
+    }
+
+    function changePage(delta) {
+      goToPage(currentPage + delta);
+    }
+
+    function goToPage(targetPage) {
+      if (targetPage < 1 || targetPage > totalPages || targetPage === currentPage) return;
+      currentPage = targetPage;
+      fetchUserJourneys();
+    }
+
+    function goToLastPage() {
+      goToPage(totalPages);
+    }
+
+    function changePageSize(newSize) {
+      pageSize = parseInt(newSize, 10);
+      currentPage = 1; // 切换每页大小时重置回第一页
+      fetchUserJourneys();
+    }
+
+    function handleJumpPage() {
+      const val = parseInt(document.getElementById('jumpPageInput').value, 10);
+      if (val && val >= 1 && val <= totalPages) {
+        goToPage(val);
+      } else {
+        alert(`请输入 1 到 ${totalPages} 之间的有效页码`);
       }
     }
 
