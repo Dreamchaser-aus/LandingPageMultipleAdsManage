@@ -9,15 +9,16 @@
 <body class="bg-slate-50 text-slate-800 min-h-screen">
 
   <div class="max-w-6xl mx-auto px-4 py-8">
+    <!-- 头部 -->
     <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-xl shadow-sm border border-slate-100">
       <div>
         <h1 class="text-2xl font-bold text-slate-900">多渠道引流数据后台</h1>
         <p class="text-slate-500 text-sm mt-1">支持多站点流量监测与 ROI 效果分析</p>
       </div>
-      <button onclick="fetchAllData()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">刷新数据</button>
+      <button onclick="fetchAllData()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">刷新所有数据</button>
     </header>
 
-    <!-- 💥 新增板块：落地页站点管理 💥 -->
+    <!-- 1. 落地页展示站点管理 (Logo 与 链接) -->
     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-8">
       <h2 class="text-lg font-bold mb-4 text-slate-900">🌐 落地页展示站点管理 (Logo与链接)</h2>
       
@@ -65,8 +66,10 @@
       </div>
     </div>
 
-    <!-- 图表与历史部分 -->
+    <!-- 2. 下方双列布局 -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- 左侧：推广链接生成器 -->
       <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-fit">
         <h2 class="text-lg font-bold mb-4 text-slate-900">🔗 推广链接生成器</h2>
         <div class="space-y-4">
@@ -75,7 +78,7 @@
             <input type="text" id="targetUrl" class="w-full px-3 py-2 border rounded-lg text-sm">
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">引流渠道</label>
+            <label class="block text-sm font-medium text-slate-700 mb-1">引流渠道 (utm_source)</label>
             <select id="channelSelect" class="w-full px-3 py-2 border rounded-lg text-sm">
               <option value="tiktok">TikTok 抖音</option>
               <option value="xiaohongshu">小红书</option>
@@ -85,14 +88,17 @@
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">活动名称</label>
+            <label class="block text-sm font-medium text-slate-700 mb-1">活动名称 (utm_campaign)</label>
             <input type="text" id="campaignInput" placeholder="2026_promo" class="w-full px-3 py-2 border rounded-lg text-sm">
           </div>
-          <button onclick="generateAndSaveLink()" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-2 rounded-lg text-sm font-medium transition">生成推广链接</button>
+          <button onclick="generateAndSaveLink()" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-2 rounded-lg text-sm font-medium transition">生成并保存链接</button>
         </div>
       </div>
 
+      <!-- 右侧：数据报表 & 历史链接表 -->
       <div class="lg:col-span-2 space-y-8">
+        
+        <!-- 渠道转化数据明细 -->
         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
           <h2 class="text-lg font-bold mb-4 text-slate-900">📊 渠道转化数据明细</h2>
           <div class="overflow-x-auto">
@@ -101,8 +107,8 @@
                 <tr class="border-b border-slate-200 text-slate-500 text-xs uppercase bg-slate-50">
                   <th class="p-3">目标域名</th>
                   <th class="p-3">引流渠道</th>
-                  <th class="p-3">浏览量</th>
-                  <th class="p-3">转化量</th>
+                  <th class="p-3">浏览量 (PV)</th>
+                  <th class="p-3">转化量 (Leads)</th>
                 </tr>
               </thead>
               <tbody id="statsTable" class="divide-y divide-slate-100 text-sm">
@@ -111,6 +117,27 @@
             </table>
           </div>
         </div>
+
+        <!-- 已生成的推广链接历史 (补齐) -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+          <h2 class="text-lg font-bold mb-4 text-slate-900">📋 已生成的推广链接历史</h2>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-slate-200 text-slate-500 text-xs uppercase bg-slate-50">
+                  <th class="p-3">渠道</th>
+                  <th class="p-3">活动名</th>
+                  <th class="p-3">完整链接</th>
+                  <th class="p-3">操作</th>
+                </tr>
+              </thead>
+              <tbody id="linksTable" class="divide-y divide-slate-100 text-sm">
+                <tr><td colspan="4" class="p-4 text-center text-slate-400">暂无历史链接记录</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -127,9 +154,10 @@
     function fetchAllData() {
       fetchManageWebsites();
       fetchStats();
+      fetchLinksHistory(); // 恢复：获取历史链接
     }
 
-    // 1. 获取并渲染后台管理的站点列表
+    // ----------------- 1. 落地页站点管理 -----------------
     async function fetchManageWebsites() {
       try {
         const res = await fetch(`${baseUrl}/api/websites`);
@@ -166,7 +194,6 @@
       `).join('');
     }
 
-    // 2. 提交站点 (新建或更新)
     async function handleWebsiteSubmit(e) {
       e.preventDefault();
       const id = document.getElementById('editSiteId').value;
@@ -194,7 +221,6 @@
       }
     }
 
-    // 3. 编辑和删除
     function editSite(id) {
       const site = websitesData.find(s => s.id === id);
       if (!site) return;
@@ -227,32 +253,101 @@
       }
     }
 
-    // 获取统计
+    // ----------------- 2. 数据报表 -----------------
     async function fetchStats() {
       try {
         const res = await fetch(`${baseUrl}/api/stats`);
         const json = await res.json();
         if (json.success) {
-          document.getElementById('statsTable').innerHTML = json.data.map(row => `
-            <tr>
+          const tbody = document.getElementById('statsTable');
+          if (!json.data || json.data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">暂无引流数据</td></tr>';
+            return;
+          }
+          tbody.innerHTML = json.data.map(row => `
+            <tr class="hover:bg-slate-50">
               <td class="p-3 font-medium text-slate-800">${row.domain}</td>
               <td class="p-3"><span class="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs font-semibold">${row.source}</span></td>
-              <td class="p-3">${row.views}</td>
+              <td class="p-3 text-slate-600">${row.views}</td>
               <td class="p-3 font-semibold text-emerald-600">${row.leads}</td>
             </tr>
           `).join('');
         }
-      } catch (err) {}
+      } catch (err) {
+        console.error(err);
+      }
     }
 
+    // ----------------- 3. 生成并展示推广链接历史 (补齐) -----------------
     async function generateAndSaveLink() {
       const targetUrl = document.getElementById('targetUrl').value.trim();
       const channel = document.getElementById('channelSelect').value;
       const campaign = document.getElementById('campaignInput').value.trim() || 'default';
-      const urlObj = new URL(targetUrl);
-      urlObj.searchParams.set('utm_source', channel);
-      urlObj.searchParams.set('utm_campaign', campaign);
-      prompt('推广链接生成成功，请复制：', urlObj.toString());
+
+      if (!targetUrl) return alert('请输入目标落地页 URL');
+
+      try {
+        const urlObj = new URL(targetUrl);
+        urlObj.searchParams.set('utm_source', channel);
+        urlObj.searchParams.set('utm_campaign', campaign);
+        const fullLink = urlObj.toString();
+
+        const res = await fetch(`${baseUrl}/api/links`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            target_url: targetUrl,
+            source: channel,
+            campaign: campaign,
+            full_link: fullLink
+          })
+        });
+
+        const json = await res.json();
+        if (json.success) {
+          fetchLinksHistory(); // 重新加载历史表格
+          alert('链接已成功生成并保存到历史列表！');
+        }
+      } catch (err) {
+        alert('链接格式不正确，请填写包含 https:// 的完整网址');
+      }
+    }
+
+    async function fetchLinksHistory() {
+      try {
+        const res = await fetch(`${baseUrl}/api/links`);
+        const json = await res.json();
+        if (json.success) {
+          renderLinksTable(json.data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderLinksTable(data) {
+      const tbody = document.getElementById('linksTable');
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">尚未生成过链接</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.map(row => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-3"><span class="px-2 py-1 bg-slate-100 text-slate-700 rounded text-xs font-semibold">${row.source}</span></td>
+          <td class="p-3 text-slate-600">${row.campaign}</td>
+          <td class="p-3 text-xs text-slate-500 max-w-xs truncate" title="${row.full_link}">${row.full_link}</td>
+          <td class="p-3">
+            <button onclick="copyToClipboard('${row.full_link}')" class="text-xs bg-slate-100 hover:bg-blue-50 text-blue-600 px-2.5 py-1 rounded border border-slate-200 font-medium transition">复制</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('链接已复制到剪贴板！');
+      });
     }
   </script>
 </body>
