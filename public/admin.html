@@ -1,711 +1,257 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>引流数据与行为追踪后台</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4D Gang Malaysia - Expert Reviews & Smart Play Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <style>
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased font-sans">
+<body class="bg-[#0b0f19] text-slate-100 min-h-screen font-sans antialiased">
 
-  <div class="flex min-h-screen">
+  <!-- 顶部导航栏 -->
+  <header class="border-b border-slate-800 bg-[#111827]/80 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="font-bold text-lg tracking-wider text-amber-400">4D Gang Malaysia</span>
+      </div>
+      <nav class="hidden md:flex items-center space-x-6 text-sm text-slate-300 font-medium">
+        <a href="#Home" class="hover:text-amber-400 transition-colors">Home</a>
+        <a href="#Slideshow" class="hover:text-amber-400 transition-colors">Highlights</a>
+        <a href="#Casino" class="hover:text-amber-400 transition-colors">Online Casinos</a>
+        <a href="#AboutUs" class="hover:text-amber-400 transition-colors">About Us</a>
+      </nav>
+      <span class="text-xs text-slate-400 bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700/60">Verified & Secure</span>
+    </div>
+  </header>
 
-    <!-- 左侧 Sidebar 导航栏 -->
-    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between p-4 flex-shrink-0 border-r border-slate-800">
-      <div>
-        <div class="flex items-center gap-3 px-3 py-4 mb-6 border-b border-slate-800">
-          <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-500/30">
-            📊
-          </div>
+  <main class="max-w-5xl mx-auto px-4 py-8 space-y-12">
+
+    <!-- 1. Slideshow 动态轮播图 -->
+    <section id="Slideshow" class="pt-4">
+      <div class="swiper mySwiper rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
+        <div class="swiper-wrapper" id="dynamicSlidesWrapper">
+          <!-- 动态加载 -->
+        </div>
+        <div class="swiper-pagination"></div>
+      </div>
+    </section>
+
+    <!-- 2. Multiple Companies 多个公司/平台区 -->
+    <section id="Casino" class="space-y-6 pt-4">
+      <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-slate-800/80 pb-4">
+        <div>
+          <span class="text-amber-400 text-xs font-bold uppercase tracking-wider">Trusted Navigation</span>
+          <h2 class="text-xl sm:text-2xl font-bold text-white mt-1">Featured Online Casino Partners</h2>
+        </div>
+        <p class="text-xs text-slate-400 mt-2 md:mt-0">Click any partner below to explore securely with active tracking.</p>
+      </div>
+
+      <div id="gang-portal-hub">
+        <div id="siteList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- 动态加载 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. About Us 关于我们区 -->
+    <section id="AboutUs" class="bg-[#111827] rounded-3xl p-6 sm:p-10 border border-slate-800 shadow-xl space-y-6">
+      <div class="max-w-2xl" id="aboutContentArea">
+        <!-- 动态加载 -->
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-slate-800 bg-[#111827] mt-16 py-8 text-center text-xs text-slate-500">
+    <p>&copy; 2026 4D Gang Malaysia. All Rights Reserved. Play Responsibly.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script>
+    // 初始化默认数据与读取
+    const defaultData = {
+      companies: [
+        { id: 1, name: "MegaWin Casino Malaysia", url: "#", desc_text: "Top-tier verified gaming platform offering safe entertainment and instant bonuses.", icon_url: "" },
+        { id: 2, name: "Lucky4D Partner Hub", url: "#", desc_text: "Trusted insights and smart play guides curated for professional enthusiasts.", icon_url: "" }
+      ],
+      slides: [
+        { badge: "Hot Bonuses 2026", title: "Expert Reviews & Smart Play Guidance", desc: "Discover trusted platform insights, verified ratings, and responsible play strategies curated by industry professionals.", btnText: "Explore Casinos" },
+        { badge: "100% Verified Partners", title: "Tested Games & Transparent Ratings", desc: "Over 1,380+ games tested and 680+ casino sites reviewed monthly to ensure a safer navigation experience.", btnText: "Learn More About Us" }
+      ],
+      about: {
+        badge: "About 4D Gang Malaysia",
+        title: "Dedicated to Safer & Smarter Play",
+        desc: "4D Gang Malaysia is built by a team of veteran researchers and analysts. Our mission is to cut through the noise of online platforms, delivering transparent, unbiased information and robust guidance.",
+        stats: [
+          { val: "680+", label: "Casino Sites Reviewed" },
+          { val: "1,380+", label: "Games Tested" },
+          { val: "376+ Hrs", label: "Monthly Research" }
+        ]
+      }
+    };
+
+    function loadSiteContent() {
+      const dataStr = localStorage.getItem('gang_site_content');
+      return dataStr ? JSON.parse(dataStr) : defaultData;
+    }
+
+    // 渲染动态内容
+    function renderFrontend() {
+      const data = loadSiteContent();
+
+      // 1. 渲染轮播图
+      const slideWrapper = document.getElementById('dynamicSlidesWrapper');
+      slideWrapper.innerHTML = data.slides.map(s => `
+        <div class="swiper-slide bg-gradient-to-r from-slate-900 via-amber-950/40 to-slate-900 p-8 sm:p-12 md:p-16 flex flex-col justify-center min-h-[280px] sm:min-h-[340px] relative">
+          <span class="px-3 py-1 text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full w-max mb-3 font-semibold">${s.badge}</span>
+          <h2 class="text-2xl sm:text-4xl font-black text-white mb-3 max-w-xl">${s.title}</h2>
+          <p class="text-slate-300 text-xs sm:text-sm max-w-lg mb-6 leading-relaxed">${s.desc}</p>
           <div>
-            <h1 class="text-white font-bold text-base leading-tight">流量引流后台</h1>
-            <p class="text-slate-500 text-xs mt-0.5">v3.2 Pagination Pro</p>
+            <a href="#Casino" class="inline-flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-red-600 text-white font-semibold text-xs sm:text-sm shadow-lg">
+              <span>${s.btnText}</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </a>
           </div>
         </div>
+      `).join('');
 
-        <nav class="space-y-1.5">
-          <button id="nav-stats" onclick="switchTab('stats')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-sm shadow-blue-600/20">
-            数据报表总览
-          </button>
-          <button id="nav-journeys" onclick="switchTab('journeys')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-            👥 用户轨迹与 IP
-          </button>
-          <button id="nav-websites" onclick="switchTab('websites')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-            🌐 落地页站点管理
-          </button>
-          <button id="nav-generator" onclick="switchTab('generator')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-            🔗 链接生成与导入
-          </button>
-          <button id="nav-history" onclick="switchTab('history')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-            📋 历史生成记录
-          </button>
-        </nav>
-      </div>
-    </aside>
-
-    <!-- 右侧 主内容展示区 -->
-    <main class="flex-1 overflow-y-auto bg-slate-50">
-      <header class="sticky top-0 bg-white/80 backdrop-blur border-b border-slate-200/80 px-8 py-4 flex justify-between items-center z-10">
-        <h2 id="page-title" class="text-xl font-bold text-slate-800">数据报表总览</h2>
-        <button onclick="fetchAllData()" class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-lg text-sm font-medium transition">
-          🔄 刷新数据
-        </button>
-      </header>
-
-      <div class="p-8 max-w-7xl space-y-6">
-
-        <!-- Tab 1: 数据报表总览 -->
-        <section id="tab-stats" class="tab-content space-y-6">
-          <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
-            <h3 class="text-base font-bold text-slate-900 mb-4">📊 渠道转化效果明细</h3>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="border-b border-slate-200 text-slate-500 text-xs uppercase bg-slate-50">
-                    <th class="p-3.5">目标站点</th>
-                    <th class="p-3.5">引流渠道 (utm_source)</th>
-                    <th class="p-3.5">点击转化 (Leads)</th>
-                  </tr>
-                </thead>
-                <tbody id="statsTable" class="divide-y divide-slate-100 text-sm">
-                  <tr><td colspan="3" class="p-6 text-center text-slate-400">加载中...</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- Tab 2: 用户轨迹与 IP (支持传统偏移量分页) -->
-        <section id="tab-journeys" class="tab-content hidden space-y-6">
-          <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-              <div>
-                <h3 class="text-base font-bold text-slate-900">👥 访客列表与点击轨迹</h3>
-                <p class="text-xs text-slate-500 mt-0.5">点击任意用户行可查看点击路径顺序</p>
-              </div>
-              
-              <!-- 每页显示条数切换 -->
-              <div class="flex items-center gap-2 text-xs text-slate-600">
-                <span>每页显示:</span>
-                <select id="pageSizeSelect" onchange="changePageSize(this.value)" class="border border-slate-200 rounded-lg px-2 py-1 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option value="10">10 条</option>
-                  <option value="20" selected>20 条</option>
-                  <option value="50">50 条</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- 数据表格 -->
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="border-b border-slate-200 text-slate-500 text-xs uppercase bg-slate-50">
-                    <th class="p-3.5">访客 ID</th>
-                    <th class="p-3.5">IP 地址</th>
-                    <th class="p-3.5">设备与浏览器</th>
-                    <th class="p-3.5">渠道 / 活动</th>
-                    <th class="p-3.5">点击频次</th>
-                    <th class="p-3.5">最近活跃时间</th>
-                    <th class="p-3.5 text-center">点击轨迹</th>
-                  </tr>
-                </thead>
-                <tbody id="journeysTable" class="divide-y divide-slate-100 text-sm">
-                  <tr><td colspan="7" class="p-6 text-center text-slate-400">加载中...</td></tr>
-                </tbody>
-              </table>
-            </div>
-
-            <!-- 传统分页控制器工具栏 -->
-            <div class="mt-5 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600">
-              <div id="pageInfoText">共 0 条数据，显示第 0-0 条</div>
-              
-              <div class="flex items-center gap-1.5">
-                <button id="btnFirst" onclick="goToPage(1)" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">首页</button>
-                <button id="btnPrev" onclick="changePage(-1)" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">上一页</button>
-                
-                <span class="px-3 py-1 bg-slate-100 text-slate-700 font-semibold rounded-lg" id="currentPageTag">第 1 / 1 页</span>
-                
-                <button id="btnNext" onclick="changePage(1)" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">下一页</button>
-                <button id="btnLast" onclick="goToLastPage()" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">尾页</button>
-                
-                <!-- 跳转指定页 -->
-                <div class="flex items-center gap-1 ml-3 pl-3 border-l border-slate-200">
-                  <span>跳至</span>
-                  <input type="number" id="jumpPageInput" min="1" class="w-12 px-2 py-1 border border-slate-200 rounded-md text-center focus:outline-none" placeholder="1">
-                  <span>页</span>
-                  <button onclick="handleJumpPage()" class="px-2 py-1 bg-slate-800 text-white rounded-md hover:bg-slate-700">GO</button>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </section>
-
-        <!-- Tab 3: 落地页站点管理 -->
-        <section id="tab-websites" class="tab-content hidden space-y-6">
-          <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
-            <h3 class="text-base font-bold text-slate-900 mb-4">🌐 动态添加 / 编辑落地页卡片</h3>
-            
-            <form id="websiteForm" onsubmit="handleWebsiteSubmit(event)" class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
-              <input type="hidden" id="editSiteId">
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">站点名称</label>
-                <input type="text" id="siteName" required placeholder="官方商城" class="w-full px-3 py-2 border rounded-lg text-sm">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">描述/副标题</label>
-                <input type="text" id="siteDesc" placeholder="限时优惠" class="w-full px-3 py-2 border rounded-lg text-sm">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">跳转 URL</label>
-                <input type="url" id="siteUrl" required placeholder="https://..." class="w-full px-3 py-2 border rounded-lg text-sm">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Logo URL</label>
-                <input type="url" id="siteIcon" placeholder="https://..." class="w-full px-3 py-2 border rounded-lg text-sm">
-              </div>
-              <div class="flex items-end gap-2">
-                <button type="submit" id="submitBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg text-sm font-medium transition">保存站点</button>
-                <button type="button" id="cancelBtn" onclick="resetWebsiteForm()" class="hidden bg-slate-300 text-slate-700 py-2 px-3 rounded-lg text-sm">取消</button>
-              </div>
-            </form>
-
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="border-b border-slate-200 text-slate-500 text-xs uppercase bg-slate-50">
-                    <th class="p-3.5">Logo</th>
-                    <th class="p-3.5">站点名称</th>
-                    <th class="p-3.5">描述</th>
-                    <th class="p-3.5">目标链接</th>
-                    <th class="p-3.5">操作</th>
-                  </tr>
-                </thead>
-                <tbody id="websiteManageTable" class="divide-y divide-slate-100 text-sm">
-                  <tr><td colspan="5" class="p-6 text-center text-slate-400">加载中...</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- Tab 4: 链接生成与直接导入 -->
-        <section id="tab-generator" class="tab-content hidden space-y-6">
-          <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-200 bg-blue-50/20 max-w-2xl">
-            <h3 class="text-base font-bold text-slate-900 mb-1">📥 快捷导入已有 UTM 链接</h3>
-            <p class="text-xs text-slate-500 mb-4">在外部生成好的链接直接粘贴到下方，系统将自动拆解 utm_source 并记录在案：</p>
-            <div class="space-y-3">
-              <input type="url" id="externalUrlInput" placeholder="https://your-domain.com/?utm_source=tiktok_ads&utm_campaign=summer_2026" class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
-              <button onclick="importExternalUtmLink()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-2">
-                解析并保存导入记录
-              </button>
-            </div>
-          </div>
-
-          <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60 max-w-2xl">
-            <h3 class="text-base font-bold text-slate-900 mb-4">🛠️ 手动配置生成新的推广链接</h3>
-            <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">引流目标落地页 URL</label>
-                <input type="text" id="targetUrl" class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">引流渠道 (utm_source)</label>
-                <select id="channelSelect" class="w-full px-3.5 py-2.5 border rounded-xl text-sm">
-                  <option value="tiktok">TikTok 抖音</option>
-                  <option value="xiaohongshu">小红书</option>
-                  <option value="google_ads">Google 广告</option>
-                  <option value="facebook">Facebook</option>
-                  <option value="wechat">微信公众号/群</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">活动名称 (utm_campaign)</label>
-                <input type="text" id="campaignInput" placeholder="2026_promo" class="w-full px-3.5 py-2.5 border rounded-xl text-sm">
-              </div>
-              <button onclick="generateAndSaveLink()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition">生成并保存链接</button>
-            </div>
-          </div>
-        </section>
-
-        <!-- Tab 5: 历史生成与导入记录 -->
-        <section id="tab-history" class="tab-content hidden space-y-6">
-          <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
-            <h3 class="text-base font-bold text-slate-900 mb-4">📋 推广链接历史记录</h3>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="border-b border-slate-200 text-slate-500 text-xs uppercase bg-slate-50">
-                    <th class="p-3.5">渠道</th>
-                    <th class="p-3.5">活动名</th>
-                    <th class="p-3.5">完整推广链接</th>
-                    <th class="p-3.5">操作</th>
-                  </tr>
-                </thead>
-                <tbody id="linksTable" class="divide-y divide-slate-100 text-sm">
-                  <tr><td colspan="4" class="p-6 text-center text-slate-400">加载中...</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-      </div>
-    </main>
-  </div>
-
-  <script>
-    const baseUrl = window.location.origin;
-    let websitesData = [];
-
-    // ================= 分页全局变量管理 =================
-    let currentPage = 1;
-    let pageSize = 20;
-    let totalRecords = 0;
-    let totalPages = 1;
-
-    const tabTitles = {
-      'stats': '数据报表总览',
-      'journeys': '用户轨迹与 IP 设备',
-      'websites': '落地页站点管理',
-      'generator': '链接生成与导入',
-      'history': '历史生成记录'
-    };
-
-    window.onload = () => {
-      document.getElementById('targetUrl').value = baseUrl;
-      fetchAllData();
-    };
-
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.className = "nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all";
+      // 初始化 Swiper
+      if (window.mySwiperInstance) {
+        window.mySwiperInstance.destroy(true, true);
+      }
+      window.mySwiperInstance = new Swiper(".mySwiper", {
+        loop: true,
+        autoplay: { delay: 4500, disableOnInteraction: false },
+        pagination: { el: ".swiper-pagination", clickable: true },
       });
 
-      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-      const activeNav = document.getElementById(`nav-${tabId}`);
-      if (activeNav) {
-        activeNav.className = "nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-sm shadow-blue-600/20";
-      }
-
-      document.getElementById('page-title').innerText = tabTitles[tabId] || '后台管理';
-    }
-
-    function fetchAllData() {
-      fetchStats();
-      fetchUserJourneys();
-      fetchManageWebsites();
-      fetchLinksHistory();
-    }
-
-    // 1. 数据报表总览
-    async function fetchStats() {
-      const tbody = document.getElementById('statsTable');
-      try {
-        const res = await fetch(`${baseUrl}/api/stats`);
-        const json = await res.json();
-        if (json.success) {
-          if (!json.data || json.data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3" class="p-6 text-center text-slate-400">暂无引流数据</td></tr>';
-            return;
-          }
-          tbody.innerHTML = json.data.map(row => `
-            <tr class="hover:bg-slate-50">
-              <td class="p-3.5 font-medium text-slate-800">${row.domain}</td>
-              <td class="p-3.5"><span class="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-md text-xs font-semibold">${row.source}</span></td>
-              <td class="p-3.5 font-semibold text-emerald-600">${row.leads}</td>
-            </tr>
-          `).join('');
-        }
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-red-500">获取失败: ${err.message}</td></tr>`;
-      }
-    }
-
-    // User-Agent 解析函数
-    function parseUserAgent(ua) {
-      if (!ua || ua === 'Unknown') return { label: '未知设备', icon: '❓' };
-      let os = '未知系统';
-      let browser = '未知浏览器';
-      let icon = '💻';
-
-      if (/iphone|ipad|ipod/i.test(ua)) { os = 'iOS'; icon = '📱'; }
-      else if (/android/i.test(ua)) { os = 'Android'; icon = '📱'; }
-      else if (/macintosh|mac os x/i.test(ua)) { os = 'macOS'; icon = '💻'; }
-      else if (/windows/i.test(ua)) { os = 'Windows'; icon = '💻'; }
-
-      if (/micromessenger/i.test(ua)) { browser = '微信'; }
-      else if (/tiktok|bytedance/i.test(ua)) { browser = 'TikTok App'; }
-      else if (/chrome/i.test(ua) && !/edg/i.test(ua)) { browser = 'Chrome'; }
-      else if (/safari/i.test(ua) && !/chrome/i.test(ua)) { browser = 'Safari'; }
-      else if (/edg/i.test(ua)) { browser = 'Edge'; }
-
-      return { label: `${os} · ${browser}`, icon };
-    }
-
-    // ================= 2. 用户轨迹（带传统偏移量分页） =================
-    async function fetchUserJourneys() {
-      const tbody = document.getElementById('journeysTable');
-      tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">加载中...</td></tr>';
-
-      try {
-        // 请求后台接口，携带 page 与 limit 参数
-        const res = await fetch(`${baseUrl}/api/user-journeys?page=${currentPage}&limit=${pageSize}`);
-        const json = await res.json();
-
-        if (json.success) {
-          const list = json.data || [];
+      // 2. 渲染公司列表
+      const siteList = document.getElementById('siteList');
+      siteList.innerHTML = data.companies.map((site, index) => `
+        <div data-id="${site.id}" 
+             data-name="${encodeURIComponent(site.name)}" 
+             data-url="${encodeURIComponent(site.url)}" 
+             style="animation-delay: ${index * 0.05}s"
+             class="fade-in group bg-[#111827] hover:bg-[#1f2937] p-4.5 sm:p-5 rounded-2xl border border-slate-800 hover:border-amber-500/55 transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-xl relative overflow-hidden">
           
-          // 如果后端传回了总记录数，更新全局变量；如果未传，兼容全量前端切片模式
-          if (json.pagination) {
-            totalRecords = json.pagination.total || list.length;
-            totalPages = json.pagination.totalPages || Math.ceil(totalRecords / pageSize);
-          } else {
-            // 前端兼容模式：如果后端尚未实现 SQL 分页
-            totalRecords = list.length;
-            totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
-          }
+          <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-500 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
-          renderJourneysTable(json.pagination ? list : list.slice((currentPage - 1) * pageSize, currentPage * pageSize));
-          updatePaginationUI();
-        }
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-red-500">获取失败: ${err.message}</td></tr>`;
-      }
-    }
-
-    // 渲染轨迹表格行
-    function renderJourneysTable(pageData) {
-      const tbody = document.getElementById('journeysTable');
-      if (!pageData || pageData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">当前页无轨迹数据</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = pageData.map((row, index) => {
-        const uaInfo = parseUserAgent(row.user_agent);
-        const ipDisplay = row.ip_address || '未记录';
-        const rowId = `path-row-${index}`;
-        const btnId = `path-btn-${index}`;
-        const pathSteps = (row.click_path || '').split(' ➔ ').filter(Boolean);
-
-        return `
-          <tr class="hover:bg-slate-50 cursor-pointer transition-colors" onclick="togglePathRow('${rowId}', '${btnId}')">
-            <td class="p-3.5 font-mono text-xs text-slate-600">${row.visitor_id}</td>
-            <td class="p-3.5 font-mono text-xs text-slate-700">
-              <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-600 border border-slate-200/60">${ipDisplay}</span>
-            </td>
-            <td class="p-3.5 text-xs text-slate-700">
-              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 rounded border border-slate-200/60" title="${row.user_agent || ''}">
-                <span>${uaInfo.icon}</span>
-                <span class="font-medium">${uaInfo.label}</span>
-              </span>
-            </td>
-            <td class="p-3.5">
-              <span class="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs font-semibold">${row.source}</span>
-              <span class="text-xs text-slate-400 ml-1">${row.campaign}</span>
-            </td>
-            <td class="p-3.5">
-              <span class="px-2.5 py-1 ${row.total_clicks > 1 ? 'bg-amber-100 text-amber-700 font-bold' : 'bg-slate-100 text-slate-600'} rounded-full text-xs">
-                ${row.total_clicks} 次点击
-              </span>
-            </td>
-            <td class="p-3.5 text-xs text-slate-500">${new Date(row.last_active).toLocaleString()}</td>
-            <td class="p-3.5 text-center">
-              <button id="${btnId}" class="px-2.5 py-1 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-medium transition-colors border border-blue-200/60">
-                展开轨迹 🔽
-              </button>
-            </td>
-          </tr>
-
-          <!-- 折叠展开的横向路径卡片 -->
-          <tr id="${rowId}" class="hidden bg-slate-50/80">
-            <td colspan="7" class="p-4 border-b border-slate-200/80">
-              <div class="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-inner">
-                <div class="text-xs font-semibold text-slate-500 mb-2 flex items-center gap-1">
-                  <span>🛣️ 访客点击路径顺序 (${pathSteps.length} 个站点)：</span>
-                </div>
-                <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-                  ${pathSteps.map((site, i) => `
-                    <div class="flex-shrink-0 flex items-center gap-2">
-                      <span class="px-3 py-1.5 bg-slate-100 text-slate-800 font-medium rounded-lg border border-slate-200 shadow-sm">
-                        <span class="text-slate-400 mr-1 font-mono">${i + 1}.</span>${site}
-                      </span>
-                      ${i < pathSteps.length - 1 ? '<span class="text-slate-400 font-bold">➔</span>' : ''}
-                    </div>
-                  `).join('')}
-                </div>
+          <div class="flex items-start space-x-3.5 mb-4">
+            <img src="${site.icon_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + site.id}" 
+                 class="w-12 h-12 rounded-xl object-cover bg-slate-800 p-1 shrink-0 border border-slate-700/60 group-hover:scale-105 transition-transform">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center justify-between">
+                <h3 class="font-bold text-slate-100 text-sm group-hover:text-amber-400 transition-colors truncate">${site.name}</h3>
+                <span class="px-2 py-0.5 text-[9px] bg-amber-500/15 text-amber-400 border border-amber-500/20 rounded font-semibold shrink-0">Verified</span>
               </div>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
+              <p class="text-slate-400 text-xs mt-1.5 line-clamp-2 leading-relaxed">${site.desc_text || 'Official safe navigation channel & trusted review.'}</p>
+            </div>
+          </div>
 
-    // 折叠展开点击路径
-    function togglePathRow(rowId, btnId) {
-      const row = document.getElementById(rowId);
-      const btn = document.getElementById(btnId);
-      if (!row || !btn) return;
-
-      if (row.classList.contains('hidden')) {
-        row.classList.remove('hidden');
-        btn.innerHTML = '收起轨迹 🔼';
-        btn.className = 'px-2.5 py-1 text-xs bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg font-medium transition-colors border border-amber-200/60';
-      } else {
-        row.classList.add('hidden');
-        btn.innerHTML = '展开轨迹 🔽';
-        btn.className = 'px-2.5 py-1 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-medium transition-colors border border-blue-200/60';
-      }
-    }
-
-    // ================= 分页控制逻辑 =================
-    function updatePaginationUI() {
-      const startRecord = totalRecords === 0 ? 0 : (currentPage - 1) * pageSize + 1;
-      const endRecord = Math.min(currentPage * pageSize, totalRecords);
-
-      document.getElementById('pageInfoText').innerText = `共 ${totalRecords} 条数据，显示第 ${startRecord}-${endRecord} 条`;
-      document.getElementById('currentPageTag').innerText = `第 ${currentPage} / ${totalPages || 1} 页`;
-
-      // 按钮可点击状态判断
-      document.getElementById('btnFirst').disabled = (currentPage <= 1);
-      document.getElementById('btnPrev').disabled = (currentPage <= 1);
-      document.getElementById('btnNext').disabled = (currentPage >= totalPages || totalPages === 0);
-      document.getElementById('btnLast').disabled = (currentPage >= totalPages || totalPages === 0);
-    }
-
-    function changePage(delta) {
-      goToPage(currentPage + delta);
-    }
-
-    function goToPage(targetPage) {
-      if (targetPage < 1 || targetPage > totalPages || targetPage === currentPage) return;
-      currentPage = targetPage;
-      fetchUserJourneys();
-    }
-
-    function goToLastPage() {
-      goToPage(totalPages);
-    }
-
-    function changePageSize(newSize) {
-      pageSize = parseInt(newSize, 10);
-      currentPage = 1; // 切换每页大小时重置回第一页
-      fetchUserJourneys();
-    }
-
-    function handleJumpPage() {
-      const val = parseInt(document.getElementById('jumpPageInput').value, 10);
-      if (val && val >= 1 && val <= totalPages) {
-        goToPage(val);
-      } else {
-        alert(`请输入 1 到 ${totalPages} 之间的有效页码`);
-      }
-    }
-
-    // 3. 落地页卡片管理
-    async function fetchManageWebsites() {
-      try {
-        const res = await fetch(`${baseUrl}/api/websites`);
-        const json = await res.json();
-        if (json.success) {
-          websitesData = json.data;
-          renderManageWebsitesTable(json.data);
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
-    function renderManageWebsitesTable(data) {
-      const tbody = document.getElementById('websiteManageTable');
-      if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">尚未配置站点，请在上方添加</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = data.map(site => `
-        <tr class="hover:bg-slate-50">
-          <td class="p-3.5">
-            <img src="${site.icon_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + site.id}" class="w-8 h-8 rounded-lg object-cover bg-slate-100">
-          </td>
-          <td class="p-3.5 font-semibold text-slate-800">${site.name}</td>
-          <td class="p-3.5 text-xs text-slate-500">${site.desc_text || '-'}</td>
-          <td class="p-3.5 text-xs text-blue-600 max-w-xs truncate"><a href="${site.url}" target="_blank">${site.url}</a></td>
-          <td class="p-3.5 space-x-2">
-            <button onclick="editSite(${site.id})" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md font-medium">修改</button>
-            <button onclick="deleteSite(${site.id})" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1 rounded-md font-medium">删除</button>
-          </td>
-        </tr>
+          <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-xs font-medium">
+            <span class="text-slate-400 text-[11px] flex items-center space-x-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <span>Tracking Active</span>
+            </span>
+            <div class="px-3 py-1.5 rounded-xl bg-slate-800 group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-red-600 text-slate-300 group-hover:text-white transition-all shadow-sm flex items-center space-x-1">
+              <span>Visit Site</span>
+              <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
       `).join('');
-    }
 
-    async function handleWebsiteSubmit(e) {
-      e.preventDefault();
-      const id = document.getElementById('editSiteId').value;
-      const name = document.getElementById('siteName').value.trim();
-      const desc_text = document.getElementById('siteDesc').value.trim();
-      const url = document.getElementById('siteUrl').value.trim();
-      const icon_url = document.getElementById('siteIcon').value.trim();
-
-      const method = id ? 'PUT' : 'POST';
-      const apiUrl = id ? `${baseUrl}/api/websites/${id}` : `${baseUrl}/api/websites`;
-
-      try {
-        const res = await fetch(apiUrl, {
-          method: method,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, desc_text, url, icon_url })
+      // 绑定点击事件及打点
+      document.querySelectorAll('#siteList > div').forEach(card => {
+        card.addEventListener('click', () => {
+          const id = card.getAttribute('data-id');
+          const name = decodeURIComponent(card.getAttribute('data-name'));
+          const url = decodeURIComponent(card.getAttribute('data-url'));
+          trackAndRedirect(id, name, url);
         });
-        const json = await res.json();
-        if (json.success) {
-          resetWebsiteForm();
-          fetchManageWebsites();
-        }
-      } catch (err) {
-        alert('操作失败');
-      }
-    }
-
-    function editSite(id) {
-      const site = websitesData.find(s => s.id === id);
-      if (!site) return;
-      document.getElementById('editSiteId').value = site.id;
-      document.getElementById('siteName').value = site.name;
-      document.getElementById('siteDesc').value = site.desc_text || '';
-      document.getElementById('siteUrl').value = site.url;
-      document.getElementById('siteIcon').value = site.icon_url || '';
-
-      document.getElementById('submitBtn').innerText = '保存修改';
-      document.getElementById('submitBtn').className = 'w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition';
-      document.getElementById('cancelBtn').classList.remove('hidden');
-    }
-
-    function resetWebsiteForm() {
-      document.getElementById('websiteForm').reset();
-      document.getElementById('editSiteId').value = '';
-      document.getElementById('submitBtn').innerText = '保存站点';
-      document.getElementById('submitBtn').className = 'w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg text-sm font-medium transition';
-      document.getElementById('cancelBtn').classList.add('hidden');
-    }
-
-    async function deleteSite(id) {
-      if (!confirm('确定删除该站点？')) return;
-      try {
-        await fetch(`${baseUrl}/api/websites/${id}`, { method: 'DELETE' });
-        fetchManageWebsites();
-      } catch (err) {
-        alert('删除失败');
-      }
-    }
-
-    // 4. 解析并导入外部 UTM 链接
-    async function importExternalUtmLink() {
-      const inputUrl = document.getElementById('externalUrlInput').value.trim();
-      if (!inputUrl) return alert('请输入完备的 UTM 链接');
-
-      try {
-        const urlObj = new URL(inputUrl);
-        const source = urlObj.searchParams.get('utm_source') || 'imported_source';
-        const campaign = urlObj.searchParams.get('utm_campaign') || 'none';
-
-        const res = await fetch(`${baseUrl}/api/links`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            target_url: urlObj.origin + urlObj.pathname,
-            source: source,
-            campaign: campaign,
-            full_link: inputUrl
-          })
-        });
-
-        const json = await res.json();
-        if (json.success) {
-          document.getElementById('externalUrlInput').value = '';
-          fetchLinksHistory();
-          alert(`导入成功！\n识别渠道(source): ${source}\n识别活动(campaign): ${campaign}`);
-          switchTab('history');
-        }
-      } catch (err) {
-        alert('链接格式不正确！请确保包含 http:// 或 https://');
-      }
-    }
-
-    // 5. 历史推广链接
-    async function fetchLinksHistory() {
-      const tbody = document.getElementById('linksTable');
-      try {
-        const res = await fetch(`${baseUrl}/api/links`);
-        const json = await res.json();
-        if (json.success) {
-          renderLinksTable(json.data);
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
-    function renderLinksTable(data) {
-      const tbody = document.getElementById('linksTable');
-      if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400">尚未生成或导入过历史链接</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = data.map(row => `
-        <tr class="hover:bg-slate-50">
-          <td class="p-3.5"><span class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-md text-xs font-semibold">${row.source}</span></td>
-          <td class="p-3.5 text-slate-600">${row.campaign}</td>
-          <td class="p-3.5 text-xs text-slate-500 max-w-xs truncate" title="${row.full_link}">${row.full_link}</td>
-          <td class="p-3.5">
-            <button onclick="copyToClipboard('${row.full_link}')" class="text-xs bg-slate-100 hover:bg-blue-50 text-blue-600 px-3 py-1.5 rounded-md border border-slate-200 font-medium transition">一键复制</button>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    async function generateAndSaveLink() {
-      const targetUrl = document.getElementById('targetUrl').value.trim();
-      const channel = document.getElementById('channelSelect').value;
-      const campaign = document.getElementById('campaignInput').value.trim() || 'default';
-
-      if (!targetUrl) return alert('请输入目标 URL');
-
-      try {
-        const urlObj = new URL(targetUrl);
-        urlObj.searchParams.set('utm_source', channel);
-        urlObj.searchParams.set('utm_campaign', campaign);
-        const fullLink = urlObj.toString();
-
-        const res = await fetch(`${baseUrl}/api/links`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            target_url: targetUrl,
-            source: channel,
-            campaign: campaign,
-            full_link: fullLink
-          })
-        });
-
-        const json = await res.json();
-        if (json.success) {
-          fetchLinksHistory();
-          alert('链接生成成功！');
-          switchTab('history');
-        }
-      } catch (err) {
-        alert('请输入包含 https:// 的完整网址');
-      }
-    }
-
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        alert('链接已成功复制到剪贴板！');
       });
+
+      // 3. 渲染关于我们
+      const aboutArea = document.getElementById('aboutContentArea');
+      aboutArea.innerHTML = `
+        <span class="px-3 py-1 text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-semibold">${data.about.badge}</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3 mb-2">${data.about.title}</h2>
+        <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">${data.about.desc}</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-slate-800 mt-6">
+          ${data.about.stats.map(st => `
+            <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80">
+              <div class="text-amber-400 font-bold text-lg mb-1">${st.val}</div>
+              <div class="text-slate-300 font-semibold text-xs mb-1">${st.label}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
     }
+
+    // UTM 与打点跳转核心函数
+    function getVisitorId() {
+      let vid = localStorage.getItem('gang_visitor_id');
+      if (!vid) {
+        vid = 'vid_' + Math.random().toString(36).substr(2, 8) + '_' + Date.now().toString().slice(-6);
+        localStorage.setItem('gang_visitor_id', vid);
+      }
+      return vid;
+    }
+
+    function captureAndGetUtm() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlSource = urlParams.get('source') || urlParams.get('utm_source');
+      const urlCampaign = urlParams.get('campaign') || urlParams.get('utm_campaign');
+
+      if (urlSource) sessionStorage.setItem('gang_utm_source', urlSource);
+      if (urlCampaign) sessionStorage.setItem('gang_utm_campaign', urlCampaign);
+
+      const source = urlSource || sessionStorage.getItem('gang_utm_source') || 'direct';
+      const campaign = urlCampaign || sessionStorage.getItem('gang_utm_campaign') || 'none';
+
+      return { source, campaign };
+    }
+
+    function trackAndRedirect(siteId, siteName, targetUrl) {
+      const visitorId = getVisitorId();
+      const { source, campaign } = captureAndGetUtm();
+
+      const payload = {
+        visitor_id: visitorId,
+        site_id: siteId,
+        site_name: siteName,
+        target_domain: targetUrl,
+        source: source,
+        campaign: campaign,
+        timestamp: new Date().toISOString()
+      };
+
+      fetch('https://your-backend-api.com/api/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true
+      }).catch(err => console.error('Tracking failed:', err));
+
+      if(targetUrl && targetUrl !== '#') {
+        window.open(targetUrl, '_blank');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      captureAndGetUtm();
+      renderFrontend();
+    });
   </script>
 </body>
 </html>
