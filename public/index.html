@@ -3,76 +3,89 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Malaysia 4D 官方直达与精选聚合导航</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Malaysia 4D Live Results & Official Portal</title>
+  <script src="https://tailwindcss.com"></script>
   <style>
     @keyframes pulseGlow {
-      0%, 100% { opacity: 0.4; transform: scale(1); }
-      50% { opacity: 0.8; transform: scale(1.05); }
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.08); }
     }
     .glow-bg {
-      animation: pulseGlow 4s infinite ease-in-out;
+      animation: pulseGlow 5s infinite ease-in-out;
     }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(12px); }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .fade-in-up {
-      animation: fadeInUp 0.4s ease-out forwards;
+    .fade-in {
+      animation: fadeIn 0.4s ease-out forwards;
     }
   </style>
 </head>
-<body class="bg-[#0f172a] text-slate-100 min-h-screen flex flex-col items-center justify-between font-sans relative overflow-x-hidden selection:bg-amber-500 selection:text-black">
+<body class="bg-[#0b1329] text-slate-100 min-h-screen flex flex-col justify-between font-sans relative overflow-x-hidden selection:bg-amber-500 selection:text-black">
 
-  <!-- 背景装饰光晕 -->
-  <div class="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-r from-blue-600/20 to-amber-500/20 blur-[120px] rounded-full pointer-events-none glow-bg"></div>
+  <!-- 顶部背景发光装饰 -->
+  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[250px] bg-gradient-to-b from-blue-600/15 via-amber-500/10 to-transparent blur-[100px] pointer-events-none glow-bg"></div>
 
-  <!-- 主容器 -->
-  <div class="w-full max-w-lg mx-auto p-4 sm:p-6 flex flex-col z-10 my-auto">
-    
-    <!-- 头部区域 -->
-    <div class="text-center mb-8 pt-4">
-      <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-tr from-amber-500 via-red-600 to-blue-600 rounded-3xl shadow-2xl shadow-amber-500/20 mb-4 p-0.5 transform hover:scale-105 transition-transform duration-300">
-        <div class="w-full h-full bg-[#0f172a] rounded-[22px] flex items-center justify-center text-3xl">
+  <!-- 顶部导航栏 / 头部 Logo 区 -->
+  <header class="w-full border-b border-slate-800/80 bg-[#0b1329]/90 backdrop-blur-md sticky top-0 z-30">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-gradient-to-tr from-amber-500 to-red-600 rounded-xl flex items-center justify-center text-xl shadow-lg shadow-amber-500/20 font-bold">
           🎲
         </div>
+        <div>
+          <span class="font-black text-base sm:text-lg tracking-wider bg-gradient-to-r from-white via-slate-200 to-amber-400 bg-clip-text text-transparent">
+            4D MALAYSIA HUB
+          </span>
+          <span class="block text-[10px] text-amber-400 font-semibold tracking-widest uppercase">Official Direct Portal</span>
+        </div>
       </div>
-      <h1 class="text-2xl font-black tracking-wider bg-gradient-to-r from-white via-slate-200 to-amber-400 bg-clip-text text-transparent">
-        MALAYSIA 4D HUB
-      </h1>
-      <p class="text-xs text-slate-400 mt-2 font-medium tracking-wide">
-        ✨ 汇聚全马官方开彩通道 · 安全直达 · 实时追踪
-      </p>
+      <div class="flex items-center space-x-2">
+        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping mr-1.5"></span>
+          LIVE ONLINE
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主体内容区（宽屏门户网格布局） -->
+  <main class="max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-grow z-10">
+    
+    <!-- 顶部公告/提示横幅 -->
+    <div class="bg-gradient-to-r from-slate-900 via-slate-900/90 to-blue-950/40 border border-slate-800/80 rounded-2xl p-4 mb-6 shadow-xl flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0 text-sm">
+          📢
+        </div>
+        <div>
+          <h2 class="text-xs sm:text-sm font-bold text-slate-200">全马官方开彩通道与授权导航</h2>
+          <p class="text-[11px] text-slate-400 mt-0.5">点击下方任意平台卡片，即可安全直达官方指定页面。</p>
+        </div>
+      </div>
     </div>
 
-    <!-- 站点/通道列表容器 -->
-    <div id="siteList" class="space-y-3.5">
-      <!-- 动态加载提示 -->
-      <div class="text-center text-slate-400 py-12 text-sm flex flex-col items-center justify-center space-y-3 bg-slate-900/40 rounded-2xl border border-slate-800 backdrop-blur-md">
-        <svg class="animate-spin h-6 w-6 text-amber-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    <!-- 动态卡片渲染容器（采用 2 列网格布局，完美还原门户首页样式） -->
+    <div id="siteList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <!-- 加载中占位符 -->
+      <div class="col-span-full text-center text-slate-400 py-16 text-sm flex flex-col items-center justify-center space-y-3 bg-slate-900/40 rounded-2xl border border-slate-800/80 backdrop-blur-md">
+        <svg class="animate-spin h-7 w-7 text-amber-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        <span class="text-slate-400 font-medium">正在连接官方服务器数据...</span>
+        <span class="text-slate-400 font-medium">正在加载官方开彩平台数据...</span>
       </div>
     </div>
 
-    <!-- 底部公告或提示 -->
-    <div class="mt-8 text-center bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-md">
-      <div class="flex items-center justify-center space-x-1.5 text-xs text-amber-400 font-semibold mb-1">
-        <span>🔒</span>
-        <span>安全保障提示</span>
-      </div>
-      <p class="text-[11px] text-slate-400 leading-relaxed">
-        所有链接均为官方直达通道，请核对防伪域名。理性娱乐，享受精彩瞬间。
-      </p>
+  </main>
+
+  <!-- 底部版权栏 -->
+  <footer class="w-full bg-[#080e1d] border-t border-slate-800/80 py-6 text-center text-xs text-slate-500 z-10">
+    <div class="max-w-4xl mx-auto px-4 space-y-2">
+      <p>© 2026 Malaysia 4D Portal System. All Rights Reserved.</p>
+      <p class="text-[10px] text-slate-600">本站仅提供公开信息导航与安全跳转服务，所有内容归各官方平台所有。</p>
     </div>
-
-  </div>
-
-  <!-- 页脚信息 -->
-  <footer class="w-full text-center py-6 text-[11px] text-slate-500 border-t border-slate-900 z-10">
-    © 2026 Malaysia 4D Portal System. All Rights Reserved.
   </footer>
 
   <script>
@@ -118,49 +131,58 @@
           renderSites(json.data);
         } else {
           document.getElementById('siteList').innerHTML = `
-            <div class="text-center text-slate-400 py-10 text-sm bg-slate-900/40 rounded-2xl border border-dashed border-slate-800">
+            <div class="col-span-full text-center text-slate-400 py-12 text-sm bg-slate-900/40 rounded-2xl border border-dashed border-slate-800">
               暂无配置数据，请前往后台添加频道
             </div>`;
         }
       } catch (err) {
         document.getElementById('siteList').innerHTML = `
-          <div class="text-center text-red-400 py-10 text-sm bg-red-950/20 rounded-2xl border border-red-900/50">
+          <div class="col-span-full text-center text-red-400 py-12 text-sm bg-red-950/20 rounded-2xl border border-red-900/50">
             数据同步失败，请检查网络后重试
           </div>`;
       }
     }
 
-    // 渲染带有 4D 聚合网风格的卡片
+    // 渲染 4D 门户网格卡片样式
     function renderSites(sites) {
       const container = document.getElementById('siteList');
       container.innerHTML = sites.map((site, index) => `
         <div data-id="${site.id}" 
              data-name="${encodeURIComponent(site.name)}" 
              data-url="${encodeURIComponent(site.url)}" 
-             style="animation-delay: ${index * 0.05}s"
-             class="site-card fade-in-up group bg-slate-900/80 hover:bg-slate-800/90 p-4 sm:p-4.5 rounded-2xl border border-slate-800 hover:border-amber-500/50 transition-all duration-300 cursor-pointer flex items-center justify-between shadow-lg shadow-black/20 hover:shadow-amber-500/5 relative overflow-hidden">
+             style="animation-delay: ${index * 0.04}s"
+             class="site-card fade-in group bg-slate-900/80 hover:bg-slate-800/90 p-4.5 sm:p-5 rounded-2xl border border-slate-800/90 hover:border-amber-500/60 transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-lg shadow-black/30 hover:shadow-amber-500/10 relative overflow-hidden">
           
-          <!-- 左侧微光特效 -->
+          <!-- 左侧微光特效条 -->
           <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-500 to-red-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
-          <div class="flex items-center space-x-3.5 min-w-0 pr-2">
+          <!-- 卡片上部：图标、名称与状态标签 -->
+          <div class="flex items-start space-x-3.5 mb-4">
             <img src="${site.icon_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + site.id}" 
-                 class="w-12 h-12 rounded-xl object-cover bg-slate-800 p-1 shadow-inner shrink-0 border border-slate-700/50 group-hover:scale-105 transition-transform">
-            <div class="min-w-0">
-              <div class="flex items-center space-x-2">
-                <h3 class="font-bold text-slate-100 text-sm group-hover:text-amber-400 transition-colors truncate">${site.name}</h3>
-                <span class="px-1.5 py-0.5 text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded font-medium shrink-0">OFFICIAL</span>
+                 class="w-14 h-14 rounded-2xl object-cover bg-slate-800/90 p-1.5 shadow-inner shrink-0 border border-slate-700/60 group-hover:scale-105 transition-transform">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center justify-between">
+                <h3 class="font-bold text-slate-100 text-sm sm:text-base group-hover:text-amber-400 transition-colors truncate">${site.name}</h3>
+                <span class="px-2 py-0.5 text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-md font-semibold shrink-0">官方直达</span>
               </div>
-              <p class="text-slate-400 text-xs mt-1 truncate font-normal">${site.desc_text || '点击进入官方专属开彩与查询通道'}</p>
+              <p class="text-slate-400 text-xs mt-1.5 line-clamp-2 leading-relaxed font-normal">${site.desc_text || '点击进入官方专属开彩与查询通道'}</p>
             </div>
           </div>
 
-          <!-- 右侧箭头按钮 -->
-          <div class="w-9 h-9 rounded-xl bg-slate-800/80 group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-red-600 flex items-center justify-center text-slate-400 group-hover:text-white transition-all shadow-sm shrink-0 border border-slate-700/60 group-hover:border-transparent">
-            <svg class="w-4 h-4 transform group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
-            </svg>
+          <!-- 卡片底部：直达按钮 -->
+          <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-medium">
+            <span class="text-slate-400 text-[11px] flex items-center space-x-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+              <span>安全加密连接</span>
+            </span>
+            <div class="px-3.5 py-1.5 rounded-xl bg-slate-800 group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-red-600 text-slate-300 group-hover:text-white transition-all shadow-sm flex items-center space-x-1 border border-slate-700/60 group-hover:border-transparent">
+              <span>立即进入</span>
+              <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </div>
           </div>
+
         </div>
       `).join('');
 
