@@ -3,84 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4D Gang Malaysia - Expert Reviews & Smart Play Hub</title>
+    <title>4D Gang Malaysia - Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <style>
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(8px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      .fade-in { animation: fadeIn 0.4s ease-out forwards; }
-    </style>
 </head>
 <body class="bg-[#0b0f19] text-slate-100 min-h-screen font-sans antialiased">
 
-  <!-- 顶部导航栏 -->
-  <header class="border-b border-slate-800 bg-[#111827]/80 backdrop-blur-md sticky top-0 z-50">
-    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+  <!-- 顶部导航 -->
+  <header class="border-b border-slate-800 bg-[#111827] sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <span class="font-bold text-lg tracking-wider text-amber-400">4D Gang Malaysia</span>
+        <span class="font-bold text-lg text-amber-400">4D Gang Admin</span>
+        <span class="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded">Management Hub</span>
       </div>
-      <nav class="hidden md:flex items-center space-x-6 text-sm text-slate-300 font-medium">
-        <a href="#Home" class="hover:text-amber-400 transition-colors">Home</a>
-        <a href="#Slideshow" class="hover:text-amber-400 transition-colors">Highlights</a>
-        <a href="#Casino" class="hover:text-amber-400 transition-colors">Online Casinos</a>
-        <a href="#AboutUs" class="hover:text-amber-400 transition-colors">About Us</a>
-      </nav>
-      <span class="text-xs text-slate-400 bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700/60">Verified & Secure</span>
+      <a href="index.html" target="_blank" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-700 transition-colors flex items-center space-x-1.5">
+        <span>View Live Site</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+      </a>
     </div>
   </header>
 
-  <main class="max-w-5xl mx-auto px-4 py-8 space-y-12">
+  <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+    
+    <!-- 状态提示栏 -->
+    <div id="toast" class="hidden fixed top-20 right-4 z-50 bg-emerald-500 text-white text-xs px-4 py-3 rounded-xl shadow-2xl transition-all duration-300">
+      Settings saved successfully!
+    </div>
 
-    <!-- 1. Slideshow 动态轮播图 -->
-    <section id="Slideshow" class="pt-4">
-      <div class="swiper mySwiper rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
-        <div class="swiper-wrapper" id="dynamicSlidesWrapper">
-          <!-- 动态加载 -->
-        </div>
-        <div class="swiper-pagination"></div>
-      </div>
-    </section>
+    <!-- 选项卡导航 -->
+    <div class="flex space-x-2 border-b border-slate-800 pb-4 overflow-x-auto">
+      <button onclick="switchTab('companies')" id="btn-companies" class="tab-btn px-5 py-2.5 rounded-xl text-xs font-bold transition-all bg-amber-500 text-white shadow-lg">Partner Companies</button>
+      <button onclick="switchTab('slideshow')" id="btn-slideshow" class="tab-btn px-5 py-2.5 rounded-xl text-xs font-bold transition-all bg-slate-800 text-slate-400 hover:text-white">Slideshow Content</button>
+      <button onclick="switchTab('about')" id="btn-about" class="tab-btn px-5 py-2.5 rounded-xl text-xs font-bold transition-all bg-slate-800 text-slate-400 hover:text-white">About Us & Stats</button>
+    </div>
 
-    <!-- 2. Multiple Companies 多个公司/平台区 -->
-    <section id="Casino" class="space-y-6 pt-4">
-      <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-slate-800/80 pb-4">
+    <!-- 1. 合作伙伴公司管理面板 -->
+    <section id="tab-companies" class="tab-content space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span class="text-amber-400 text-xs font-bold uppercase tracking-wider">Trusted Navigation</span>
-          <h2 class="text-xl sm:text-2xl font-bold text-white mt-1">Featured Online Casino Partners</h2>
+          <h2 class="text-xl font-bold text-white">Manage Partner Companies</h2>
+          <p class="text-xs text-slate-400 mt-1">Add, edit, or remove casino/navigation partners displayed on the front page.</p>
         </div>
-        <p class="text-xs text-slate-400 mt-2 md:mt-0">Click any partner below to explore securely with active tracking.</p>
+        <button onclick="openModal()" class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-red-600 text-white text-xs font-semibold rounded-xl shadow-lg hover:opacity-90 transition-opacity flex items-center justify-center space-x-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          <span>Add New Company</span>
+        </button>
       </div>
 
-      <div id="gang-portal-hub">
-        <div id="siteList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- 动态加载 -->
-        </div>
+      <!-- 公司列表网格 -->
+      <div id="adminCompanyList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- 动态加载 -->
       </div>
     </section>
 
-    <!-- 3. About Us 关于我们区 -->
-    <section id="AboutUs" class="bg-[#111827] rounded-3xl p-6 sm:p-10 border border-slate-800 shadow-xl space-y-6">
-      <div class="max-w-2xl" id="aboutContentArea">
-        <!-- 动态加载 -->
+    <!-- 2. 轮播图管理面板 -->
+    <section id="tab-slideshow" class="tab-content space-y-6 hidden">
+      <div>
+        <h2 class="text-xl font-bold text-white">Manage Slideshow Content</h2>
+        <p class="text-xs text-slate-400 mt-1">Customize the sliding banners shown at the top of your homepage.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="slidesFormContainer">
+        <!-- 动态加载 Slide 表单 -->
+      </div>
+    </section>
+
+    <!-- 3. 关于我们与统计数据管理面板 -->
+    <section id="tab-about" class="tab-content space-y-6 hidden">
+      <div>
+        <h2 class="text-xl font-bold text-white">Manage About Us & Stats</h2>
+        <p class="text-xs text-slate-400 mt-1">Edit your company narrative and the achievement numbers.</p>
+      </div>
+
+      <div class="bg-[#111827] p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6 max-w-3xl">
+        <div class="space-y-2">
+          <label class="text-xs font-semibold text-slate-300">About Section Badge</label>
+          <input type="text" id="aboutBadge" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-semibold text-slate-300">Main Title</label>
+          <input type="text" id="aboutTitle" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-semibold text-slate-300">Description Narrative</label>
+          <textarea id="aboutDesc" rows="4" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-800">
+          <div>
+            <label class="text-[11px] font-semibold text-slate-400">Stat 1 Value</label>
+            <input type="text" id="stat1Val" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
+            <label class="text-[11px] font-semibold text-slate-400 mt-2 block">Stat 1 Label</label>
+            <input type="text" id="stat1Label" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
+          </div>
+          <div>
+            <label class="text-[11px] font-semibold text-slate-400">Stat 2 Value</label>
+            <input type="text" id="stat2Val" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
+            <label class="text-[11px] font-semibold text-slate-400 mt-2 block">Stat 2 Label</label>
+            <input type="text" id="stat2Label" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
+          </div>
+          <div>
+            <label class="text-[11px] font-semibold text-slate-400">Stat 3 Value</label>
+            <input type="text" id="stat3Val" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
+            <label class="text-[11px] font-semibold text-slate-400 mt-2 block">Stat 3 Label</label>
+            <input type="text" id="stat3Label" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
+          </div>
+        </div>
+
+        <button onclick="saveAboutUs()" class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-red-600 text-white text-xs font-semibold rounded-xl shadow-lg hover:opacity-90 transition-opacity">Save About Us Changes</button>
       </div>
     </section>
 
   </main>
 
-  <footer class="border-t border-slate-800 bg-[#111827] mt-16 py-8 text-center text-xs text-slate-500">
-    <p>&copy; 2026 4D Gang Malaysia. All Rights Reserved. Play Responsibly.</p>
-  </footer>
+  <!-- 添加/编辑公司弹窗 -->
+  <div id="companyModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-[#111827] border border-slate-800 w-full max-w-lg rounded-3xl p-6 sm:p-8 space-y-5 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 id="modalTitle" class="font-bold text-white text-base">Add New Company</h3>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-white">&times;</button>
+      </div>
+      <input type="hidden" id="editIndex" value="-1">
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs font-semibold text-slate-300">Company Name</label>
+          <input type="text" id="cName" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-300">Target URL (Redirect Link)</label>
+          <input type="text" id="cUrl" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500" placeholder="https://...">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-300">Description text</label>
+          <textarea id="cDesc" rows="3" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500"></textarea>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-300">Icon Image URL (Optional)</label>
+          <input type="text" id="cIcon" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500" placeholder="Leave empty for auto-generated avatar">
+        </div>
+      </div>
+      <div class="flex justify-end space-x-3 pt-4 border-t border-slate-800">
+        <button onclick="closeModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">Cancel</button>
+        <button onclick="saveCompany()" class="px-6 py-2 rounded-xl bg-amber-500 text-white text-xs font-semibold shadow-lg">Save Company</button>
+      </div>
+    </div>
+  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script>
-    // 初始化默认数据与读取
+    // 默认初始数据结构
     const defaultData = {
       companies: [
-        { id: 1, name: "MegaWin Casino Malaysia", url: "#", desc_text: "Top-tier verified gaming platform offering safe entertainment and instant bonuses.", icon_url: "" },
-        { id: 2, name: "Lucky4D Partner Hub", url: "#", desc_text: "Trusted insights and smart play guides curated for professional enthusiasts.", icon_url: "" }
+        { id: 1, name: "MegaWin Casino Malaysia", url: "https://example.com", desc_text: "Top-tier verified gaming platform offering safe entertainment and instant bonuses.", icon_url: "" },
+        { id: 2, name: "Lucky4D Partner Hub", url: "https://example.com", desc_text: "Trusted insights and smart play guides curated for professional enthusiasts.", icon_url: "" },
+        { id: 3, name: "Royal Star Gaming", url: "https://example.com", desc_text: "Comprehensive game testing reports and secure navigation channels.", icon_url: "" },
+        { id: 4, name: "Gold Coast 4D Club", url: "https://example.com", desc_text: "Unbiased reviews, transparent bonus ratings, and responsible play support.", icon_url: "" }
       ],
       slides: [
         { badge: "Hot Bonuses 2026", title: "Expert Reviews & Smart Play Guidance", desc: "Discover trusted platform insights, verified ratings, and responsible play strategies curated by industry professionals.", btnText: "Explore Casinos" },
@@ -89,7 +164,7 @@
       about: {
         badge: "About 4D Gang Malaysia",
         title: "Dedicated to Safer & Smarter Play",
-        desc: "4D Gang Malaysia is built by a team of veteran researchers and analysts. Our mission is to cut through the noise of online platforms, delivering transparent, unbiased information and robust guidance.",
+        desc: "4D Gang Malaysia is built by a team of veteran researchers and analysts. Our mission is to cut through the noise of online platforms, delivering transparent, unbiased information and robust guidance. We believe in playing with confidence, prioritizing recreation and safety over chasing unrealistic financial returns.",
         stats: [
           { val: "680+", label: "Casino Sites Reviewed" },
           { val: "1,380+", label: "Games Tested" },
@@ -98,159 +173,199 @@
       }
     };
 
-    function loadSiteContent() {
-      const dataStr = localStorage.getItem('gang_site_content');
-      return dataStr ? JSON.parse(dataStr) : defaultData;
+    // 获取本地存储数据
+    function getAppData() {
+      const data = localStorage.getItem('gang_site_content');
+      if (!data) {
+        localStorage.setItem('gang_site_content', JSON.stringify(defaultData));
+        return defaultData;
+      }
+      return JSON.parse(data);
     }
 
-    // 渲染动态内容
-    function renderFrontend() {
-      const data = loadSiteContent();
+    function saveAppData(data) {
+      localStorage.setItem('gang_site_content', JSON.stringify(data));
+      showToast();
+    }
 
-      // 1. 渲染轮播图
-      const slideWrapper = document.getElementById('dynamicSlidesWrapper');
-      slideWrapper.innerHTML = data.slides.map(s => `
-        <div class="swiper-slide bg-gradient-to-r from-slate-900 via-amber-950/40 to-slate-900 p-8 sm:p-12 md:p-16 flex flex-col justify-center min-h-[280px] sm:min-h-[340px] relative">
-          <span class="px-3 py-1 text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full w-max mb-3 font-semibold">${s.badge}</span>
-          <h2 class="text-2xl sm:text-4xl font-black text-white mb-3 max-w-xl">${s.title}</h2>
-          <p class="text-slate-300 text-xs sm:text-sm max-w-lg mb-6 leading-relaxed">${s.desc}</p>
+    function showToast() {
+      const t = document.getElementById('toast');
+      t.classList.remove('hidden');
+      setTimeout(() => t.classList.add('hidden'), 2500);
+    }
+
+    // 切换标签页
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(el => {
+        el.classList.remove('bg-amber-500', 'text-white', 'shadow-lg');
+        el.classList.add('bg-slate-800', 'text-slate-400');
+      });
+
+      document.getElementById('tab-' + tabName).classList.remove('hidden');
+      const activeBtn = document.getElementById('btn-' + tabName);
+      activeBtn.classList.remove('bg-slate-800', 'text-slate-400');
+      activeBtn.classList.add('bg-amber-500', 'text-white', 'shadow-lg');
+
+      if(tabName === 'companies') renderAdminCompanies();
+      if(tabName === 'slideshow') renderAdminSlides();
+      if(tabName === 'about') loadAboutUsForm();
+    }
+
+    // 渲染公司列表
+    function renderAdminCompanies() {
+      const data = getAppData();
+      const container = document.getElementById('adminCompanyList');
+      container.innerHTML = data.companies.map((c, index) => `
+        <div class="bg-[#111827] p-4.5 rounded-2xl border border-slate-800 flex items-center justify-between space-x-4">
+          <div class="flex items-center space-x-3.5 min-w-0">
+            <img src="${c.icon_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + c.id}" class="w-10 h-10 rounded-xl bg-slate-800 p-1 shrink-0 border border-slate-700">
+            <div class="min-w-0">
+              <h4 class="font-bold text-white text-xs truncate">${c.name}</h4>
+              <p class="text-slate-400 text-[11px] truncate mt-0.5">${c.url}</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2 shrink-0">
+            <button onclick="editCompany(${index})" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-xl border border-slate-700">Edit</button>
+            <button onclick="deleteCompany(${index})" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs rounded-xl border border-red-500/20">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 公司模态框控制
+    function openModal(index = -1) {
+      document.getElementById('editIndex').value = index;
+      if (index >= 0) {
+        const data = getAppData();
+        const c = data.companies[index];
+        document.getElementById('modalTitle').innerText = "Edit Company";
+        document.getElementById('cName').value = c.name;
+        document.getElementById('cUrl').value = c.url;
+        document.getElementById('cDesc').value = c.desc_text;
+        document.getElementById('cIcon').value = c.icon_url || '';
+      } else {
+        document.getElementById('modalTitle').innerText = "Add New Company";
+        document.getElementById('cName').value = '';
+        document.getElementById('cUrl').value = '';
+        document.getElementById('cDesc').value = '';
+        document.getElementById('cIcon').value = '';
+      }
+      document.getElementById('companyModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('companyModal').classList.add('hidden');
+    }
+
+    function saveCompany() {
+      const index = parseInt(document.getElementById('editIndex').value);
+      const name = document.getElementById('cName').value.trim();
+      const url = document.getElementById('cUrl').value.trim();
+      const desc_text = document.getElementById('cDesc').value.trim();
+      const icon_url = document.getElementById('cIcon').value.trim();
+
+      if (!name || !url) {
+        alert('Please fill in company name and target URL.');
+        return;
+      }
+
+      const data = getAppData();
+      if (index >= 0) {
+        data.companies[index] = { ...data.companies[index], name, url, desc_text, icon_url };
+      } else {
+        const newId = Date.now();
+        data.companies.push({ id: newId, name, url, desc_text, icon_url });
+      }
+
+      saveAppData(data);
+      closeModal();
+      renderAdminCompanies();
+    }
+
+    function editCompany(index) {
+      openModal(index);
+    }
+
+    function deleteCompany(index) {
+      if (confirm('Are you sure you want to delete this company partner?')) {
+        const data = getAppData();
+        data.companies.splice(index, 1);
+        saveAppData(data);
+        renderAdminCompanies();
+      }
+    }
+
+    // 渲染轮播图管理表单
+    function renderAdminSlides() {
+      const data = getAppData();
+      const container = document.getElementById('slidesFormContainer');
+      container.innerHTML = data.slides.map((s, idx) => `
+        <div class="bg-[#111827] p-6 rounded-3xl border border-slate-800 space-y-4">
+          <h3 class="font-bold text-white text-sm">Slide Banner #${idx + 1}</h3>
           <div>
-            <a href="#Casino" class="inline-flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-red-600 text-white font-semibold text-xs sm:text-sm shadow-lg">
-              <span>${s.btnText}</span>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-            </a>
+            <label class="text-[11px] font-semibold text-slate-400">Badge Text</label>
+            <input type="text" id="slideBadge_${idx}" value="${s.badge}" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
           </div>
+          <div>
+            <label class="text-[11px] font-semibold text-slate-400">Main Headline</label>
+            <input type="text" id="slideTitle_${idx}" value="${s.title}" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
+          </div>
+          <div>
+            <label class="text-[11px] font-semibold text-slate-400">Description</label>
+            <textarea id="slideDesc_${idx}" rows="2" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">${s.desc}</textarea>
+          </div>
+          <button onclick="saveSlide(${idx})" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700">Save Slide #${idx + 1}</button>
         </div>
       `).join('');
-
-      // 初始化 Swiper
-      if (window.mySwiperInstance) {
-        window.mySwiperInstance.destroy(true, true);
-      }
-      window.mySwiperInstance = new Swiper(".mySwiper", {
-        loop: true,
-        autoplay: { delay: 4500, disableOnInteraction: false },
-        pagination: { el: ".swiper-pagination", clickable: true },
-      });
-
-      // 2. 渲染公司列表
-      const siteList = document.getElementById('siteList');
-      siteList.innerHTML = data.companies.map((site, index) => `
-        <div data-id="${site.id}" 
-             data-name="${encodeURIComponent(site.name)}" 
-             data-url="${encodeURIComponent(site.url)}" 
-             style="animation-delay: ${index * 0.05}s"
-             class="fade-in group bg-[#111827] hover:bg-[#1f2937] p-4.5 sm:p-5 rounded-2xl border border-slate-800 hover:border-amber-500/55 transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-xl relative overflow-hidden">
-          
-          <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-500 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-          <div class="flex items-start space-x-3.5 mb-4">
-            <img src="${site.icon_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + site.id}" 
-                 class="w-12 h-12 rounded-xl object-cover bg-slate-800 p-1 shrink-0 border border-slate-700/60 group-hover:scale-105 transition-transform">
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center justify-between">
-                <h3 class="font-bold text-slate-100 text-sm group-hover:text-amber-400 transition-colors truncate">${site.name}</h3>
-                <span class="px-2 py-0.5 text-[9px] bg-amber-500/15 text-amber-400 border border-amber-500/20 rounded font-semibold shrink-0">Verified</span>
-              </div>
-              <p class="text-slate-400 text-xs mt-1.5 line-clamp-2 leading-relaxed">${site.desc_text || 'Official safe navigation channel & trusted review.'}</p>
-            </div>
-          </div>
-
-          <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-xs font-medium">
-            <span class="text-slate-400 text-[11px] flex items-center space-x-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-              <span>Tracking Active</span>
-            </span>
-            <div class="px-3 py-1.5 rounded-xl bg-slate-800 group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-red-600 text-slate-300 group-hover:text-white transition-all shadow-sm flex items-center space-x-1">
-              <span>Visit Site</span>
-              <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
-              </svg>
-            </div>
-          </div>
-        </div>
-      `).join('');
-
-      // 绑定点击事件及打点
-      document.querySelectorAll('#siteList > div').forEach(card => {
-        card.addEventListener('click', () => {
-          const id = card.getAttribute('data-id');
-          const name = decodeURIComponent(card.getAttribute('data-name'));
-          const url = decodeURIComponent(card.getAttribute('data-url'));
-          trackAndRedirect(id, name, url);
-        });
-      });
-
-      // 3. 渲染关于我们
-      const aboutArea = document.getElementById('aboutContentArea');
-      aboutArea.innerHTML = `
-        <span class="px-3 py-1 text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-semibold">${data.about.badge}</span>
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3 mb-2">${data.about.title}</h2>
-        <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">${data.about.desc}</p>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-slate-800 mt-6">
-          ${data.about.stats.map(st => `
-            <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80">
-              <div class="text-amber-400 font-bold text-lg mb-1">${st.val}</div>
-              <div class="text-slate-300 font-semibold text-xs mb-1">${st.label}</div>
-            </div>
-          `).join('')}
-        </div>
-      `;
     }
 
-    // UTM 与打点跳转核心函数
-    function getVisitorId() {
-      let vid = localStorage.getItem('gang_visitor_id');
-      if (!vid) {
-        vid = 'vid_' + Math.random().toString(36).substr(2, 8) + '_' + Date.now().toString().slice(-6);
-        localStorage.setItem('gang_visitor_id', vid);
-      }
-      return vid;
-    }
-
-    function captureAndGetUtm() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlSource = urlParams.get('source') || urlParams.get('utm_source');
-      const urlCampaign = urlParams.get('campaign') || urlParams.get('utm_campaign');
-
-      if (urlSource) sessionStorage.setItem('gang_utm_source', urlSource);
-      if (urlCampaign) sessionStorage.setItem('gang_utm_campaign', urlCampaign);
-
-      const source = urlSource || sessionStorage.getItem('gang_utm_source') || 'direct';
-      const campaign = urlCampaign || sessionStorage.getItem('gang_utm_campaign') || 'none';
-
-      return { source, campaign };
-    }
-
-    function trackAndRedirect(siteId, siteName, targetUrl) {
-      const visitorId = getVisitorId();
-      const { source, campaign } = captureAndGetUtm();
-
-      const payload = {
-        visitor_id: visitorId,
-        site_id: siteId,
-        site_name: siteName,
-        target_domain: targetUrl,
-        source: source,
-        campaign: campaign,
-        timestamp: new Date().toISOString()
+    function saveSlide(idx) {
+      const data = getAppData();
+      data.slides[idx] = {
+        badge: document.getElementById(`slideBadge_${idx}`).value,
+        title: document.getElementById(`slideTitle_${idx}`).value,
+        desc: document.getElementById(`slideDesc_${idx}`).value,
+        btnText: data.slides[idx].btnText
       };
-
-      fetch('https://your-backend-api.com/api/track', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        keepalive: true
-      }).catch(err => console.error('Tracking failed:', err));
-
-      if(targetUrl && targetUrl !== '#') {
-        window.open(targetUrl, '_blank');
-      }
+      saveAppData(data);
     }
 
+    // 加载关于我们表单
+    function loadAboutUsForm() {
+      const data = getAppData();
+      const a = data.about;
+      document.getElementById('aboutBadge').value = a.badge;
+      document.getElementById('aboutTitle').value = a.title;
+      document.getElementById('aboutDesc').value = a.desc;
+      
+      document.getElementById('stat1Val').value = a.stats[0].val;
+      document.getElementById('stat1Label').value = a.stats[0].label;
+      document.getElementById('stat2Val').value = a.stats[1].val;
+      document.getElementById('stat2Label').value = a.stats[1].label;
+      document.getElementById('stat3Val').value = a.stats[2].val;
+      document.getElementById('stat3Label').value = a.stats[2].label;
+    }
+
+    function saveAboutUs() {
+      const data = getAppData();
+      data.about = {
+        badge: document.getElementById('aboutBadge').value,
+        title: document.getElementById('aboutTitle').value,
+        desc: document.getElementById('aboutDesc').value,
+        stats: [
+          { val: document.getElementById('stat1Val').value, label: document.getElementById('stat1Label').value },
+          { val: document.getElementById('stat2Val').value, label: document.getElementById('stat2Label').value },
+          { val: document.getElementById('stat3Val').value, label: document.getElementById('stat3Label').value }
+        ]
+      };
+      saveAppData(data);
+    }
+
+    // 初始化加载
     document.addEventListener('DOMContentLoaded', () => {
-      captureAndGetUtm();
-      renderFrontend();
+      getAppData(); // 初始化默认数据
+      renderAdminCompanies();
     });
   </script>
 </body>
