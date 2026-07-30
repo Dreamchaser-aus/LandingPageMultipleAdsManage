@@ -19,7 +19,7 @@
           </div>
           <div>
             <h1 class="text-white font-bold text-base leading-tight">流量引流后台</h1>
-            <p class="text-slate-500 text-xs mt-0.5">v2.6 Stable</p>
+            <p class="text-slate-500 text-xs mt-0.5">v2.7 Enhanced</p>
           </div>
         </div>
 
@@ -34,7 +34,7 @@
             🌐 落地页站点管理
           </button>
           <button id="nav-generator" onclick="switchTab('generator')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-            🔗 生成推广链接
+            🔗 链接生成与导入
           </button>
           <button id="nav-history" onclick="switchTab('history')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
             📋 历史生成记录
@@ -52,7 +52,7 @@
         </button>
       </header>
 
-      <div class="p-8 max-w-6xl">
+      <div class="p-8 max-w-6xl space-y-6">
 
         <!-- Tab 1: 数据报表总览 -->
         <section id="tab-stats" class="tab-content space-y-6">
@@ -148,14 +148,28 @@
           </div>
         </section>
 
-        <!-- Tab 4: 生成推广链接 -->
+        <!-- Tab 4: 生成与导入推广链接 (增强版) -->
         <section id="tab-generator" class="tab-content hidden space-y-6">
+          
+          <!-- 区域 1：直接粘贴已有 UTM 链接导入 -->
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-200 bg-blue-50/20 max-w-2xl">
+            <h3 class="text-base font-bold text-slate-900 mb-1">📥 快捷导入已有 UTM 链接</h3>
+            <p class="text-xs text-slate-500 mb-4">如果你已经在外部生成了完整链接，粘贴至下方，系统将自动识别参数并保存到记录。</p>
+            <div class="space-y-3">
+              <input type="url" id="externalUrlInput" placeholder="例如：https://your-domain.com/?utm_source=tiktok_ads&utm_campaign=summer_2026" class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+              <button onclick="importExternalUtmLink()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-2">
+                解析并存入历史记录
+              </button>
+            </div>
+          </div>
+
+          <!-- 区域 2：常规拼接生成链接 -->
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60 max-w-2xl">
-            <h3 class="text-base font-bold text-slate-900 mb-4">🔗 创建带追踪参数的推广链接</h3>
+            <h3 class="text-base font-bold text-slate-900 mb-4">🛠️ 手动配置生成新的推广链接</h3>
             <div class="space-y-4">
               <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">引流目标落地页 URL</label>
-                <input type="text" id="targetUrl" class="w-full px-3.5 py-2.5 border rounded-xl text-sm">
+                <input type="text" id="targetUrl" class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
               </div>
               <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">引流渠道 (utm_source)</label>
@@ -174,6 +188,7 @@
               <button onclick="generateAndSaveLink()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition">生成并保存链接</button>
             </div>
           </div>
+
         </section>
 
         <!-- Tab 5: 历史生成记录 -->
@@ -210,7 +225,7 @@
       'stats': '数据报表总览',
       'journeys': '用户点击轨迹',
       'websites': '落地页站点管理',
-      'generator': '生成推广链接',
+      'generator': '链接生成与导入',
       'history': '历史生成记录'
     };
 
@@ -259,11 +274,9 @@
               <td class="p-3.5 font-semibold text-emerald-600">${row.leads}</td>
             </tr>
           `).join('');
-        } else {
-          tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-red-500">获取失败: ${json.error}</td></tr>`;
         }
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-red-500">网络错误: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-red-500">获取失败: ${err.message}</td></tr>`;
       }
     }
 
@@ -400,7 +413,42 @@
       }
     }
 
-    // 4. 历史推广链接
+    // 4. 新增功能：快捷解析并导入外部 UTM 链接
+    async function importExternalUtmLink() {
+      const inputUrl = document.getElementById('externalUrlInput').value.trim();
+      if (!inputUrl) return alert('请输入完备的 UTM 链接');
+
+      try {
+        const urlObj = new URL(inputUrl);
+        const source = urlObj.searchParams.get('utm_source') || 'imported_source';
+        const campaign = urlObj.searchParams.get('utm_campaign') || 'none';
+
+        const res = await fetch(`${baseUrl}/api/links`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            target_url: urlObj.origin + urlObj.pathname,
+            source: source,
+            campaign: campaign,
+            full_link: inputUrl
+          })
+        });
+
+        const json = await res.json();
+        if (json.success) {
+          document.getElementById('externalUrlInput').value = '';
+          fetchLinksHistory();
+          alert(`导入成功！\n识别到渠道(source): ${source}\n识别到活动(campaign): ${campaign}`);
+          switchTab('history');
+        } else {
+          alert('导入失败: ' + json.error);
+        }
+      } catch (err) {
+        alert('链接格式不正确！请输入带有 http:// 或 https:// 的完整 URL');
+      }
+    }
+
+    // 5. 历史推广链接
     async function fetchLinksHistory() {
       const tbody = document.getElementById('linksTable');
       try {
@@ -419,7 +467,7 @@
     function renderLinksTable(data) {
       const tbody = document.getElementById('linksTable');
       if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400">尚未生成过历史链接</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400">尚未生成或导入过历史链接</td></tr>';
         return;
       }
 
