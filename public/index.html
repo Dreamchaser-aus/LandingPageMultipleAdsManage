@@ -36,11 +36,11 @@
       return vid;
     }
 
-    // 2. 抓取与锁定 UTM 渠道参数（带 Session 缓存防丢失）
+    // 2. 抓取与锁定 UTM 渠道参数（同时兼容 source/utm_source 格式）
     function captureAndGetUtm() {
       const urlParams = new URLSearchParams(window.location.search);
-      const urlSource = urlParams.get('utm_source');
-      const urlCampaign = urlParams.get('utm_campaign');
+      const urlSource = urlParams.get('source') || urlParams.get('utm_source');
+      const urlCampaign = urlParams.get('campaign') || urlParams.get('utm_campaign');
 
       if (urlSource) sessionStorage.setItem('current_utm_source', urlSource);
       if (urlCampaign) sessionStorage.setItem('current_utm_campaign', urlCampaign);
@@ -103,21 +103,21 @@
       });
     }
 
-    // 4. 点击记录与无感跳转
+    // 4. 点击记录与无感跳转（已修正接口路径与字段对齐）
     function trackAndRedirect(siteId, siteName, targetUrl) {
       const visitorId = getVisitorId();
       const { source, campaign } = captureAndGetUtm();
 
+      // 严格对齐后端要求的参数结构
       const payload = {
         visitor_id: visitorId,
-        website_id: parseInt(siteId),
-        website_name: siteName,
+        target_domain: targetUrl,
         source: source,
         campaign: campaign
       };
 
-      // 利用 keepalive 实现后台异步发送，不阻塞跳转
-      fetch(`${baseUrl}/api/track-click`, {
+      // 修正请求路径为正确的 /api/track
+      fetch(`${baseUrl}/api/track`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
