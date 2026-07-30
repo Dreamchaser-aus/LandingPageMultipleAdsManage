@@ -10,7 +10,7 @@
 
   <div class="flex min-h-screen">
 
-    <!-- ==================== 左侧 Sidebar ==================== -->
+    <!-- 左侧 Sidebar -->
     <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between p-4 flex-shrink-0 border-r border-slate-800">
       <div>
         <div class="flex items-center gap-3 px-3 py-4 mb-6 border-b border-slate-800">
@@ -19,57 +19,36 @@
           </div>
           <div>
             <h1 class="text-white font-bold text-base leading-tight">流量引流后台</h1>
-            <p class="text-slate-500 text-xs mt-0.5">v2.5 Track System</p>
+            <p class="text-slate-500 text-xs mt-0.5">v2.6 Stable</p>
           </div>
         </div>
 
         <nav class="space-y-1.5">
-          <button id="nav-stats" onclick="switchTab('stats')" 
-                  class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-sm shadow-blue-600/20">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+          <button id="nav-stats" onclick="switchTab('stats')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-sm shadow-blue-600/20">
             数据报表总览
           </button>
-
-          <button id="nav-journeys" onclick="switchTab('journeys')" 
-                  class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-            用户点击轨迹
+          <button id="nav-journeys" onclick="switchTab('journeys')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
+            👥 用户点击轨迹
           </button>
-
-          <button id="nav-websites" onclick="switchTab('websites')" 
-                  class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
-            落地页站点管理
+          <button id="nav-websites" onclick="switchTab('websites')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
+            🌐 落地页站点管理
           </button>
-
-          <button id="nav-generator" onclick="switchTab('generator')" 
-                  class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-            生成推广链接
+          <button id="nav-generator" onclick="switchTab('generator')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
+            🔗 生成推广链接
           </button>
-
-          <button id="nav-history" onclick="switchTab('history')" 
-                  class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01m-.01 4h.01"></path></svg>
-            历史生成记录
+          <button id="nav-history" onclick="switchTab('history')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
+            📋 历史生成记录
           </button>
         </nav>
       </div>
-
-      <div class="pt-4 border-t border-slate-800 text-xs text-slate-500">
-        <p>环境: Railway App</p>
-        <p class="mt-1 text-slate-600">数据库: PostgreSQL</p>
-      </div>
     </aside>
 
-    <!-- ==================== 右侧 主内容 ==================== -->
+    <!-- 右侧 主内容 -->
     <main class="flex-1 overflow-y-auto bg-slate-50">
-
       <header class="sticky top-0 bg-white/80 backdrop-blur border-b border-slate-200/80 px-8 py-4 flex justify-between items-center z-10">
         <h2 id="page-title" class="text-xl font-bold text-slate-800">数据报表总览</h2>
         <button onclick="fetchAllData()" class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-lg text-sm font-medium transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-          刷新所有数据
+          刷新数据
         </button>
       </header>
 
@@ -89,26 +68,24 @@
                   </tr>
                 </thead>
                 <tbody id="statsTable" class="divide-y divide-slate-100 text-sm">
-                  <tr><td colspan="3" class="p-6 text-center text-slate-400">数据加载中...</td></tr>
+                  <tr><td colspan="3" class="p-6 text-center text-slate-400">加载中...</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
         </section>
 
-        <!-- Tab 2: 用户点击轨迹分析 (新增) -->
+        <!-- Tab 2: 用户点击轨迹 -->
         <section id="tab-journeys" class="tab-content hidden space-y-6">
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
-            <div class="mb-4">
-              <h3 class="text-base font-bold text-slate-900">👥 访客跨站点点击轨迹</h3>
-              <p class="text-xs text-slate-500 mt-1">识别同一个访客在落地页上的多次点击行为与访问路径</p>
-            </div>
+            <h3 class="text-base font-bold text-slate-900 mb-1">👥 访客跨站点点击轨迹</h3>
+            <p class="text-xs text-slate-500 mb-4">识别同一个访客在落地页上的多次点击行为与访问路径</p>
 
             <div class="overflow-x-auto">
               <table class="w-full text-left border-collapse">
                 <thead>
                   <tr class="border-b border-slate-200 text-slate-500 text-xs uppercase bg-slate-50">
-                    <th class="p-3.5">访客 ID (Visitor ID)</th>
+                    <th class="p-3.5">访客 ID</th>
                     <th class="p-3.5">渠道 / 活动</th>
                     <th class="p-3.5">点击频次</th>
                     <th class="p-3.5">跨站点点击顺序路径</th>
@@ -132,23 +109,23 @@
               <input type="hidden" id="editSiteId">
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">站点名称</label>
-                <input type="text" id="siteName" required placeholder="如：官方商城" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="text" id="siteName" required placeholder="官方商城" class="w-full px-3 py-2 border rounded-lg text-sm">
               </div>
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">描述/副标题</label>
-                <input type="text" id="siteDesc" placeholder="如：限时优惠领券" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="text" id="siteDesc" placeholder="限时优惠" class="w-full px-3 py-2 border rounded-lg text-sm">
               </div>
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">跳转 URL</label>
                 <input type="url" id="siteUrl" required placeholder="https://..." class="w-full px-3 py-2 border rounded-lg text-sm">
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Logo图片 URL</label>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Logo URL</label>
                 <input type="url" id="siteIcon" placeholder="https://..." class="w-full px-3 py-2 border rounded-lg text-sm">
               </div>
               <div class="flex items-end gap-2">
                 <button type="submit" id="submitBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg text-sm font-medium transition">保存站点</button>
-                <button type="button" id="cancelBtn" onclick="resetWebsiteForm()" class="hidden bg-slate-300 hover:bg-slate-400 text-slate-700 py-2 px-3 rounded-lg text-sm transition">取消</button>
+                <button type="button" id="cancelBtn" onclick="resetWebsiteForm()" class="hidden bg-slate-300 text-slate-700 py-2 px-3 rounded-lg text-sm">取消</button>
               </div>
             </form>
 
@@ -178,11 +155,11 @@
             <div class="space-y-4">
               <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">引流目标落地页 URL</label>
-                <input type="text" id="targetUrl" class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <input type="text" id="targetUrl" class="w-full px-3.5 py-2.5 border rounded-xl text-sm">
               </div>
               <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">引流渠道 (utm_source)</label>
-                <select id="channelSelect" class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <select id="channelSelect" class="w-full px-3.5 py-2.5 border rounded-xl text-sm">
                   <option value="tiktok">TikTok 抖音</option>
                   <option value="xiaohongshu">小红书</option>
                   <option value="google_ads">Google 广告</option>
@@ -192,7 +169,7 @@
               </div>
               <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">活动名称 (utm_campaign)</label>
-                <input type="text" id="campaignInput" placeholder="2026_promo" class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <input type="text" id="campaignInput" placeholder="2026_promo" class="w-full px-3.5 py-2.5 border rounded-xl text-sm">
               </div>
               <button onclick="generateAndSaveLink()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition">生成并保存链接</button>
             </div>
@@ -214,7 +191,7 @@
                   </tr>
                 </thead>
                 <tbody id="linksTable" class="divide-y divide-slate-100 text-sm">
-                  <tr><td colspan="4" class="p-6 text-center text-slate-400">暂无历史链接记录</td></tr>
+                  <tr><td colspan="4" class="p-6 text-center text-slate-400">加载中...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -242,7 +219,6 @@
       fetchAllData();
     };
 
-    // 切换 Tab 视图
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -267,11 +243,11 @@
 
     // 1. 数据报表
     async function fetchStats() {
+      const tbody = document.getElementById('statsTable');
       try {
         const res = await fetch(`${baseUrl}/api/stats`);
         const json = await res.json();
         if (json.success) {
-          const tbody = document.getElementById('statsTable');
           if (!json.data || json.data.length === 0) {
             tbody.innerHTML = '<tr><td colspan="3" class="p-6 text-center text-slate-400">暂无引流数据</td></tr>';
             return;
@@ -283,19 +259,21 @@
               <td class="p-3.5 font-semibold text-emerald-600">${row.leads}</td>
             </tr>
           `).join('');
+        } else {
+          tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-red-500">获取失败: ${json.error}</td></tr>`;
         }
       } catch (err) {
-        console.error(err);
+        tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-red-500">网络错误: ${err.message}</td></tr>`;
       }
     }
 
-    // 2. 跨站点轨迹分析 (新增)
+    // 2. 轨迹查看
     async function fetchUserJourneys() {
+      const tbody = document.getElementById('journeysTable');
       try {
         const res = await fetch(`${baseUrl}/api/user-journeys`);
         const json = await res.json();
         if (json.success) {
-          const tbody = document.getElementById('journeysTable');
           if (!json.data || json.data.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">暂无用户轨迹记录</td></tr>';
             return;
@@ -314,7 +292,7 @@
               </td>
               <td class="p-3.5 text-xs text-slate-800 font-medium">
                 <div class="bg-slate-50 p-2 rounded-lg border border-slate-200/60 inline-block">
-                  ${row.click_path.split(' ➔ ').map(site => `<span class="inline-block bg-white px-2 py-1 rounded shadow-sm border border-slate-200">${site}</span>`).join(' <span class="text-slate-400 mx-1">➔</span> ')}
+                  ${(row.click_path || '').split(' ➔ ').map(site => `<span class="inline-block bg-white px-2 py-1 rounded shadow-sm border border-slate-200">${site}</span>`).join(' <span class="text-slate-400 mx-1">➔</span> ')}
                 </div>
               </td>
               <td class="p-3.5 text-xs text-slate-500">${new Date(row.last_active).toLocaleString()}</td>
@@ -322,11 +300,11 @@
           `).join('');
         }
       } catch (err) {
-        console.error(err);
+        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-500">获取失败: ${err.message}</td></tr>`;
       }
     }
 
-    // 3. 站点管理 API 交互
+    // 3. 落地页卡片管理
     async function fetchManageWebsites() {
       try {
         const res = await fetch(`${baseUrl}/api/websites`);
@@ -422,7 +400,41 @@
       }
     }
 
-    // 4. 推广链接生成与历史
+    // 4. 历史推广链接
+    async function fetchLinksHistory() {
+      const tbody = document.getElementById('linksTable');
+      try {
+        const res = await fetch(`${baseUrl}/api/links`);
+        const json = await res.json();
+        if (json.success) {
+          renderLinksTable(json.data);
+        } else {
+          tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-red-500">接口返回错误: ${json.error}</td></tr>`;
+        }
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-red-500">网络连接异常: ${err.message}</td></tr>`;
+      }
+    }
+
+    function renderLinksTable(data) {
+      const tbody = document.getElementById('linksTable');
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400">尚未生成过历史链接</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.map(row => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-3.5"><span class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-md text-xs font-semibold">${row.source}</span></td>
+          <td class="p-3.5 text-slate-600">${row.campaign}</td>
+          <td class="p-3.5 text-xs text-slate-500 max-w-xs truncate" title="${row.full_link}">${row.full_link}</td>
+          <td class="p-3.5">
+            <button onclick="copyToClipboard('${row.full_link}')" class="text-xs bg-slate-100 hover:bg-blue-50 text-blue-600 px-3 py-1.5 rounded-md border border-slate-200 font-medium transition">一键复制</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
     async function generateAndSaveLink() {
       const targetUrl = document.getElementById('targetUrl').value.trim();
       const channel = document.getElementById('channelSelect').value;
@@ -450,41 +462,14 @@
         const json = await res.json();
         if (json.success) {
           fetchLinksHistory();
-          alert('链接已成功生成！');
+          alert('链接生成成功！');
           switchTab('history');
+        } else {
+          alert('生成失败: ' + json.error);
         }
       } catch (err) {
-        alert('请输入包含 https:// 的正确网址格式');
+        alert('请输入包含 https:// 的完整网址');
       }
-    }
-
-    async function fetchLinksHistory() {
-      try {
-        const res = await fetch(`${baseUrl}/api/links`);
-        const json = await res.json();
-        if (json.success) renderLinksTable(json.data);
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
-    function renderLinksTable(data) {
-      const tbody = document.getElementById('linksTable');
-      if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400">尚未生成过链接</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = data.map(row => `
-        <tr class="hover:bg-slate-50">
-          <td class="p-3.5"><span class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-md text-xs font-semibold">${row.source}</span></td>
-          <td class="p-3.5 text-slate-600">${row.campaign}</td>
-          <td class="p-3.5 text-xs text-slate-500 max-w-xs truncate" title="${row.full_link}">${row.full_link}</td>
-          <td class="p-3.5">
-            <button onclick="copyToClipboard('${row.full_link}')" class="text-xs bg-slate-100 hover:bg-blue-50 text-blue-600 px-3 py-1.5 rounded-md border border-slate-200 font-medium transition">一键复制</button>
-          </td>
-        </tr>
-      `).join('');
     }
 
     function copyToClipboard(text) {
