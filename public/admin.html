@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4D Gang Malaysia - Admin Dashboard</title>
+    <title>4D Gang Malaysia - Advanced Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-[#0b0f19] text-slate-100 min-h-screen font-sans antialiased">
@@ -13,7 +13,7 @@
     <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
       <div class="flex items-center space-x-3">
         <span class="font-bold text-lg text-amber-400">4D Gang Admin</span>
-        <span class="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded">Management Hub</span>
+        <span class="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded">Management & Tracking Hub</span>
       </div>
       <a href="index.html" target="_blank" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-700 transition-colors flex items-center space-x-1.5">
         <span>View Live Site</span>
@@ -31,9 +31,10 @@
 
     <!-- 选项卡导航 -->
     <div class="flex space-x-2 border-b border-slate-800 pb-4 overflow-x-auto">
-      <button onclick="switchTab('companies')" id="btn-companies" class="tab-btn px-5 py-2.5 rounded-xl text-xs font-bold transition-all bg-amber-500 text-white shadow-lg">Partner Companies</button>
-      <button onclick="switchTab('slideshow')" id="btn-slideshow" class="tab-btn px-5 py-2.5 rounded-xl text-xs font-bold transition-all bg-slate-800 text-slate-400 hover:text-white">Slideshow Content</button>
-      <button onclick="switchTab('about')" id="btn-about" class="tab-btn px-5 py-2.5 rounded-xl text-xs font-bold transition-all bg-slate-800 text-slate-400 hover:text-white">About Us & Stats</button>
+      <button onclick="switchTab('companies')" id="btn-companies" class="tab-btn px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-amber-500 text-white shadow-lg shrink-0">Partner Companies</button>
+      <button onclick="switchTab('slideshow')" id="btn-slideshow" class="tab-btn px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-slate-800 text-slate-400 hover:text-white shrink-0">Slideshow Content</button>
+      <button onclick="switchTab('about')" id="btn-about" class="tab-btn px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-slate-800 text-slate-400 hover:text-white shrink-0">About Us & Stats</button>
+      <button onclick="switchTab('tracking')" id="btn-tracking" class="tab-btn px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-slate-800 text-slate-400 hover:text-white shrink-0">Tracking & Analytics</button>
     </div>
 
     <!-- 1. 合作伙伴公司管理面板 -->
@@ -49,10 +50,7 @@
         </button>
       </div>
 
-      <!-- 公司列表网格 -->
-      <div id="adminCompanyList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- 动态加载 -->
-      </div>
+      <div id="adminCompanyList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
     </section>
 
     <!-- 2. 轮播图管理面板 -->
@@ -62,9 +60,7 @@
         <p class="text-xs text-slate-400 mt-1">Customize the sliding banners shown at the top of your homepage.</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="slidesFormContainer">
-        <!-- 动态加载 Slide 表单 -->
-      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="slidesFormContainer"></div>
     </section>
 
     <!-- 3. 关于我们与统计数据管理面板 -->
@@ -113,6 +109,46 @@
       </div>
     </section>
 
+    <!-- 4. 追踪设置与点击日志分析面板 -->
+    <section id="tab-tracking" class="tab-content space-y-6 hidden">
+      <div>
+        <h2 class="text-xl font-bold text-white">Tracking & UTM Analytics</h2>
+        <p class="text-xs text-slate-400 mt-1">Configure your backend API endpoint and view real-time click logs.</p>
+      </div>
+
+      <div class="bg-[#111827] p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-4 max-w-3xl">
+        <h3 class="font-bold text-white text-sm">Backend API Endpoint Configuration</h3>
+        <p class="text-slate-400 text-xs">Set the URL where front-end click tracking data will be sent via `fetch`.</p>
+        <div class="flex gap-3">
+          <input type="text" id="apiEndpointInput" class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500" placeholder="https://your-backend-api.com">
+          <button onclick="saveApiEndpoint()" class="px-5 py-2.5 bg-amber-500 text-white text-xs font-semibold rounded-xl shadow-lg">Save URL</button>
+        </div>
+      </div>
+
+      <div class="bg-[#111827] p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-white text-sm">Recent Click & Traffic Logs (Local Buffer)</h3>
+          <button onclick="clearLogs()" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs rounded-xl border border-red-500/20">Clear Logs</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+              <tr>
+                <th class="p-3">Time</th>
+                <th class="p-3">Visitor ID</th>
+                <th class="p-3">Target Partner</th>
+                <th class="p-3">Source (UTM)</th>
+                <th class="p-3">Campaign</th>
+              </tr>
+            </thead>
+            <tbody id="trackingLogsTable" class="divide-y divide-slate-800/60">
+              <!-- 动态加载日志 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- 添加/编辑公司弹窗 -->
@@ -149,7 +185,6 @@
   </div>
 
   <script>
-    // 默认初始数据结构
     const defaultData = {
       companies: [
         { id: 1, name: "MegaWin Casino Malaysia", url: "https://example.com", desc_text: "Top-tier verified gaming platform offering safe entertainment and instant bonuses.", icon_url: "" },
@@ -173,7 +208,6 @@
       }
     };
 
-    // 获取本地存储数据
     function getAppData() {
       const data = localStorage.getItem('gang_site_content');
       if (!data) {
@@ -194,7 +228,6 @@
       setTimeout(() => t.classList.add('hidden'), 2500);
     }
 
-    // 切换标签页
     function switchTab(tabName) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.tab-btn').forEach(el => {
@@ -210,9 +243,9 @@
       if(tabName === 'companies') renderAdminCompanies();
       if(tabName === 'slideshow') renderAdminSlides();
       if(tabName === 'about') loadAboutUsForm();
+      if(tabName === 'tracking') loadTrackingSettingsAndLogs();
     }
 
-    // 渲染公司列表
     function renderAdminCompanies() {
       const data = getAppData();
       const container = document.getElementById('adminCompanyList');
@@ -233,7 +266,6 @@
       `).join('');
     }
 
-    // 公司模态框控制
     function openModal(index = -1) {
       document.getElementById('editIndex').value = index;
       if (index >= 0) {
@@ -296,7 +328,6 @@
       }
     }
 
-    // 渲染轮播图管理表单
     function renderAdminSlides() {
       const data = getAppData();
       const container = document.getElementById('slidesFormContainer');
@@ -331,7 +362,6 @@
       saveAppData(data);
     }
 
-    // 加载关于我们表单
     function loadAboutUsForm() {
       const data = getAppData();
       const a = data.about;
@@ -362,9 +392,42 @@
       saveAppData(data);
     }
 
-    // 初始化加载
+    function loadTrackingSettingsAndLogs() {
+      const savedUrl = localStorage.getItem('gang_api_backend_url') || 'https://your-backend-api.com';
+      document.getElementById('apiEndpointInput').value = savedUrl;
+
+      const logs = JSON.parse(localStorage.getItem('gang_tracking_logs') || '[]');
+      const tbody = document.getElementById('trackingLogsTable');
+      if (logs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">No tracking logs recorded yet.</td></tr>`;
+      } else {
+        tbody.innerHTML = logs.reverse().map(l => `
+          <tr class="hover:bg-slate-900/40">
+            <td class="p-3 text-slate-400">${new Date(l.timestamp).toLocaleString()}</td>
+            <td class="p-3 font-mono text-amber-400">${l.visitor_id}</td>
+            <td class="p-3 font-semibold text-white">${l.site_name}</td>
+            <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px]">${l.source}</span></td>
+            <td class="p-3 text-slate-400">${l.campaign}</td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function saveApiEndpoint() {
+      const url = document.getElementById('apiEndpointInput').value.trim();
+      localStorage.setItem('gang_api_backend_url', url);
+      showToast();
+    }
+
+    function clearLogs() {
+      if (confirm('Are you sure you want to clear all tracking records?')) {
+        localStorage.removeItem('gang_tracking_logs');
+        loadTrackingSettingsAndLogs();
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-      getAppData(); // 初始化默认数据
+      getAppData();
       renderAdminCompanies();
     });
   </script>
