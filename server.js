@@ -110,11 +110,20 @@ app.get('/admin', (req, res) => {
 // ================= 3. API 接口 (PostgreSQL 适配版) =================
 
 /**
- * 轨迹打点 API
+ * 轨迹打点 API（已优化：精确提取纯净客户端真实 IP）
  */
 app.post('/api/track', async (req, res) => {
   const { visitor_id, target_domain, source, campaign } = req.body;
-  const ip_address = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+  
+  // 优化后的 IP 解析逻辑：防止代理链条导致多个 IP 串连在一起
+  let ip_address = '127.0.0.1';
+  const rawIp = req.headers['x-forwarded-for'];
+  if (rawIp) {
+    ip_address = rawIp.split(',')[0].trim();
+  } else if (req.socket.remoteAddress) {
+    ip_address = req.socket.remoteAddress;
+  }
+
   const user_agent = req.headers['user-agent'] || 'Unknown';
 
   if (!visitor_id || !target_domain) {
