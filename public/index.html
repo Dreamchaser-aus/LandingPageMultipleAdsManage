@@ -56,7 +56,7 @@
 
       <div id="gang-portal-hub">
         <div id="siteList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- 动态加载 -->
+          <!-- 动态加载所有卡片 -->
         </div>
       </div>
     </section>
@@ -76,11 +76,13 @@
 
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script>
-    // 初始化默认数据与读取
+    // 基础防崩溃默认数据
     const defaultData = {
       companies: [
         { id: 1, name: "MegaWin Casino Malaysia", url: "https://google.com", desc_text: "Top-tier verified gaming platform offering safe entertainment and instant bonuses.", icon_url: "" },
-        { id: 2, name: "Lucky4D Partner Hub", url: "https://google.com", desc_text: "Trusted insights and smart play guides curated for professional enthusiasts.", icon_url: "" }
+        { id: 2, name: "Lucky4D Partner Hub", url: "https://google.com", desc_text: "Trusted insights and smart play guides curated for professional enthusiasts.", icon_url: "" },
+        { id: 3, name: "Grand Spin Official", url: "https://google.com", desc_text: "Premier destination for modern digital slot reviews and high RTP games.", icon_url: "" },
+        { id: 4, name: "Royal Bet Portal", url: "https://google.com", desc_text: "Fast withdrawals and verified security compliance for regional players.", icon_url: "" }
       ],
       slides: [
         { badge: "Hot Bonuses 2026", title: "Expert Reviews & Smart Play Guidance", desc: "Discover trusted platform insights, verified ratings, and responsible play strategies curated by industry professionals.", btnText: "Explore Casinos" },
@@ -103,113 +105,134 @@
       return dataStr ? JSON.parse(dataStr) : defaultData;
     }
 
-    // 渲染动态内容
+    // 渲染前端动态内容
     async function renderFrontend() {
-      const data = loadSiteContent();
+      let data = loadSiteContent();
 
-      // 从服务器数据库异步获取后台发布的最新卡片列表
+      // 从后端 API 请求最新的全量卡片数据
       try {
         const res = await fetch('/api/websites');
         const json = await res.json();
-        if (json.success && json.data && json.data.length > 0) {
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
           data.companies = json.data;
+          
+          // 强行刷新本地缓存，防止旧的 2 卡片缓存滞后
+          const currentData = loadSiteContent();
+          currentData.companies = json.data;
+          localStorage.setItem('gang_site_content', JSON.stringify(currentData));
         }
       } catch (e) {
-        console.warn('读取线上站点失败，将使用本地/默认数据:', e);
+        console.warn('从 API 获取最新卡片失败，使用备用/本地数据:', e);
       }
 
       // 1. 渲染轮播图
       const slideWrapper = document.getElementById('dynamicSlidesWrapper');
-      slideWrapper.innerHTML = data.slides.map(s => `
-        <div class="swiper-slide bg-gradient-to-r from-slate-900 via-amber-950/40 to-slate-900 p-8 sm:p-12 md:p-16 flex flex-col justify-center min-h-[280px] sm:min-h-[340px] relative">
-          <span class="px-3 py-1 text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full w-max mb-3 font-semibold">${s.badge}</span>
-          <h2 class="text-2xl sm:text-4xl font-black text-white mb-3 max-w-xl">${s.title}</h2>
-          <p class="text-slate-300 text-xs sm:text-sm max-w-lg mb-6 leading-relaxed">${s.desc}</p>
-          <div>
-            <a href="#Casino" class="inline-flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-red-600 text-white font-semibold text-xs sm:text-sm shadow-lg">
-              <span>${s.btnText}</span>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-            </a>
-          </div>
-        </div>
-      `).join('');
-
-      // 初始化 Swiper
-      if (window.mySwiperInstance) {
-        window.mySwiperInstance.destroy(true, true);
-      }
-      window.mySwiperInstance = new Swiper(".mySwiper", {
-        loop: true,
-        autoplay: { delay: 4500, disableOnInteraction: false },
-        pagination: { el: ".swiper-pagination", clickable: true },
-      });
-
-      // 2. 渲染公司列表
-      const siteList = document.getElementById('siteList');
-      siteList.innerHTML = data.companies.map((site, index) => `
-        <div data-id="${site.id}" 
-             data-name="${encodeURIComponent(site.name)}" 
-             data-url="${encodeURIComponent(site.url)}" 
-             style="animation-delay: ${index * 0.05}s"
-             class="fade-in group bg-[#111827] hover:bg-[#1f2937] p-4.5 sm:p-5 rounded-2xl border border-slate-800 hover:border-amber-500/55 transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-xl relative overflow-hidden">
-          
-          <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-500 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-          <div class="flex items-start space-x-3.5 mb-4">
-            <img src="${site.icon_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + site.id}" 
-                 class="w-12 h-12 rounded-xl object-cover bg-slate-800 p-1 shrink-0 border border-slate-700/60 group-hover:scale-105 transition-transform">
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center justify-between">
-                <h3 class="font-bold text-slate-100 text-sm group-hover:text-amber-400 transition-colors truncate">${site.name}</h3>
-                <span class="px-2 py-0.5 text-[9px] bg-amber-500/15 text-amber-400 border border-amber-500/20 rounded font-semibold shrink-0">Verified</span>
-              </div>
-              <p class="text-slate-400 text-xs mt-1.5 line-clamp-2 leading-relaxed">${site.desc_text || 'Official safe navigation channel & trusted review.'}</p>
+      if (slideWrapper && data.slides) {
+        slideWrapper.innerHTML = data.slides.map(s => `
+          <div class="swiper-slide bg-gradient-to-r from-slate-900 via-amber-950/40 to-slate-900 p-8 sm:p-12 md:p-16 flex flex-col justify-center min-h-[280px] sm:min-h-[340px] relative">
+            <span class="px-3 py-1 text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full w-max mb-3 font-semibold">${s.badge}</span>
+            <h2 class="text-2xl sm:text-4xl font-black text-white mb-3 max-w-xl">${s.title}</h2>
+            <p class="text-slate-300 text-xs sm:text-sm max-w-lg mb-6 leading-relaxed">${s.desc}</p>
+            <div>
+              <a href="#Casino" class="inline-flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-red-600 text-white font-semibold text-xs sm:text-sm shadow-lg">
+                <span>${s.btnText}</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+              </a>
             </div>
           </div>
+        `).join('');
 
-          <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-xs font-medium">
-            <span class="text-slate-400 text-[11px] flex items-center space-x-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-              <span>Tracking Active</span>
-            </span>
-            <div class="px-3 py-1.5 rounded-xl bg-slate-800 group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-red-600 text-slate-300 group-hover:text-white transition-all shadow-sm flex items-center space-x-1">
-              <span>Visit Site</span>
-              <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
-              </svg>
-            </div>
-          </div>
-        </div>
-      `).join('');
-
-      // 绑定点击事件及打点
-      document.querySelectorAll('#siteList > div').forEach(card => {
-        card.addEventListener('click', () => {
-          const id = card.getAttribute('data-id');
-          const name = decodeURIComponent(card.getAttribute('data-name'));
-          const url = decodeURIComponent(card.getAttribute('data-url'));
-          trackAndRedirect(id, name, url);
+        if (window.mySwiperInstance) {
+          window.mySwiperInstance.destroy(true, true);
+        }
+        window.mySwiperInstance = new Swiper(".mySwiper", {
+          loop: true,
+          autoplay: { delay: 4500, disableOnInteraction: false },
+          pagination: { el: ".swiper-pagination", clickable: true },
         });
-      });
+      }
 
-      // 3. 渲染关于我们
-      const aboutArea = document.getElementById('aboutContentArea');
-      aboutArea.innerHTML = `
-        <span class="px-3 py-1 text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-semibold">${data.about.badge}</span>
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3 mb-2">${data.about.title}</h2>
-        <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">${data.about.desc}</p>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-slate-800 mt-6">
-          ${data.about.stats.map(st => `
-            <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80">
-              <div class="text-amber-400 font-bold text-lg mb-1">${st.val}</div>
-              <div class="text-slate-300 font-semibold text-xs mb-1">${st.label}</div>
+      // 2. 渲染所有卡片列表（包含字段空缺清洗容错，确保全部无阻展示）
+      const siteList = document.getElementById('siteList');
+      if (siteList && Array.isArray(data.companies)) {
+        siteList.innerHTML = data.companies.map((site, index) => {
+          // 容错清洗：防止后端存在 null 导致循环报错中断
+          const siteId = site.id || index;
+          const safeName = site.name || 'Verified Partner';
+          const safeUrl = site.url || '#';
+          const safeDesc = site.desc_text || site.description || 'Official safe navigation channel & trusted review.';
+          const safeIcon = site.icon_url || site.logo || `https://api.dicebear.com/7.x/identicon/svg?seed=${siteId}`;
+
+          return `
+            <div data-id="${siteId}" 
+                 data-name="${encodeURIComponent(safeName)}" 
+                 data-url="${encodeURIComponent(safeUrl)}" 
+                 style="animation-delay: ${index * 0.04}s"
+                 class="fade-in group bg-[#111827] hover:bg-[#1f2937] p-4.5 sm:p-5 rounded-2xl border border-slate-800 hover:border-amber-500/55 transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-xl relative overflow-hidden">
+              
+              <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-500 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+              <div class="flex items-start space-x-3.5 mb-4">
+                <img src="${safeIcon}" 
+                     alt="${safeName}"
+                     class="w-12 h-12 rounded-xl object-cover bg-slate-800 p-1 shrink-0 border border-slate-700/60 group-hover:scale-105 transition-transform"
+                     onerror="this.src='https://api.dicebear.com/7.x/identicon/svg?seed=${siteId}'">
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center justify-between">
+                    <h3 class="font-bold text-slate-100 text-sm group-hover:text-amber-400 transition-colors truncate">${safeName}</h3>
+                    <span class="px-2 py-0.5 text-[9px] bg-amber-500/15 text-amber-400 border border-amber-500/20 rounded font-semibold shrink-0">Verified</span>
+                  </div>
+                  <p class="text-slate-400 text-xs mt-1.5 line-clamp-2 leading-relaxed">${safeDesc}</p>
+                </div>
+              </div>
+
+              <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-xs font-medium">
+                <span class="text-slate-400 text-[11px] flex items-center space-x-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                  <span>Tracking Active</span>
+                </span>
+                <div class="px-3 py-1.5 rounded-xl bg-slate-800 group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-red-600 text-slate-300 group-hover:text-white transition-all shadow-sm flex items-center space-x-1">
+                  <span>Visit Site</span>
+                  <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </div>
+              </div>
             </div>
-          `).join('')}
-        </div>
-      `;
+          `;
+        }).join('');
+
+        // 为每个卡片绑定点击与追踪事件
+        document.querySelectorAll('#siteList > div').forEach(card => {
+          card.addEventListener('click', () => {
+            const id = card.getAttribute('data-id');
+            const name = decodeURIComponent(card.getAttribute('data-name'));
+            const url = decodeURIComponent(card.getAttribute('data-url'));
+            trackAndRedirect(id, name, url);
+          });
+        });
+      }
+
+      // 3. 渲染 About Us
+      const aboutArea = document.getElementById('aboutContentArea');
+      if (aboutArea && data.about) {
+        aboutArea.innerHTML = `
+          <span class="px-3 py-1 text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-semibold">${data.about.badge}</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3 mb-2">${data.about.title}</h2>
+          <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">${data.about.desc}</p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-slate-800 mt-6">
+            ${data.about.stats.map(st => `
+              <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80">
+                <div class="text-amber-400 font-bold text-lg mb-1">${st.val}</div>
+                <div class="text-slate-300 font-semibold text-xs mb-1">${st.label}</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
     }
 
-    // UTM 与打点跳转核心函数
+    // 访客 ID 管理
     function getVisitorId() {
       let vid = localStorage.getItem('gang_visitor_id');
       if (!vid) {
@@ -219,6 +242,7 @@
       return vid;
     }
 
+    // UTM 参数解析
     function captureAndGetUtm() {
       const urlParams = new URLSearchParams(window.location.search);
       const urlSource = urlParams.get('source') || urlParams.get('utm_source');
@@ -233,20 +257,18 @@
       return { source, campaign };
     }
 
-    // 追踪与跳转处理函数（修复版：正确对齐 /api/track 接口与参数）
+    // 打点追踪与跳转
     function trackAndRedirect(siteId, siteName, targetUrl) {
       const visitorId = getVisitorId();
       const { source, campaign } = captureAndGetUtm();
 
-      // 1. 匹配后端声明需要的 target_domain 字段
       const payload = {
         visitor_id: visitorId,
-        target_domain: siteName || targetUrl, // 对应后端的 req.body.target_domain
+        target_domain: siteName || targetUrl,
         source: source,
         campaign: campaign
       };
 
-      // 2. 接口路径更正为 /api/track，并优先采用 sendBeacon 防中断
       const endpoint = '/api/track';
       let isSent = false;
 
@@ -264,12 +286,11 @@
         }).catch(err => console.error('Tracking failed:', err));
       }
 
-      // 3. 延迟 150 毫秒后跳转，确保请求在移动端正确发送
       setTimeout(() => {
         if (targetUrl && targetUrl !== '#') {
           window.location.href = targetUrl;
         } else {
-          alert('该平台暂未配置有效的跳转目标链接。');
+          alert('该平台暂未配置有效的跳转链接。');
         }
       }, 150);
     }
