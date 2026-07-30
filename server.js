@@ -12,7 +12,14 @@ const pool = new Pool({
 });
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+
+// 静态文件服务：配置 extensions: ['html']，访问 /admin 时会自动去匹配 admin.html
+app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
+
+// 页面路由拦截：确保直接访问 /admin 能够成功渲染 admin.html
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
 
 // 数据库建表初始化
 async function initDB() {
@@ -53,7 +60,7 @@ async function initDB() {
       );
     `);
 
-    // 4. 用户点击日志轨迹表 (新增)
+    // 4. 用户点击日志轨迹表
     await pool.query(`
       CREATE TABLE IF NOT EXISTS click_logs (
         id SERIAL PRIMARY KEY,
@@ -159,18 +166,16 @@ app.get('/api/stats', async (req, res) => {
   }
 });
 
-// 4. 记录用户跨站点点击轨迹 (新增)
+// 4. 记录用户跨站点点击轨迹
 app.post('/api/track-click', async (req, res) => {
   const { visitor_id, website_id, website_name, source, campaign } = req.body;
   try {
-    // 写入细粒度点击日志
     await pool.query(
       `INSERT INTO click_logs (visitor_id, website_id, website_name, source, campaign) 
        VALUES ($1, $2, $3, $4, $5)`,
       [visitor_id, website_id, website_name, source || 'direct', campaign || 'none']
     );
 
-    // 更新全局 Stats 汇总表
     await pool.query(
       `INSERT INTO stats (domain, source, views, leads) 
        VALUES ($1, $2, 0, 1)
@@ -186,7 +191,7 @@ app.post('/api/track-click', async (req, res) => {
   }
 });
 
-// 5. 获取用户点击轨迹聚合列表 (新增)
+// 5. 获取用户点击轨迹聚合列表
 app.get('/api/user-journeys', async (req, res) => {
   try {
     const query = `
