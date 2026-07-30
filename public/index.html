@@ -1,224 +1,180 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Malaysia 4D Live Results & Official Portal</title>
-  <script src="https://tailwindcss.com"></script>
-  <style>
-    @keyframes pulseGlow {
-      0%, 100% { opacity: 0.3; transform: scale(1); }
-      50% { opacity: 0.6; transform: scale(1.08); }
-    }
-    .glow-bg {
-      animation: pulseGlow 5s infinite ease-in-out;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .fade-in {
-      animation: fadeIn 0.4s ease-out forwards;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4D Gang Malaysia - Portal</title>
+    <!-- 引入 Tailwind CSS 样式库 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+    </style>
 </head>
-<body class="bg-[#0b1329] text-slate-100 min-h-screen flex flex-col justify-between font-sans relative overflow-x-hidden selection:bg-amber-500 selection:text-black">
+<body class="bg-[#0b0f19] text-slate-100 min-h-screen font-sans antialiased">
 
-  <!-- 顶部背景发光装饰 -->
-  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[250px] bg-gradient-to-b from-blue-600/15 via-amber-500/10 to-transparent blur-[100px] pointer-events-none glow-bg"></div>
-
-  <!-- 顶部导航栏 / 头部 Logo 区 -->
-  <header class="w-full border-b border-slate-800/80 bg-[#0b1329]/90 backdrop-blur-md sticky top-0 z-30">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+  <!-- 页面顶部导航 -->
+  <header class="border-b border-slate-800 bg-[#111827]/80 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 bg-gradient-to-tr from-amber-500 to-red-600 rounded-xl flex items-center justify-center text-xl shadow-lg shadow-amber-500/20 font-bold">
-          🎲
-        </div>
-        <div>
-          <span class="font-black text-base sm:text-lg tracking-wider bg-gradient-to-r from-white via-slate-200 to-amber-400 bg-clip-text text-transparent">
-            4D MALAYSIA HUB
-          </span>
-          <span class="block text-[10px] text-amber-400 font-semibold tracking-widest uppercase">Official Direct Portal</span>
-        </div>
+        <span class="font-bold text-lg tracking-wider text-amber-400">4D Gang Malaysia</span>
       </div>
-      <div class="flex items-center space-x-2">
-        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping mr-1.5"></span>
-          LIVE ONLINE
-        </span>
-      </div>
+      <span class="text-xs text-slate-400 bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700/60">Expert Reviews & Safe Play</span>
     </div>
   </header>
 
-  <!-- 主体内容区（宽屏门户网格布局） -->
-  <main class="max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-grow z-10">
-    
-    <!-- 顶部公告/提示横幅 -->
-    <div class="bg-gradient-to-r from-slate-900 via-slate-900/90 to-blue-950/40 border border-slate-800/80 rounded-2xl p-4 mb-6 shadow-xl flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0 text-sm">
-          📢
-        </div>
-        <div>
-          <h2 class="text-xs sm:text-sm font-bold text-slate-200">全马官方开彩通道与授权导航</h2>
-          <p class="text-[11px] text-slate-400 mt-0.5">点击下方任意平台卡片，即可安全直达官方指定页面。</p>
+  <!-- 主体内容区域 -->
+  <main class="max-w-4xl mx-auto px-4 py-8">
+    <div class="text-center mb-8">
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-white mb-2">Expert Reviews, Hot Bonuses & Smart Play Tips</h1>
+      <p class="text-slate-400 text-xs sm:text-sm max-w-2xl mx-auto">Verified, unbiased information on games and platforms to help you play with confidence.</p>
+    </div>
+
+    <div id="gang-portal-hub">
+      <div id="siteList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- 动态数据加载态占位 -->
+        <div class="col-span-full text-center text-slate-400 py-16 text-sm bg-slate-900/60 rounded-2xl border border-slate-800/80 flex flex-col items-center justify-center space-y-3">
+          <svg class="animate-spin h-6 w-6 text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>Loading Partners...</span>
         </div>
       </div>
     </div>
-
-    <!-- 动态卡片渲染容器（采用 2 列网格布局，完美还原门户首页样式） -->
-    <div id="siteList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <!-- 加载中占位符 -->
-      <div class="col-span-full text-center text-slate-400 py-16 text-sm flex flex-col items-center justify-center space-y-3 bg-slate-900/40 rounded-2xl border border-slate-800/80 backdrop-blur-md">
-        <svg class="animate-spin h-7 w-7 text-amber-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <span class="text-slate-400 font-medium">正在加载官方开彩平台数据...</span>
-      </div>
-    </div>
-
   </main>
 
-  <!-- 底部版权栏 -->
-  <footer class="w-full bg-[#080e1d] border-t border-slate-800/80 py-6 text-center text-xs text-slate-500 z-10">
-    <div class="max-w-4xl mx-auto px-4 space-y-2">
-      <p>© 2026 Malaysia 4D Portal System. All Rights Reserved.</p>
-      <p class="text-[10px] text-slate-600">本站仅提供公开信息导航与安全跳转服务，所有内容归各官方平台所有。</p>
-    </div>
-  </footer>
-
   <script>
-    const baseUrl = window.location.origin;
+    (function() {
+      // 请将此处修改为你实际的后端 API 接口地址
+      const apiBackendUrl = 'https://your-backend-api.com';
 
-    // 1. 获取或生成唯一的 Visitor ID
-    function getVisitorId() {
-      let vid = localStorage.getItem('user_visitor_id');
-      if (!vid) {
-        vid = 'vid_' + Math.random().toString(36).substr(2, 8) + '_' + Date.now().toString().slice(-6);
-        localStorage.setItem('user_visitor_id', vid);
-      }
-      return vid;
-    }
-
-    // 2. 抓取与锁定 UTM 渠道参数（带 Session 缓存防丢失）
-    function captureAndGetUtm() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlSource = urlParams.get('source') || urlParams.get('utm_source');
-      const urlCampaign = urlParams.get('campaign') || urlParams.get('utm_campaign');
-
-      if (urlSource) sessionStorage.setItem('current_utm_source', urlSource);
-      if (urlCampaign) sessionStorage.setItem('current_utm_campaign', urlCampaign);
-
-      const source = urlSource || sessionStorage.getItem('current_utm_source') || 'direct';
-      const campaign = urlCampaign || sessionStorage.getItem('current_utm_campaign') || 'none';
-
-      return { source, campaign };
-    }
-
-    // 3. 页面初始化
-    window.onload = () => {
-      captureAndGetUtm();
-      fetchWebsites();
-    };
-
-    // 获取后台配置的站点卡片（对接你的 /api/websites 接口）
-    async function fetchWebsites() {
-      try {
-        const res = await fetch(`${baseUrl}/api/websites`);
-        const json = await res.json();
-        if (json.success && json.data.length > 0) {
-          renderSites(json.data);
-        } else {
-          document.getElementById('siteList').innerHTML = `
-            <div class="col-span-full text-center text-slate-400 py-12 text-sm bg-slate-900/40 rounded-2xl border border-dashed border-slate-800">
-              暂无配置数据，请前往后台添加频道
-            </div>`;
+      // 1. 生成或获取跨页面的唯一访客 ID
+      function getVisitorId() {
+        let vid = localStorage.getItem('gang_visitor_id');
+        if (!vid) {
+          vid = 'vid_' + Math.random().toString(36).substr(2, 8) + '_' + Date.now().toString().slice(-6);
+          localStorage.setItem('gang_visitor_id', vid);
         }
-      } catch (err) {
-        document.getElementById('siteList').innerHTML = `
-          <div class="col-span-full text-center text-red-400 py-12 text-sm bg-red-950/20 rounded-2xl border border-red-900/50">
-            数据同步失败，请检查网络后重试
-          </div>`;
+        return vid;
       }
-    }
 
-    // 渲染 4D 门户网格卡片样式
-    function renderSites(sites) {
-      const container = document.getElementById('siteList');
-      container.innerHTML = sites.map((site, index) => `
-        <div data-id="${site.id}" 
-             data-name="${encodeURIComponent(site.name)}" 
-             data-url="${encodeURIComponent(site.url)}" 
-             style="animation-delay: ${index * 0.04}s"
-             class="site-card fade-in group bg-slate-900/80 hover:bg-slate-800/90 p-4.5 sm:p-5 rounded-2xl border border-slate-800/90 hover:border-amber-500/60 transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-lg shadow-black/30 hover:shadow-amber-500/10 relative overflow-hidden">
-          
-          <!-- 左侧微光特效条 -->
-          <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-500 to-red-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+      // 2. 捕获并存储营销渠道 UTM 参数
+      function captureAndGetUtm() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlSource = urlParams.get('source') || urlParams.get('utm_source');
+        const urlCampaign = urlParams.get('campaign') || urlParams.get('utm_campaign');
 
-          <!-- 卡片上部：图标、名称与状态标签 -->
-          <div class="flex items-start space-x-3.5 mb-4">
-            <img src="${site.icon_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + site.id}" 
-                 class="w-14 h-14 rounded-2xl object-cover bg-slate-800/90 p-1.5 shadow-inner shrink-0 border border-slate-700/60 group-hover:scale-105 transition-transform">
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center justify-between">
-                <h3 class="font-bold text-slate-100 text-sm sm:text-base group-hover:text-amber-400 transition-colors truncate">${site.name}</h3>
-                <span class="px-2 py-0.5 text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-md font-semibold shrink-0">官方直达</span>
+        if (urlSource) sessionStorage.setItem('gang_utm_source', urlSource);
+        if (urlCampaign) sessionStorage.setItem('gang_utm_campaign', urlCampaign);
+
+        const source = urlSource || sessionStorage.getItem('gang_utm_source') || 'direct';
+        const campaign = urlCampaign || sessionStorage.getItem('gang_utm_campaign') || 'none';
+
+        return { source, campaign };
+      }
+
+      // 3. 从后端异步拉取平台卡片数据
+      async function fetchSites() {
+        try {
+          const res = await fetch(`${apiBackendUrl}/api/websites`);
+          const json = await res.json();
+          if (json.success && json.data.length > 0) {
+            renderSites(json.data);
+          } else {
+            document.getElementById('siteList').innerHTML = '<div class="col-span-full text-center text-slate-400 py-12 text-sm bg-slate-900/60 rounded-2xl border border-slate-800">No channels available at the moment.</div>';
+          }
+        } catch (err) {
+          document.getElementById('siteList').innerHTML = '<div class="col-span-full text-center text-red-400 py-12 text-sm bg-slate-900/60 rounded-2xl border border-slate-800">Failed to load platform listings.</div>';
+        }
+      }
+
+      // 4. 渲染平台卡片列表
+      function renderSites(sites) {
+        const container = document.getElementById('siteList');
+        container.innerHTML = sites.map((site, index) => `
+          <div data-id="${site.id}" 
+               data-name="${encodeURIComponent(site.name)}" 
+               data-url="${encodeURIComponent(site.url)}" 
+               style="animation-delay: ${index * 0.05}s"
+               class="fade-in group bg-[#111827] hover:bg-[#1f2937] p-4.5 sm:p-5 rounded-2xl border border-slate-800 hover:border-amber-500/50 transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-xl relative overflow-hidden">
+            
+            <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-500 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+            <div class="flex items-start space-x-3.5 mb-4">
+              <img src="${site.icon_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + site.id}" 
+                   class="w-12 h-12 rounded-xl object-cover bg-slate-800 p-1 shrink-0 border border-slate-700/60 group-hover:scale-105 transition-transform">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center justify-between">
+                  <h3 class="font-bold text-slate-100 text-sm group-hover:text-amber-400 transition-colors truncate">${site.name}</h3>
+                  <span class="px-2 py-0.5 text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded font-semibold shrink-0">Verified</span>
+                </div>
+                <p class="text-slate-400 text-xs mt-1.5 line-clamp-2 leading-relaxed">${site.desc_text || 'Official safe navigation channel & trusted review.'}</p>
               </div>
-              <p class="text-slate-400 text-xs mt-1.5 line-clamp-2 leading-relaxed font-normal">${site.desc_text || '点击进入官方专属开彩与查询通道'}</p>
+            </div>
+
+            <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-xs font-medium">
+              <span class="text-slate-400 text-[11px] flex items-center space-x-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span>Tracking Active</span>
+              </span>
+              <div class="px-3 py-1.5 rounded-xl bg-slate-800 group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-red-600 text-slate-300 group-hover:text-white transition-all shadow-sm flex items-center space-x-1">
+                <span>Visit Site</span>
+                <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </div>
             </div>
           </div>
+        `).join('');
 
-          <!-- 卡片底部：直达按钮 -->
-          <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-medium">
-            <span class="text-slate-400 text-[11px] flex items-center space-x-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-              <span>安全加密连接</span>
-            </span>
-            <div class="px-3.5 py-1.5 rounded-xl bg-slate-800 group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-red-600 text-slate-300 group-hover:text-white transition-all shadow-sm flex items-center space-x-1 border border-slate-700/60 group-hover:border-transparent">
-              <span>立即进入</span>
-              <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
-              </svg>
-            </div>
-          </div>
-
-        </div>
-      `).join('');
-
-      // 绑定点击事件：完成无感打点并跳转
-      document.querySelectorAll('.site-card').forEach(card => {
-        card.addEventListener('click', () => {
-          const id = card.getAttribute('data-id');
-          const name = decodeURIComponent(card.getAttribute('data-name'));
-          const url = decodeURIComponent(card.getAttribute('data-url'));
-          trackAndRedirect(id, name, url);
+        // 绑定点击事件，处理统计打点与跳转
+        document.querySelectorAll('#siteList > div').forEach(card => {
+          card.addEventListener('click', () => {
+            const id = card.getAttribute('data-id');
+            const name = decodeURIComponent(card.getAttribute('data-name'));
+            const url = decodeURIComponent(card.getAttribute('data-url'));
+            trackAndRedirect(id, name, url);
+          });
         });
+      }
+
+      // 5. 核心打点与外链跳转函数
+      function trackAndRedirect(siteId, siteName, targetUrl) {
+        const visitorId = getVisitorId();
+        const { source, campaign } = captureAndGetUtm();
+
+        const payload = {
+          visitor_id: visitorId,
+          site_id: siteId,
+          site_name: siteName,
+          target_domain: targetUrl,
+          source: source,
+          campaign: campaign,
+          timestamp: new Date().toISOString()
+        };
+
+        // 使用 keepalive 保证跳转瞬间数据能成功异步送达服务器
+        fetch(`${apiBackendUrl}/api/track`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          keepalive: true
+        }).catch(err => console.error('Tracking failed:', err));
+
+        // 新标签页安全打开目标链接
+        window.open(targetUrl, '_blank');
+      }
+
+      // 初始化执行
+      document.addEventListener('DOMContentLoaded', () => {
+        captureAndGetUtm();
+        fetchSites();
       });
-    }
-
-    // 4. 异步打点并无感跳转
-    function trackAndRedirect(siteId, siteName, targetUrl) {
-      const visitorId = getVisitorId();
-      const { source, campaign } = captureAndGetUtm();
-
-      const payload = {
-        visitor_id: visitorId,
-        target_domain: targetUrl,
-        source: source,
-        campaign: campaign
-      };
-
-      // 使用 keepalive 保证跳转瞬间请求不被浏览器中断
-      fetch(`${baseUrl}/api/track`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        keepalive: true
-      }).catch(err => console.error('Track error:', err));
-
-      window.open(targetUrl, '_blank');
-    }
+    })();
   </script>
 </body>
 </html>
