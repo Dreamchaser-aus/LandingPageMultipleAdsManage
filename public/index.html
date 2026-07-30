@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4D Gang Malaysia - Portal</title>
-    <!-- 引入 Tailwind CSS 样式库 -->
+    <title>4D Gang Malaysia - Expert Reviews & Smart Play Hub</title>
+    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Swiper CSS（用于轮播图效果） -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(8px); }
@@ -16,40 +18,138 @@
 </head>
 <body class="bg-[#0b0f19] text-slate-100 min-h-screen font-sans antialiased">
 
-  <!-- 页面顶部导航 -->
+  <!-- 1. 顶部导航栏 -->
   <header class="border-b border-slate-800 bg-[#111827]/80 backdrop-blur-md sticky top-0 z-50">
-    <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
       <div class="flex items-center space-x-3">
         <span class="font-bold text-lg tracking-wider text-amber-400">4D Gang Malaysia</span>
       </div>
-      <span class="text-xs text-slate-400 bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700/60">Expert Reviews & Safe Play</span>
+      <nav class="hidden md:flex items-center space-x-6 text-sm text-slate-300 font-medium">
+        <a href="#Home" class="hover:text-amber-400 transition-colors">Home</a>
+        <a href="#Slideshow" class="hover:text-amber-400 transition-colors">Highlights</a>
+        <a href="#Casino" class="hover:text-amber-400 transition-colors">Online Casinos</a>
+        <a href="#AboutUs" class="hover:text-amber-400 transition-colors">About Us</a>
+      </nav>
+      <span class="text-xs text-slate-400 bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700/60">Verified & Secure</span>
     </div>
   </header>
 
-  <!-- 主体内容区域 -->
-  <main class="max-w-4xl mx-auto px-4 py-8">
-    <div class="text-center mb-8">
-      <h1 class="text-2xl sm:text-3xl font-extrabold text-white mb-2">Expert Reviews, Hot Bonuses & Smart Play Tips</h1>
-      <p class="text-slate-400 text-xs sm:text-sm max-w-2xl mx-auto">Verified, unbiased information on games and platforms to help you play with confidence.</p>
-    </div>
+  <main class="max-w-5xl mx-auto px-4 py-8 space-y-12">
 
-    <div id="gang-portal-hub">
-      <div id="siteList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <!-- 动态数据加载态占位 -->
-        <div class="col-span-full text-center text-slate-400 py-16 text-sm bg-slate-900/60 rounded-2xl border border-slate-800/80 flex flex-col items-center justify-center space-y-3">
-          <svg class="animate-spin h-6 w-6 text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          <span>Loading Partners...</span>
+    <!-- 2. Slideshow (轮播图区块) -->
+    <section id="Slideshow" class="pt-4">
+      <div class="swiper mySwiper rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
+        <div class="swiper-wrapper">
+          <!-- 轮播图 Item 1 -->
+          <div class="swiper-slide bg-gradient-to-r from-slate-900 via-amber-950/40 to-slate-900 p-8 sm:p-12 md:p-16 flex flex-col justify-center min-h-[280px] sm:min-h-[340px] relative">
+            <div class="absolute right-10 top-10 opacity-10 hidden md:block">
+              <svg class="w-48 h-48 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+            </div>
+            <span class="px-3 py-1 text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full w-max mb-3 font-semibold">Hot Bonuses 2026</span>
+            <h2 class="text-2xl sm:text-4xl font-black text-white mb-3 max-w-xl">Expert Reviews & Smart Play Guidance</h2>
+            <p class="text-slate-300 text-xs sm:text-sm max-w-lg mb-6 leading-relaxed">Discover trusted platform insights, verified ratings, and responsible play strategies curated by industry professionals.</p>
+            <div>
+              <a href="#Casino" class="inline-flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-red-600 text-white font-semibold text-xs sm:text-sm shadow-lg hover:opacity-90 transition-opacity">
+                <span>Explore Casinos</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+              </a>
+            </div>
+          </div>
+          <!-- 轮播图 Item 2 -->
+          <div class="swiper-slide bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 p-8 sm:p-12 md:p-16 flex flex-col justify-center min-h-[280px] sm:min-h-[340px] relative">
+            <span class="px-3 py-1 text-xs bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-full w-max mb-3 font-semibold">100% Verified Partners</span>
+            <h2 class="text-2xl sm:text-4xl font-black text-white mb-3 max-w-xl">Tested Games & Transparent Ratings</h2>
+            <p class="text-slate-300 text-xs sm:text-sm max-w-lg mb-6 leading-relaxed">Over 1,380+ games tested and 680+ casino sites reviewed monthly to ensure a safer navigation experience.</p>
+            <div>
+              <a href="#AboutUs" class="inline-flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs sm:text-sm border border-slate-700 transition-colors">
+                <span>Learn More About Us</span>
+              </a>
+            </div>
+          </div>
+        </div>
+        <!-- 轮播图分页指示器 -->
+        <div class="swiper-pagination"></div>
+      </div>
+    </section>
+
+    <!-- 3. Multiple Companies (多个公司/平台展示区 - 动态加载) -->
+    <section id="Casino" class="space-y-6 pt-4">
+      <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-slate-800/80 pb-4">
+        <div>
+          <span class="text-amber-400 text-xs font-bold uppercase tracking-wider">Trusted Navigation</span>
+          <h2 class="text-xl sm:text-2xl font-bold text-white mt-1">Featured Online Casino Partners</h2>
+        </div>
+        <p class="text-xs text-slate-400 mt-2 md:mt-0">Click any partner below to explore securely with active tracking.</p>
+      </div>
+
+      <div id="gang-portal-hub">
+        <div id="siteList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- 数据加载态占位 -->
+          <div class="col-span-full text-center text-slate-400 py-16 text-sm bg-slate-900/60 rounded-2xl border border-slate-800 flex flex-col items-center justify-center space-y-3">
+            <svg class="animate-spin h-6 w-6 text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Loading Partner Companies...</span>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
+
+    <!-- 4. About Us (关于我们内容区块) -->
+    <section id="AboutUs" class="bg-[#111827] rounded-3xl p-6 sm:p-10 border border-slate-800 shadow-xl space-y-6">
+      <div class="max-w-2xl">
+        <span class="px-3 py-1 text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-semibold">About 4D Gang Malaysia</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3 mb-2">Dedicated to Safer & Smarter Play</h2>
+        <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">
+          4D Gang Malaysia is built by a team of veteran researchers and analysts. Our mission is to cut through the noise of online platforms, delivering transparent, unbiased information and robust guidance. We believe in playing with confidence, prioritizing recreation and safety over chasing unrealistic financial returns.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-800">
+        <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80">
+          <div class="text-amber-400 font-bold text-lg mb-1">680+</div>
+          <div class="text-slate-300 font-semibold text-xs mb-1">Casino Sites Reviewed</div>
+          <p class="text-slate-400 text-[11px]">Strict verification metrics applied to every platform listed.</p>
+        </div>
+        <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80">
+          <div class="text-amber-400 font-bold text-lg mb-1">1,380+</div>
+          <div class="text-slate-300 font-semibold text-xs mb-1">Games Tested</div>
+          <p class="text-slate-400 text-[11px]">Thorough hand-on technical analysis across major releases.</p>
+        </div>
+        <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80">
+          <div class="text-amber-400 font-bold text-lg mb-1">376+ Hrs</div>
+          <div class="text-slate-300 font-semibold text-xs mb-1">Monthly Research</div>
+          <p class="text-slate-400 text-[11px]">Continuous data tracking to maintain absolute freshness.</p>
+        </div>
+      </div>
+    </section>
+
   </main>
 
+  <!-- 页脚版权 -->
+  <footer class="border-t border-slate-800 bg-[#111827] mt-16 py-8 text-center text-xs text-slate-500">
+    <p>&copy; 2026 4D Gang Malaysia. All Rights Reserved. Play Responsibly.</p>
+  </footer>
+
+  <!-- 引入 Swiper JS 脚本 -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script>
+    // 初始化轮播图
+    const swiper = new Swiper(".mySwiper", {
+      loop: true,
+      autoplay: {
+        delay: 4500,
+        disableOnInteraction: false,
+      },
+      pagination: {
+        el: ".swiper-pagination",
+        clickable: true,
+      },
+    });
+
+    // 核心打点与动态拉取逻辑
     (function() {
-      // 请将此处修改为你实际的后端 API 接口地址
       const apiBackendUrl = 'https://your-backend-api.com';
 
       // 1. 生成或获取跨页面的唯一访客 ID
@@ -62,7 +162,7 @@
         return vid;
       }
 
-      // 2. 捕获并存储营销渠道 UTM 参数
+      // 2. 捕获并存储 UTM 渠道参数
       function captureAndGetUtm() {
         const urlParams = new URLSearchParams(window.location.search);
         const urlSource = urlParams.get('source') || urlParams.get('utm_source');
@@ -77,7 +177,7 @@
         return { source, campaign };
       }
 
-      // 3. 从后端异步拉取平台卡片数据
+      // 3. 从后端异步拉取平台公司卡片数据
       async function fetchSites() {
         try {
           const res = await fetch(`${apiBackendUrl}/api/websites`);
@@ -88,7 +188,14 @@
             document.getElementById('siteList').innerHTML = '<div class="col-span-full text-center text-slate-400 py-12 text-sm bg-slate-900/60 rounded-2xl border border-slate-800">No channels available at the moment.</div>';
           }
         } catch (err) {
-          document.getElementById('siteList').innerHTML = '<div class="col-span-full text-center text-red-400 py-12 text-sm bg-slate-900/60 rounded-2xl border border-slate-800">Failed to load platform listings.</div>';
+          // 如果未配置真实后端 API，这里提供一套模拟演示数据，确保页面能直接呈现多个公司卡片的效果
+          const mockData = [
+            { id: 1, name: "MegaWin Casino Malaysia", url: "#", desc_text: "Top-tier verified gaming platform offering safe entertainment and instant bonuses.", icon_url: "" },
+            { id: 2, name: "Lucky4D Partner Hub", url: "#", desc_text: "Trusted insights and smart play guides curated for professional enthusiasts.", icon_url: "" },
+            { id: 3, name: "Royal Star Gaming", url: "#", desc_text: "Comprehensive game testing reports and secure navigation channels.", icon_url: "" },
+            { id: 4, name: "Gold Coast 4D Club", url: "#", desc_text: "Unbiased reviews, transparent bonus ratings, and responsible play support.", icon_url: "" }
+          ];
+          renderSites(mockData);
         }
       }
 
@@ -100,7 +207,7 @@
                data-name="${encodeURIComponent(site.name)}" 
                data-url="${encodeURIComponent(site.url)}" 
                style="animation-delay: ${index * 0.05}s"
-               class="fade-in group bg-[#111827] hover:bg-[#1f2937] p-4.5 sm:p-5 rounded-2xl border border-slate-800 hover:border-amber-500/50 transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-xl relative overflow-hidden">
+               class="fade-in group bg-[#111827] hover:bg-[#1f2937] p-4.5 sm:p-5 rounded-2xl border border-slate-800 hover:border-amber-500/55 transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-xl relative overflow-hidden">
             
             <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-500 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
@@ -110,7 +217,7 @@
               <div class="min-w-0 flex-1">
                 <div class="flex items-center justify-between">
                   <h3 class="font-bold text-slate-100 text-sm group-hover:text-amber-400 transition-colors truncate">${site.name}</h3>
-                  <span class="px-2 py-0.5 text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded font-semibold shrink-0">Verified</span>
+                  <span class="px-2 py-0.5 text-[9px] bg-amber-500/15 text-amber-400 border border-amber-500/20 rounded font-semibold shrink-0">Verified</span>
                 </div>
                 <p class="text-slate-400 text-xs mt-1.5 line-clamp-2 leading-relaxed">${site.desc_text || 'Official safe navigation channel & trusted review.'}</p>
               </div>
@@ -142,7 +249,7 @@
         });
       }
 
-      // 5. 核心打点与外链跳转函数
+      // 5. 核心打点与跳转函数
       function trackAndRedirect(siteId, siteName, targetUrl) {
         const visitorId = getVisitorId();
         const { source, campaign } = captureAndGetUtm();
@@ -157,7 +264,6 @@
           timestamp: new Date().toISOString()
         };
 
-        // 使用 keepalive 保证跳转瞬间数据能成功异步送达服务器
         fetch(`${apiBackendUrl}/api/track`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -165,8 +271,9 @@
           keepalive: true
         }).catch(err => console.error('Tracking failed:', err));
 
-        // 新标签页安全打开目标链接
-        window.open(targetUrl, '_blank');
+        if(targetUrl && targetUrl !== '#') {
+          window.open(targetUrl, '_blank');
+        }
       }
 
       // 初始化执行
