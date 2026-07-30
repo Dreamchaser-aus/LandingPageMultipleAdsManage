@@ -104,8 +104,19 @@
     }
 
     // 渲染动态内容
-    function renderFrontend() {
+    async function renderFrontend() {
       const data = loadSiteContent();
+
+      // 从服务器数据库异步获取后台发布的最新卡片列表
+      try {
+        const res = await fetch('/api/websites');
+        const json = await res.json();
+        if (json.success && json.data && json.data.length > 0) {
+          data.companies = json.data;
+        }
+      } catch (e) {
+        console.warn('读取线上站点失败，将使用本地/默认数据:', e);
+      }
 
       // 1. 渲染轮播图
       const slideWrapper = document.getElementById('dynamicSlidesWrapper');
@@ -222,36 +233,45 @@
       return { source, campaign };
     }
 
-    // 追踪与跳转处理函数（API: /track）
+    // 追踪与跳转处理函数（修复版：正确对齐 /api/track 接口与参数）
     function trackAndRedirect(siteId, siteName, targetUrl) {
       const visitorId = getVisitorId();
       const { source, campaign } = captureAndGetUtm();
 
+      // 1. 匹配后端声明需要的 target_domain 字段
       const payload = {
         visitor_id: visitorId,
-        site_id: siteId,
-        site_name: siteName,
-        target_url: targetUrl,
+        target_domain: siteName || targetUrl, // 对应后端的 req.body.target_domain
         source: source,
-        campaign: campaign,
-        user_agent: navigator.userAgent,
-        timestamp: new Date().toISOString()
+        campaign: campaign
       };
 
-      // 发送到后台 /track 接口
-      fetch('/track', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        keepalive: true // 保证跳转时，请求仍可在后台成功传输
-      }).catch(err => console.error('Tracking failed:', err));
+      // 2. 接口路径更正为 /api/track，并优先采用 sendBeacon 防中断
+      const endpoint = '/api/track';
+      let isSent = false;
 
-      // 执行页面跳转
-      if (targetUrl && targetUrl !== '#') {
-        window.location.href = targetUrl;
-      } else {
-        alert('该平台暂未配置有效的跳转目标链接。');
+      if (navigator.sendBeacon) {
+        const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+        isSent = navigator.sendBeacon(endpoint, blob);
       }
+
+      if (!isSent) {
+        fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          keepalive: true
+        }).catch(err => console.error('Tracking failed:', err));
+      }
+
+      // 3. 延迟 150 毫秒后跳转，确保请求在移动端正确发送
+      setTimeout(() => {
+        if (targetUrl && targetUrl !== '#') {
+          window.location.href = targetUrl;
+        } else {
+          alert('该平台暂未配置有效的跳转目标链接。');
+        }
+      }, 150);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
