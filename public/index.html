@@ -9,7 +9,6 @@
 <body class="bg-slate-100 min-h-screen flex flex-col justify-between items-center p-4 antialiased">
 
   <div class="max-w-md w-full my-auto space-y-6">
-    <!-- 头部 Profile 区域 -->
     <div class="text-center space-y-3">
       <div class="w-20 h-20 bg-blue-600 rounded-full mx-auto flex items-center justify-center text-3xl shadow-lg shadow-blue-500/20 text-white font-bold">
         🚀
@@ -18,7 +17,7 @@
       <p class="text-slate-500 text-sm">点击下方卡片即可直接进入对应站点</p>
     </div>
 
-    <!-- 站点卡片列表 -->
+    <!-- 站点列表 -->
     <div id="siteList" class="space-y-3">
       <div class="text-center text-slate-400 py-8">正在加载站点资源...</div>
     </div>
@@ -31,7 +30,6 @@
   <script>
     const baseUrl = window.location.origin;
 
-    // 1. 获取或生成专属的 Visitor ID
     function getVisitorId() {
       let vid = localStorage.getItem('user_visitor_id');
       if (!vid) {
@@ -41,7 +39,6 @@
       return vid;
     }
 
-    // 2. 页面加载完毕获取动态站点
     window.onload = () => {
       fetchWebsites();
     };
@@ -63,8 +60,10 @@
     function renderSites(sites) {
       const container = document.getElementById('siteList');
       container.innerHTML = sites.map(site => `
-        <div onclick="trackAndRedirect(${site.id}, '${site.name}', '${site.url}')" 
-             class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 hover:shadow-md hover:border-blue-400 transition-all cursor-pointer flex items-center justify-between">
+        <div data-id="${site.id}" 
+             data-name="${encodeURIComponent(site.name)}" 
+             data-url="${encodeURIComponent(site.url)}" 
+             class="site-card group bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 hover:shadow-md hover:border-blue-400 transition-all cursor-pointer flex items-center justify-between">
           <div class="flex items-center space-x-3.5">
             <img src="${site.icon_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + site.id}" 
                  class="w-12 h-12 rounded-xl object-cover bg-slate-50">
@@ -78,37 +77,41 @@
           </div>
         </div>
       `).join('');
+
+      // 安全注册点击监听，避免字符转义导致语法崩溃
+      document.querySelectorAll('.site-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const id = card.getAttribute('data-id');
+          const name = decodeURIComponent(card.getAttribute('data-name'));
+          const url = decodeURIComponent(card.getAttribute('data-url'));
+          trackAndRedirect(id, name, url);
+        });
+      });
     }
 
-    // 3. 点击卡片：追踪轨迹 + 页面跳转
     function trackAndRedirect(siteId, siteName, targetUrl) {
       const visitorId = getVisitorId();
-      
       const urlParams = new URLSearchParams(window.location.search);
       const source = urlParams.get('utm_source') || 'direct';
       const campaign = urlParams.get('utm_campaign') || 'none';
 
-      const payload = JSON.stringify({
+      const payload = {
         visitor_id: visitorId,
-        website_id: siteId,
+        website_id: parseInt(siteId),
         website_name: siteName,
         source: source,
         campaign: campaign
-      });
+      };
 
-      // 异步无阻塞上报日志
-      if (navigator.sendBeacon) {
-        navigator.sendBeacon(`${baseUrl}/api/track-click`, new Blob([payload], { type: 'application/json' }));
-      } else {
-        fetch(`${baseUrl}/api/track-click`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: payload,
-          keepalive: true
-        });
-      }
+      // 使用双保险：keepalive 确保离开页面也能成功发送 POST 请求
+      fetch(`${baseUrl}/api/track-click`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true
+      }).catch(err => console.error('Tracking failed', err));
 
-      // 跳转目标地址
+      // 新标签页打开链接
       window.open(targetUrl, '_blank');
     }
   </script>
