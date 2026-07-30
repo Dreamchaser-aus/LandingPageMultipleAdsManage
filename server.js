@@ -1,20 +1,18 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path'); // 新增：路径解析模块
 const { Pool } = require('pg');
 
 const app = express();
-// 允许所有域名跨域提交打点数据
 app.use(cors()); 
 app.use(express.json());
 
-// 获取 Railway 提供的动态端口
 const PORT = process.env.PORT || 3000;
 
-// 配置 PostgreSQL 数据库连接 (Railway 会自动注入 DATABASE_URL)
+// 配置 PostgreSQL 数据库连接
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  // 生产环境下 Railway 的 PG 数据库通常需要 SSL
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
@@ -40,22 +38,30 @@ async function initDatabase() {
   }
 }
 
-// 启动时建表
 if (process.env.DATABASE_URL) {
   initDatabase();
-} else {
-  console.warn('Warning: DATABASE_URL is not set. Database operations will fail.');
 }
 
-// 接口：健康检查 (Railway 部署时会调用)
+// ------------------- 核心新增：托管静态文件 -------------------
+
+// 开启 static 中间件
+app.use(express.static(path.join(__dirname, 'public')));
+
+// 1. 访问首页 / 直接展示落地页 (index.html)
 app.get('/', (req, res) => {
-  res.send('Tracking API is running successfully on Railway!');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+
+// 2. 访问 /admin 直接展示后台管理界面 (admin.html)
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+// ------------------- 后端 API 接口 -------------------
 
 // 接口：记录浏览事件 (PV)
 app.post('/track/view', async (req, res) => {
   const { website_domain, source, campaign, user_agent } = req.body;
-  // 获取真实的客户端 IP
   const ip_address = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
   try {
@@ -71,9 +77,9 @@ app.post('/track/view', async (req, res) => {
   }
 });
 
-// 接口：记录转化事件 (Lead/Sale)
+// 接口：记录转化事件 (Lead)
 app.post('/track/lead', async (req, res) => {
-  const { website_domain, source, campaign, user_agent, extra_data } = req.body;
+  const { website_domain, source, campaign, user_agent } = req.body;
   const ip_address = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
   try {
@@ -89,7 +95,7 @@ app.post('/track/lead', async (req, res) => {
   }
 });
 
-// 接口：获取简单的数据统计报表 (供你的管理后台调用)
+// 接口：获取数据统计报表
 app.get('/api/stats', async (req, res) => {
   try {
     const query = `
