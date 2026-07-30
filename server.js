@@ -4,7 +4,7 @@ const path = require('path');
 const cors = require('cors');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 // 中间件配置
 app.use(cors());
@@ -15,17 +15,29 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ================= 1. 连接 Railway PostgreSQL 数据库 =================
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
-});
+const poolConfig = process.env.DATABASE_URL
+  ? {
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false }
+    }
+  : {
+      host: process.env.PGHOST,
+      user: process.env.PGUSER,
+      password: process.env.PGPASSWORD,
+      database: process.env.PGDATABASE,
+      port: process.env.PGPORT,
+      ssl: { rejectUnauthorized: false }
+    };
+
+const pool = new Pool(poolConfig);
 
 pool.connect((err, client, release) => {
   if (err) {
-    return console.error('❌ 连接 PostgreSQL 数据库失败:', err.stack);
+    console.error('❌ 连接 PostgreSQL 数据库失败详细原因:', err.message);
+  } else {
+    console.log('⚡ 已成功连接至 Railway PostgreSQL 数据库');
+    release();
   }
-  console.log('⚡ 已成功连接至 Railway PostgreSQL 数据库');
-  release();
 });
 
 // 初始化数据库表结构
@@ -125,7 +137,7 @@ app.post('/api/track', async (req, res) => {
 });
 
 /**
- * 用户轨迹列表 API（传统偏移量分页 + PostgreSQL 适配）
+ * 用户轨迹列表 API（严格按 visitor_id 聚合，确保分页与数据完全正确）
  */
 app.get('/api/user-journeys', async (req, res) => {
   const page = Math.max(1, parseInt(req.query.page, 10) || 1);
@@ -138,19 +150,19 @@ app.get('/api/user-journeys', async (req, res) => {
     const total = parseInt(countResult.rows[0].total, 10);
     const totalPages = Math.ceil(total / limit) || 1;
 
-    // 2. 分页查询（使用 PostgreSQL 的 STRING_AGG 代替 SQLite 的 GROUP_CONCAT）
+    // 2. 严格按 visitor_id 分组查询
     const dataSql = `
       SELECT 
         visitor_id, 
-        ip_address, 
-        user_agent, 
-        source, 
-        campaign, 
+        MAX(ip_address) AS ip_address, 
+        MAX(user_agent) AS user_agent, 
+        MAX(source) AS source, 
+        MAX(campaign) AS campaign, 
         COUNT(*) AS total_clicks,
         MAX(created_at) AS last_active,
         STRING_AGG(target_domain, ' ➔ ' ORDER BY created_at ASC) AS click_path
       FROM user_tracks
-      GROUP BY visitor_id, ip_address, user_agent, source, campaign
+      GROUP BY visitor_id
       ORDER BY last_active DESC
       LIMIT $1 OFFSET $2
     `;
