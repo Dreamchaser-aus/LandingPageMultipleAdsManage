@@ -2,17 +2,41 @@ const express = require('express');
 const { Pool } = require('pg');
 const path = require('path');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// 中间件配置
+// JWT 鉴权与管理员账号设置 (优先读取环境变量，提供默认备用值)
+const JWT_SECRET = process.env.JWT_SECRET || 'gang_admin_secret_key_2026';
+const ADMIN_USER = process.env.ADMIN_USER || 'admin';
+const ADMIN_PASS = process.env.ADMIN_PASS || 'admin123';
+
+// ================= 中间件配置 =================
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 托管 public 静态目录
+// 托管 public 静态文件目录
 app.use(express.static(path.join(__dirname, 'public')));
+
+// JWT Token 验证中间件
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // 提取 Bearer <token>
+
+  if (!token) {
+    return res.status(401).json({ success: false, message: '未授权，请先登录后台' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ success: false, message: '登录状态已失效，请重新登录' });
+    }
+    req.user = user;
+    next();
+  });
+};
 
 // ================= 1. 连接 Railway PostgreSQL 数据库 =================
 const poolConfig = process.env.DATABASE_URL
@@ -33,7 +57,7 @@ const pool = new Pool(poolConfig);
 
 pool.connect((err, client, release) => {
   if (err) {
-    console.error('❌ 连接 PostgreSQL 数据库失败详细原因:', err.message);
+    console.error('❌ 连接 PostgreSQL 数据库失败:', err.message);
   } else {
     console.log('⚡ 已成功连接至 Railway PostgreSQL 数据库');
     release();
@@ -87,11 +111,11 @@ async function initDatabase() {
     if (parseInt(checkRes.rows[0].count, 10) === 0) {
       await pool.query(
         `INSERT INTO websites (name, desc_text, url, icon_url) VALUES ($1, $2, $3, $4)`,
-        ['官方主商城', '全场限时折扣包邮', 'https://example.com/shop', 'https://api.dicebear.com/7.x/identicon/svg?seed=shop']
+        ['MegaWin Casino Malaysia', 'Top-tier verified gaming platform offering safe entertainment and instant bonuses.', 'https://google.com', 'https://api.dicebear.com/7.x/identicon/svg?seed=megawin']
       );
       await pool.query(
         `INSERT INTO websites (name, desc_text, url, icon_url) VALUES ($1, $2, $3, $4)`,
-        ['客服咨询领卷', '一对一专属客服支持', 'https://example.com/support', 'https://api.dicebear.com/7.x/identicon/svg?seed=support']
+        ['Lucky4D Partner Hub', 'Trusted insights and smart play guides curated for professional enthusiasts.', 'https://google.com', 'https://api.dicebear.com/7.x/identicon/svg?seed=lucky4d']
       );
       console.log('💡 已初始化默认落地页卡片数据');
     }
@@ -102,20 +126,33 @@ async function initDatabase() {
 
 initDatabase();
 
-// ================= 2. 路由：解决 Cannot GET /admin 问题 =================
+// ================= 2. 静态页面路由 =================
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-// ================= 3. API 接口 (PostgreSQL 适配版) =================
+// ================= 3. API 接口定义 =================
 
 /**
- * 轨迹打点 API（已优化：精确提取纯净客户端真实 IP）
+ * 管理员登录 API (公开)
+ */
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+
+  if (username === ADMIN_USER && password === ADMIN_PASS) {
+    const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '24h' });
+    return res.json({ success: true, token, message: '登录成功' });
+  }
+
+  return res.status(401).json({ success: false, message: '账号或密码错误' });
+});
+
+/**
+ * 轨迹打点 API (公开：提供给前端 index.html)
  */
 app.post('/api/track', async (req, res) => {
   const { visitor_id, target_domain, source, campaign } = req.body;
   
-  // 优化后的 IP 解析逻辑：防止代理链条导致多个 IP 串连在一起
   let ip_address = '127.0.0.1';
   const rawIp = req.headers['x-forwarded-for'];
   if (rawIp) {
@@ -146,20 +183,32 @@ app.post('/api/track', async (req, res) => {
 });
 
 /**
- * 用户轨迹列表 API（严格按 visitor_id 聚合，确保分页与数据完全正确）
+ * 获取卡片列表 API (公开：允许前端展示卡片)
  */
-app.get('/api/user-journeys', async (req, res) => {
+app.get('/api/websites', async (req, res) => {
+  try {
+    const result = await pool.query(`SELECT * FROM websites ORDER BY id DESC`);
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ----------------- 以下接口均受 JWT 登录保护 -----------------
+
+/**
+ * 用户轨迹列表 API (需登录)
+ */
+app.get('/api/user-journeys', authenticateToken, async (req, res) => {
   const page = Math.max(1, parseInt(req.query.page, 10) || 1);
   const limit = Math.max(1, parseInt(req.query.limit, 10) || 20);
   const offset = (page - 1) * limit;
 
   try {
-    // 1. 获取独立访客总数
     const countResult = await pool.query(`SELECT COUNT(DISTINCT visitor_id) AS total FROM user_tracks`);
     const total = parseInt(countResult.rows[0].total, 10);
     const totalPages = Math.ceil(total / limit) || 1;
 
-    // 2. 严格按 visitor_id 分组查询
     const dataSql = `
       SELECT 
         visitor_id, 
@@ -180,12 +229,7 @@ app.get('/api/user-journeys', async (req, res) => {
     res.json({
       success: true,
       data: dataResult.rows,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages
-      }
+      pagination: { page, limit, total, totalPages }
     });
   } catch (err) {
     console.error('❌ 获取轨迹失败:', err.message);
@@ -194,9 +238,9 @@ app.get('/api/user-journeys', async (req, res) => {
 });
 
 /**
- * 报表总览 API
+ * 报表总览 API (需登录)
  */
-app.get('/api/stats', async (req, res) => {
+app.get('/api/stats', authenticateToken, async (req, res) => {
   try {
     const sql = `
       SELECT 
@@ -215,18 +259,9 @@ app.get('/api/stats', async (req, res) => {
 });
 
 /**
- * 落地页站点 API（查/增/改/删）
+ * 新增/修改/删除卡片 API (需登录)
  */
-app.get('/api/websites', async (req, res) => {
-  try {
-    const result = await pool.query(`SELECT * FROM websites ORDER BY id DESC`);
-    res.json({ success: true, data: result.rows });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-app.post('/api/websites', async (req, res) => {
+app.post('/api/websites', authenticateToken, async (req, res) => {
   const { name, desc_text, url, icon_url } = req.body;
   try {
     const result = await pool.query(
@@ -239,7 +274,7 @@ app.post('/api/websites', async (req, res) => {
   }
 });
 
-app.put('/api/websites/:id', async (req, res) => {
+app.put('/api/websites/:id', authenticateToken, async (req, res) => {
   const { name, desc_text, url, icon_url } = req.body;
   try {
     await pool.query(
@@ -252,7 +287,7 @@ app.put('/api/websites/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/websites/:id', async (req, res) => {
+app.delete('/api/websites/:id', authenticateToken, async (req, res) => {
   try {
     await pool.query(`DELETE FROM websites WHERE id = $1`, [req.params.id]);
     res.json({ success: true });
@@ -262,9 +297,9 @@ app.delete('/api/websites/:id', async (req, res) => {
 });
 
 /**
- * 推广链接历史记录 API
+ * 推广链接历史 API (需登录)
  */
-app.get('/api/links', async (req, res) => {
+app.get('/api/links', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(`SELECT * FROM generated_links ORDER BY id DESC`);
     res.json({ success: true, data: result.rows });
@@ -273,7 +308,7 @@ app.get('/api/links', async (req, res) => {
   }
 });
 
-app.post('/api/links', async (req, res) => {
+app.post('/api/links', authenticateToken, async (req, res) => {
   const { target_url, source, campaign, full_link } = req.body;
   try {
     const result = await pool.query(
