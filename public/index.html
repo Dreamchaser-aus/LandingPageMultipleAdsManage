@@ -8,13 +8,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
       * { -webkit-tap-highlight-color: transparent; }
-      
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(8px); }
         to { opacity: 1; transform: translateY(0); }
       }
       .fade-in { animation: fadeIn 0.35s ease-out forwards; }
-
       .swiper-pagination-bullet { background: rgba(255,255,255,0.4) !important; }
       .swiper-pagination-bullet-active { background: #f59e0b !important; width: 16px !important; border-radius: 9999px !important; }
     </style>
@@ -36,7 +34,6 @@
 
       <div class="flex items-center space-x-3">
         <span class="hidden sm:inline-block text-[11px] text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700/60">Verified & Secure</span>
-        
         <button id="mobileMenuBtn" aria-label="Toggle Menu" class="md:hidden p-2 text-slate-300 hover:text-amber-400 active:scale-95 transition-transform focus:outline-none">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -47,48 +44,36 @@
 
     <!-- 移动端下拉菜单 -->
     <div id="mobileMenu" class="hidden md:hidden border-t border-slate-800/80 bg-[#111827] px-4 py-3 space-y-2.5 text-sm font-medium shadow-2xl">
-      <a href="#Casino" class="mobile-nav-link block py-2 text-amber-400 hover:text-amber-400 border-b border-slate-800/50">Home</a>
-      <a href="#Slideshow" class="mobile-nav-link block py-2 text-slate-300 hover:text-amber-400 border-b border-slate-800/50">Highlights</a>
-      <a href="#AboutUs" class="mobile-nav-link block py-2 text-slate-300 hover:text-amber-400">About Us</a>
+      <a href="#Casino" class="mobile-nav-link block py-2 text-amber-400 border-b border-slate-800/50">Home</a>
+      <a href="#Slideshow" class="mobile-nav-link block py-2 text-slate-300 border-b border-slate-800/50">Highlights</a>
+      <a href="#AboutUs" class="mobile-nav-link block py-2 text-slate-300">About Us</a>
     </div>
   </header>
 
   <main class="max-w-5xl mx-auto px-3.5 sm:px-6 py-6 sm:py-8 min-h-[70vh]">
-
-    <!-- 1. 优化后的所有站点显示区 (Casino) -->
+    <!-- 1. 站点显示区 (Casino) -->
     <section id="Casino" class="view-section space-y-4 sm:space-y-6 pt-2 block">
-      
-      <!-- 简化的标题说明 -->
       <div class="mb-4 sm:mb-6">
         <h2 class="text-xl sm:text-2xl font-bold text-white">Featured Online Casinos</h2>
         <p class="text-xs sm:text-sm text-slate-400 mt-1">Select a verified partner below to start playing safely.</p>
       </div>
-
       <div id="gang-portal-hub">
-        <!-- 调整了间距的网格容器 -->
-        <div id="siteList" class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-          <!-- 动态加载所有卡片 -->
-        </div>
+        <div id="siteList" class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5"></div>
       </div>
     </section>
 
     <!-- 2. Slideshow 动态轮播图 -->
     <section id="Slideshow" class="view-section pt-2 hidden">
       <div class="swiper mySwiper rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
-        <div class="swiper-wrapper" id="dynamicSlidesWrapper">
-          <!-- 动态加载 -->
-        </div>
+        <div class="swiper-wrapper" id="dynamicSlidesWrapper"></div>
         <div class="swiper-pagination !bottom-2 sm:!bottom-4"></div>
       </div>
     </section>
 
     <!-- 3. About Us 关于我们区 -->
     <section id="AboutUs" class="view-section bg-[#111827] rounded-2xl sm:rounded-3xl p-5 sm:p-10 border border-slate-800 shadow-xl space-y-6 hidden">
-      <div class="max-w-2xl" id="aboutContentArea">
-        <!-- 动态加载 -->
-      </div>
+      <div class="max-w-2xl" id="aboutContentArea"></div>
     </section>
-
   </main>
 
   <footer class="border-t border-slate-800 bg-[#111827] mt-12 py-6 text-center text-[11px] sm:text-xs text-slate-500">
@@ -97,7 +82,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script>
-    // Tab 切换逻辑
     function switchSection(targetId) {
       document.querySelectorAll('.view-section').forEach(sec => sec.classList.add('hidden'));
       const targetEl = document.getElementById(targetId);
@@ -122,7 +106,6 @@
         e.preventDefault();
         const targetId = link.getAttribute('href').replace('#', '');
         switchSection(targetId);
-        
         const mobileMenu = document.getElementById('mobileMenu');
         if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
           mobileMenu.classList.add('hidden');
@@ -159,8 +142,12 @@
     };
 
     function loadSiteContent() {
-      const dataStr = localStorage.getItem('gang_site_content');
-      return dataStr ? JSON.parse(dataStr) : defaultData;
+      try {
+        const dataStr = localStorage.getItem('gang_site_content');
+        return dataStr ? JSON.parse(dataStr) : defaultData;
+      } catch (e) {
+        return defaultData;
+      }
     }
 
     async function renderFrontend() {
@@ -173,7 +160,7 @@
           data.companies = json.data;
         }
       } catch (e) {
-        console.warn('API 请求失败，使用本地数据:', e);
+        console.warn('API request failed, using local storage fallback:', e);
       }
 
       const slideWrapper = document.getElementById('dynamicSlidesWrapper');
@@ -200,9 +187,6 @@
         });
       }
 
-      // ==========================================
-      // 优化后的卡片渲染逻辑 (更干净、简单易懂的设计)
-      // ==========================================
       const siteList = document.getElementById('siteList');
       if (siteList && Array.isArray(data.companies)) {
         siteList.innerHTML = data.companies.map((site, index) => {
@@ -216,18 +200,13 @@
             <div data-id="${siteId}" data-name="${encodeURIComponent(safeName)}" data-url="${encodeURIComponent(safeUrl)}" 
                  style="animation-delay: ${index * 0.03}s"
                  class="fade-in group bg-[#161f30] hover:bg-[#1a2538] p-4 sm:p-5 rounded-2xl border border-slate-700/50 hover:border-amber-500/50 transition-all duration-300 active:scale-[0.98] cursor-pointer flex flex-col shadow-lg h-full">
-              
-              <!-- 顶部：Logo 与 描述 -->
               <div class="flex items-start space-x-4 mb-4">
-                <!-- 略微放大的 Logo 容器，取消了厚重的背景阴影 -->
                 <div class="w-12 h-12 sm:w-14 sm:h-14 bg-slate-800 rounded-xl p-1.5 flex items-center justify-center shrink-0 overflow-hidden group-hover:scale-105 transition-transform border border-slate-700/60">
                   <img src="${safeIcon}" alt="${safeName}" class="w-full h-full object-contain rounded-lg" onerror="this.src='https://api.dicebear.com/7.x/identicon/svg?seed=${siteId}'">
                 </div>
-                
                 <div class="min-w-0 flex-1">
                   <div class="flex items-center gap-1.5 mb-1">
                     <h3 class="font-bold text-slate-100 text-sm sm:text-base truncate group-hover:text-amber-400 transition-colors">${safeName}</h3>
-                    <!-- 用直观的绿勾图标代替文字标签 -->
                     <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                       <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                     </svg>
@@ -235,8 +214,6 @@
                   <p class="text-slate-400 text-xs sm:text-sm line-clamp-2 leading-relaxed">${safeDesc}</p>
                 </div>
               </div>
-
-              <!-- 底部：全宽访问按钮 (更直接，去除了复杂的打点文字) -->
               <div class="mt-auto pt-4 border-t border-slate-700/40">
                 <div class="w-full py-2.5 rounded-xl bg-amber-500/10 text-amber-400 group-hover:bg-amber-500 group-hover:text-slate-900 font-bold text-[13px] sm:text-sm transition-colors flex items-center justify-center space-x-2">
                   <span>Visit Website</span>
@@ -312,7 +289,7 @@
         isSent = navigator.sendBeacon(endpoint, new Blob([JSON.stringify(payload)], { type: 'application/json' }));
       }
       if (!isSent) {
-        fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), keepalive: true });
+        fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), keepalive: true }).catch(() => {});
       }
 
       setTimeout(() => {
