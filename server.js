@@ -3,6 +3,8 @@ const { Pool } = require('pg');
 const path = require('path');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -19,6 +21,43 @@ app.use(express.urlencoded({ extended: true }));
 
 // 托管 public 静态文件目录
 app.use(express.static(path.join(__dirname, 'public')));
+
+// 自动创建并托管 uploads 目录 (用于存放公司 Logo/图片)
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsDir));
+
+// ================= Multer 文件上传配置 =================
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `company-${uniqueSuffix}${ext}`);
+  }
+});
+
+// 图片格式过滤器
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = /jpeg|jpg|png|gif|webp|svg/;
+  const extName = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimeType = allowedTypes.test(file.mimetype);
+
+  if (extName && mimeType) {
+    return cb(null, true);
+  }
+  cb(new Error('仅允许上传图片文件 (jpg, jpeg, png, gif, webp, svg)'));
+};
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 限制单个文件最大 5MB
+  fileFilter: fileFilter
+});
 
 // JWT Token 验证中间件
 const authenticateToken = (req, res, next) => {
@@ -38,7 +77,7 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// ================= 1. 连接 Railway PostgreSQL 数据库 =================
+// ================= 1. 连接 PostgreSQL 数据库 =================
 const poolConfig = process.env.DATABASE_URL
   ? {
       connectionString: process.env.DATABASE_URL,
@@ -59,7 +98,7 @@ pool.connect((err, client, release) => {
   if (err) {
     console.error('❌ 连接 PostgreSQL 数据库失败:', err.message);
   } else {
-    console.log('⚡ 已成功连接至 Railway PostgreSQL 数据库');
+    console.log('⚡ 已成功连接至 PostgreSQL 数据库');
     release();
   }
 });
@@ -82,7 +121,7 @@ async function initDatabase() {
     `);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_visitor_active ON user_tracks(visitor_id, created_at)`);
 
-    // 落地页站点卡片表
+    // 落地页站点卡片表 (包含 icon_url 用于存放上传的图片路径)
     await pool.query(`
       CREATE TABLE IF NOT EXISTS websites (
         id SERIAL PRIMARY KEY,
@@ -145,6 +184,27 @@ app.post('/api/login', (req, res) => {
   }
 
   return res.status(401).json({ success: false, message: '账号或密码错误' });
+});
+
+/**
+ * 图片上传 API (需登录)
+ * 用于后台站点管理单独上传图标/Logo
+ */
+app.post('/api/upload', authenticateToken, upload.single('icon'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: '请选择要上传的图片文件' });
+  }
+
+  // 返回存入数据库的相对访问路径
+  const iconUrl = `/uploads/${req.file.filename}`;
+  res.json({
+    success: true,
+    message: '图片上传成功',
+    icon_url: iconUrl
+  });
+}, (err, req, res, next) => {
+  // 捕捉 multer 校验或体积超限错误
+  res.status(400).json({ success: false, message: err.message });
 });
 
 /**
