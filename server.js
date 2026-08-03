@@ -5,18 +5,16 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const fs = require('fs');
-const bcrypt = require('bcryptjs');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// JWT 鉴权与管理员账号设置 (优先读取环境变量)
+// JWT 鉴权与管理员账号设置 (优先读取环境变量，提供默认备用值)
 const JWT_SECRET = process.env.JWT_SECRET || 'gang_admin_secret_key_2026';
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'admin123';
 
 // ================= 中间件配置 =================
-app.set('trust proxy', true); // 开启代理信任，获取真实的真实访客 IP
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -24,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 // 托管 public 静态文件目录
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 自动创建并托管 uploads 目录
+// 自动创建并托管 uploads 目录 (用于存放公司 Logo/图片)
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
@@ -33,7 +31,9 @@ app.use('/uploads', express.static(uploadsDir));
 
 // ================= Multer 文件上传配置 =================
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadsDir),
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const ext = path.extname(file.originalname).toLowerCase();
@@ -41,6 +41,7 @@ const storage = multer.diskStorage({
   }
 });
 
+// 图片格式过滤器
 const fileFilter = (req, file, cb) => {
   const allowedTypes = /jpeg|jpg|png|gif|webp|svg/;
   const extName = allowedTypes.test(path.extname(file.originalname).toLowerCase());
@@ -61,7 +62,7 @@ const upload = multer({
 // JWT Token 验证中间件
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  const token = authHeader && authHeader.split(' ')[1]; // 提取 Bearer <token>
 
   if (!token) {
     return res.status(401).json({ success: false, message: '未授权，请先登录后台' });
@@ -88,14 +89,18 @@ const poolConfig = process.env.DATABASE_URL
       password: process.env.PGPASSWORD,
       database: process.env.PGDATABASE,
       port: process.env.PGPORT,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+      ssl: { rejectUnauthorized: false }
     };
 
 const pool = new Pool(poolConfig);
 
-// 监听数据库池空闲连接报错，防止因网络波动导致崩溃
-pool.on('error', (err) => {
-  console.error('❌ PostgreSQL 数据库池发生意外错误:', err.message);
+pool.connect((err, client, release) => {
+  if (err) {
+    console.error('❌ 连接 PostgreSQL 数据库失败:', err.message);
+  } else {
+    console.log('⚡ 已成功连接至 PostgreSQL 数据库');
+    release();
+  }
 });
 
 // 初始化数据库表结构
@@ -140,15 +145,29 @@ async function initDatabase() {
       )
     `);
 
-    // 4. 通用配置表 (用于存放轮播图、关于我们、标题等全局设置)
+    // 4. 【新增】轮播图表
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS site_configs (
-        key VARCHAR(50) PRIMARY KEY,
-        value JSONB NOT NULL
+      CREATE TABLE IF NOT EXISTS slides (
+        id SERIAL PRIMARY KEY,
+        badge TEXT,
+        title TEXT NOT NULL,
+        desc_text TEXT,
+        btn_text TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
-    // 初始化默认卡片数据（若为空）
+    // 5. 【新增】关于我们配置表
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS about_info (
+        id SERIAL PRIMARY KEY,
+        title TEXT,
+        content TEXT,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // 初始化默认卡片数据（如果表为空）
     const checkRes = await pool.query(`SELECT COUNT(*) AS count FROM websites`);
     if (parseInt(checkRes.rows[0].count, 10) === 0) {
       await pool.query(
@@ -178,7 +197,7 @@ app.get('/admin', (req, res) => {
 /**
  * 管理员登录 API (公开)
  */
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
 
   if (username === ADMIN_USER && password === ADMIN_PASS) {
@@ -192,55 +211,18 @@ app.post('/api/login', async (req, res) => {
 /**
  * 图片上传 API (需登录)
  */
-app.post('/api/upload', authenticateToken, (req, res) => {
-  upload.single('icon')(req, res, (err) => {
-    if (err) {
-      return res.status(400).json({ success: false, message: err.message });
-    }
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: '请选择要上传的图片文件' });
-    }
-    const iconUrl = `/uploads/${req.file.filename}`;
-    res.json({
-      success: true,
-      message: '图片上传成功',
-      icon_url: iconUrl
-    });
+app.post('/api/upload', authenticateToken, upload.single('icon'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: '请选择要上传的图片文件' });
+  }
+  const iconUrl = `/uploads/${req.file.filename}`;
+  res.json({
+    success: true,
+    message: '图片上传成功',
+    icon_url: iconUrl
   });
-});
-
-/**
- * 通用全局配置 API (获取轮播图/关于我们等)
- */
-app.get('/api/config', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM site_configs');
-    const configs = {};
-    result.rows.forEach(row => { configs[row.key] = row.value; });
-    res.json({ success: true, data: configs });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-/**
- * 更新全局配置 API (需登录)
- */
-app.post('/api/config', authenticateToken, async (req, res) => {
-  const { key, value } = req.body;
-  if (!key) {
-    return res.status(400).json({ success: false, message: '缺少 key 参数' });
-  }
-  try {
-    await pool.query(
-      `INSERT INTO site_configs (key, value) VALUES ($1, $2)
-       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
-      [key, JSON.stringify(value)]
-    );
-    res.json({ success: true, message: '设置已保存' });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
+}, (err, req, res, next) => {
+  res.status(400).json({ success: false, message: err.message });
 });
 
 /**
@@ -249,7 +231,14 @@ app.post('/api/config', authenticateToken, async (req, res) => {
 app.post('/api/track', async (req, res) => {
   const { visitor_id, target_domain, source, campaign } = req.body;
   
-  const ip_address = req.ip || (req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : '127.0.0.1');
+  let ip_address = '127.0.0.1';
+  const rawIp = req.headers['x-forwarded-for'];
+  if (rawIp) {
+    ip_address = rawIp.split(',')[0].trim();
+  } else if (req.socket.remoteAddress) {
+    ip_address = req.socket.remoteAddress;
+  }
+
   const user_agent = req.headers['user-agent'] || 'Unknown';
 
   if (!visitor_id || !target_domain) {
@@ -278,6 +267,30 @@ app.get('/api/websites', async (req, res) => {
   try {
     const result = await pool.query(`SELECT * FROM websites ORDER BY id DESC`);
     res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * 【新增】获取轮播图 API (公开：允许前端展示)
+ */
+app.get('/api/slides', async (req, res) => {
+  try {
+    const result = await pool.query(`SELECT * FROM slides ORDER BY id ASC`);
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * 【新增】获取关于我们信息 API (公开：允许前端展示)
+ */
+app.get('/api/about', async (req, res) => {
+  try {
+    const result = await pool.query(`SELECT * FROM about_info WHERE id = 1`);
+    res.json({ success: true, data: result.rows[0] || null });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -348,7 +361,7 @@ app.get('/api/stats', authenticateToken, async (req, res) => {
 });
 
 /**
- * 新增/修改/删除卡片 API (需登录)
+ * 落地页卡片 CRUD (需登录)
  */
 app.post('/api/websites', authenticateToken, async (req, res) => {
   const { name, desc_text, url, icon_url } = req.body;
@@ -379,6 +392,62 @@ app.put('/api/websites/:id', authenticateToken, async (req, res) => {
 app.delete('/api/websites/:id', authenticateToken, async (req, res) => {
   try {
     await pool.query(`DELETE FROM websites WHERE id = $1`, [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * 【新增】轮播图管理 CRUD (需登录)
+ */
+app.post('/api/slides', authenticateToken, async (req, res) => {
+  const { badge, title, desc, btnText } = req.body;
+  try {
+    const result = await pool.query(
+      `INSERT INTO slides (badge, title, desc_text, btn_text) VALUES ($1, $2, $3, $4) RETURNING id`,
+      [badge, title, desc, btnText]
+    );
+    res.json({ success: true, id: result.rows[0].id });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.put('/api/slides/:id', authenticateToken, async (req, res) => {
+  const { badge, title, desc, btnText } = req.body;
+  try {
+    await pool.query(
+      `UPDATE slides SET badge = $1, title = $2, desc_text = $3, btn_text = $4 WHERE id = $5`,
+      [badge, title, desc, btnText, req.params.id]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.delete('/api/slides/:id', authenticateToken, async (req, res) => {
+  try {
+    await pool.query(`DELETE FROM slides WHERE id = $1`, [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * 【新增】关于我们管理 API (需登录)
+ */
+app.post('/api/about', authenticateToken, async (req, res) => {
+  const { title, content } = req.body;
+  try {
+    const check = await pool.query(`SELECT COUNT(*) FROM about_info WHERE id = 1`);
+    if (parseInt(check.rows[0].count, 10) === 0) {
+      await pool.query(`INSERT INTO about_info (id, title, content) VALUES (1, $1, $2)`, [title, content]);
+    } else {
+      await pool.query(`UPDATE about_info SET title = $1, content = $2, updated_at = CURRENT_TIMESTAMP WHERE id = 1`, [title, content]);
+    }
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
