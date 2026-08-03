@@ -5,16 +5,18 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const fs = require('fs');
+const bcrypt = require('bcryptjs');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// JWT 鉴权与管理员账号设置 (优先读取环境变量，提供默认备用值)
+// JWT 鉴权与管理员账号设置 (优先读取环境变量)
 const JWT_SECRET = process.env.JWT_SECRET || 'gang_admin_secret_key_2026';
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'admin123';
 
 // ================= 中间件配置 =================
+app.set('trust proxy', true); // 开启代理信任，获取真实的真实访客 IP
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -22,7 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 // 托管 public 静态文件目录
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 自动创建并托管 uploads 目录 (用于存放公司 Logo/图片)
+// 自动创建并托管 uploads 目录
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
@@ -31,9 +33,7 @@ app.use('/uploads', express.static(uploadsDir));
 
 // ================= Multer 文件上传配置 =================
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);
-  },
+  destination: (req, file, cb) => cb(null, uploadsDir),
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const ext = path.extname(file.originalname).toLowerCase();
@@ -41,7 +41,6 @@ const storage = multer.diskStorage({
   }
 });
 
-// 图片格式过滤器
 const fileFilter = (req, file, cb) => {
   const allowedTypes = /jpeg|jpg|png|gif|webp|svg/;
   const extName = allowedTypes.test(path.extname(file.originalname).toLowerCase());
@@ -62,7 +61,7 @@ const upload = multer({
 // JWT Token 验证中间件
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // 提取 Bearer <token>
+  const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
     return res.status(401).json({ success: false, message: '未授权，请先登录后台' });
@@ -89,18 +88,14 @@ const poolConfig = process.env.DATABASE_URL
       password: process.env.PGPASSWORD,
       database: process.env.PGDATABASE,
       port: process.env.PGPORT,
-      ssl: { rejectUnauthorized: false }
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
     };
 
 const pool = new Pool(poolConfig);
 
-pool.connect((err, client, release) => {
-  if (err) {
-    console.error('❌ 连接 PostgreSQL 数据库失败:', err.message);
-  } else {
-    console.log('⚡ 已成功连接至 PostgreSQL 数据库');
-    release();
-  }
+// 监听数据库池空闲连接报错，防止因网络波动导致崩溃
+pool.on('error', (err) => {
+  console.error('❌ PostgreSQL 数据库池发生意外错误:', err.message);
 });
 
 // 初始化数据库表结构
@@ -145,33 +140,17 @@ async function initDatabase() {
       )
     `);
 
-    // 4. 首页轮播图表
+    // 4. 通用配置表 (用于存放轮播图、关于我们、标题等全局设置)
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS slides (
-        id SERIAL PRIMARY KEY,
-        badge TEXT NOT NULL,
-        title TEXT NOT NULL,
-        desc_text TEXT NOT NULL,
-        btn_text TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      CREATE TABLE IF NOT EXISTS site_configs (
+        key VARCHAR(50) PRIMARY KEY,
+        value JSONB NOT NULL
       )
     `);
 
-    // 5. 关于我们配置表
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS about_us (
-        id INT PRIMARY KEY DEFAULT 1,
-        badge TEXT,
-        title TEXT,
-        desc_text TEXT,
-        stats JSONB,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // 初始化默认卡片数据（如果表为空）
-    const checkWebsites = await pool.query(`SELECT COUNT(*) AS count FROM websites`);
-    if (parseInt(checkWebsites.rows[0].count, 10) === 0) {
+    // 初始化默认卡片数据（若为空）
+    const checkRes = await pool.query(`SELECT COUNT(*) AS count FROM websites`);
+    if (parseInt(checkRes.rows[0].count, 10) === 0) {
       await pool.query(
         `INSERT INTO websites (name, desc_text, url, icon_url) VALUES ($1, $2, $3, $4)`,
         ['MegaWin Casino Malaysia', 'Top-tier verified gaming platform offering safe entertainment and instant bonuses.', 'https://google.com', 'https://api.dicebear.com/7.x/identicon/svg?seed=megawin']
@@ -182,32 +161,6 @@ async function initDatabase() {
       );
       console.log('💡 已初始化默认落地页卡片数据');
     }
-
-    // 初始化默认轮播图数据（如果表为空）
-    const checkSlides = await pool.query(`SELECT COUNT(*) AS count FROM slides`);
-    if (parseInt(checkSlides.rows[0].count, 10) === 0) {
-      await pool.query(
-        `INSERT INTO slides (badge, title, desc_text, btn_text) VALUES ($1, $2, $3, $4)`,
-        ['Hot Bonuses 2026', 'Expert Reviews & Smart Play Guidance', 'Discover trusted platform insights, exclusive bonuses, and data-driven guides.', 'Explore Platform']
-      );
-      console.log('💡 已初始化默认轮播图数据');
-    }
-
-    // 初始化默认关于我们数据（如果表为空）
-    const checkAbout = await pool.query(`SELECT COUNT(*) AS count FROM about_us`);
-    if (parseInt(checkAbout.rows[0].count, 10) === 0) {
-      const defaultStats = JSON.stringify([
-        { val: '680+', label: 'Casino Sites Reviewed' },
-        { val: '1,380+', label: 'Games Tested' },
-        { val: '376+ Hrs', label: 'Monthly Research' }
-      ]);
-      await pool.query(
-        `INSERT INTO about_us (id, badge, title, desc_text, stats) VALUES (1, $1, $2, $3, $4)`,
-        ['Who We Are', 'Independent, Honest & Data-Driven Insights', 'We are a team of iGaming experts dedicated to evaluating platforms, bonus terms, and game fairness.', defaultStats]
-      );
-      console.log('💡 已初始化默认关于我们数据');
-    }
-
   } catch (err) {
     console.error('❌ 初始化数据表失败:', err.message);
   }
@@ -225,7 +178,7 @@ app.get('/admin', (req, res) => {
 /**
  * 管理员登录 API (公开)
  */
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
 
   if (username === ADMIN_USER && password === ADMIN_PASS) {
@@ -239,35 +192,64 @@ app.post('/api/login', (req, res) => {
 /**
  * 图片上传 API (需登录)
  */
-app.post('/api/upload', authenticateToken, upload.single('icon'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ success: false, message: '请选择要上传的图片文件' });
-  }
-
-  const iconUrl = `/uploads/${req.file.filename}`;
-  res.json({
-    success: true,
-    message: '图片上传成功',
-    icon_url: iconUrl
+app.post('/api/upload', authenticateToken, (req, res) => {
+  upload.single('icon')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: '请选择要上传的图片文件' });
+    }
+    const iconUrl = `/uploads/${req.file.filename}`;
+    res.json({
+      success: true,
+      message: '图片上传成功',
+      icon_url: iconUrl
+    });
   });
-}, (err, req, res, next) => {
-  res.status(400).json({ success: false, message: err.message });
 });
 
 /**
- * 轨迹打点 API (公开：提供给前端 index.html)
+ * 通用全局配置 API (获取轮播图/关于我们等)
+ */
+app.get('/api/config', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM site_configs');
+    const configs = {};
+    result.rows.forEach(row => { configs[row.key] = row.value; });
+    res.json({ success: true, data: configs });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * 更新全局配置 API (需登录)
+ */
+app.post('/api/config', authenticateToken, async (req, res) => {
+  const { key, value } = req.body;
+  if (!key) {
+    return res.status(400).json({ success: false, message: '缺少 key 参数' });
+  }
+  try {
+    await pool.query(
+      `INSERT INTO site_configs (key, value) VALUES ($1, $2)
+       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+      [key, JSON.stringify(value)]
+    );
+    res.json({ success: true, message: '设置已保存' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * 轨迹打点 API (公开)
  */
 app.post('/api/track', async (req, res) => {
   const { visitor_id, target_domain, source, campaign } = req.body;
   
-  let ip_address = '127.0.0.1';
-  const rawIp = req.headers['x-forwarded-for'];
-  if (rawIp) {
-    ip_address = rawIp.split(',')[0].trim();
-  } else if (req.socket.remoteAddress) {
-    ip_address = req.socket.remoteAddress;
-  }
-
+  const ip_address = req.ip || (req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : '127.0.0.1');
   const user_agent = req.headers['user-agent'] || 'Unknown';
 
   if (!visitor_id || !target_domain) {
@@ -290,43 +272,12 @@ app.post('/api/track', async (req, res) => {
 });
 
 /**
- * 获取卡片列表 API (公开：提供给前端 index.html 渲染)
+ * 获取卡片列表 API (公开)
  */
 app.get('/api/websites', async (req, res) => {
   try {
     const result = await pool.query(`SELECT * FROM websites ORDER BY id DESC`);
     res.json({ success: true, data: result.rows });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-/**
- * 获取轮播图列表 API (公开：提供给前端 index.html 渲染)
- */
-app.get('/api/slides', async (req, res) => {
-  try {
-    const result = await pool.query(
-      `SELECT id, badge, title, desc_text AS desc, btn_text AS "btnText" FROM slides ORDER BY id DESC`
-    );
-    res.json({ success: true, data: result.rows });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-/**
- * 获取关于我们 API (公开：提供给前端 index.html 渲染)
- */
-app.get('/api/about', async (req, res) => {
-  try {
-    const result = await pool.query(
-      `SELECT badge, title, desc_text AS desc, stats FROM about_us WHERE id = 1`
-    );
-    if (result.rows.length === 0) {
-      return res.json({ success: true, data: null });
-    }
-    res.json({ success: true, data: result.rows[0] });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -429,68 +380,6 @@ app.delete('/api/websites/:id', authenticateToken, async (req, res) => {
   try {
     await pool.query(`DELETE FROM websites WHERE id = $1`, [req.params.id]);
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-/**
- * 轮播图管理 API (需登录)
- */
-app.post('/api/slides', authenticateToken, async (req, res) => {
-  const { badge, title, desc, btnText } = req.body;
-  try {
-    const result = await pool.query(
-      `INSERT INTO slides (badge, title, desc_text, btn_text) VALUES ($1, $2, $3, $4) RETURNING id`,
-      [badge, title, desc, btnText]
-    );
-    res.json({ success: true, id: result.rows[0].id });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-app.put('/api/slides/:id', authenticateToken, async (req, res) => {
-  const { badge, title, desc, btnText } = req.body;
-  try {
-    await pool.query(
-      `UPDATE slides SET badge = $1, title = $2, desc_text = $3, btn_text = $4 WHERE id = $5`,
-      [badge, title, desc, btnText, req.params.id]
-    );
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-app.delete('/api/slides/:id', authenticateToken, async (req, res) => {
-  try {
-    await pool.query(`DELETE FROM slides WHERE id = $1`, [req.params.id]);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-/**
- * 保存/更新关于我们 API (需登录)
- */
-app.post('/api/about', authenticateToken, async (req, res) => {
-  const { badge, title, desc, stats } = req.body;
-  try {
-    const statsJson = JSON.stringify(stats || []);
-    await pool.query(
-      `INSERT INTO about_us (id, badge, title, desc_text, stats, updated_at)
-       VALUES (1, $1, $2, $3, $4, NOW())
-       ON CONFLICT (id) DO UPDATE SET
-         badge = EXCLUDED.badge,
-         title = EXCLUDED.title,
-         desc_text = EXCLUDED.desc_text,
-         stats = EXCLUDED.stats,
-         updated_at = NOW()`,
-      [badge, title, desc, statsJson]
-    );
-    res.json({ success: true, message: '“关于我们”数据更新成功' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
