@@ -21,10 +21,10 @@
 
   <!-- 顶部导航栏 -->
   <header class="border-b border-slate-800 bg-[#111827]/90 backdrop-blur-md sticky top-0 z-50">
-    <div class="max-w-5xl mx-auto px-3 sm:px-4 py-2 sm:py-3.5 flex items-center justify-between">
+    <div class="max-w-5xl mx-auto px-3 sm:px-4 py-1.5 sm:py-3.5 flex items-center justify-between">
       <div class="flex items-center space-x-2.5">
   <!-- 将下方的 src 替换为您实际的 logo 链接或本地路径，例如 src="./images/logo.png" -->
-  <img src="https://res.cloudinary.com/dqctvbenv/image/upload/v1785748684/telegram_bot/yxq6xjod41s28v7qjmqv.png" alt="MEGA88 Logo" class="h-6 sm:h-10 w-auto object-contain">
+  <img src="https://res.cloudinary.com/dqctvbenv/image/upload/v1785748684/telegram_bot/yxq6xjod41s28v7qjmqv.png" alt="MEGA88 Logo" class="h-8 sm:h-10 max-w-[180px] w-auto object-contain">
   <span class="font-bold text-base sm:text-lg tracking-wider text-amber-400"></span>
 </div>
 
@@ -168,7 +168,7 @@
       const slideWrapper = document.getElementById('dynamicSlidesWrapper');
       if (slideWrapper && data.slides) {
         slideWrapper.innerHTML = data.slides.map(s => `
-          <div class="swiper-slide bg-gradient-to-r from-slate-900 via-amber-950/40 to-slate-900 p-6 sm:p-12 md:p-16 flex flex-col justify-center pb-12 sm:pb-12 min-h-[260px] sm:min-h-[340px] relative">
+          <div class="swiper-slide bg-gradient-to-r from-slate-900 via-amber-950/40 to-slate-900 p-5 sm:p-12 md:p-16 flex flex-col justify-center pb-12 sm:pb-12 min-h-[220px] sm:min-h-[340px] relative">
             <span class="px-2.5 py-0.5 text-[10px] sm:text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full w-max mb-2 sm:mb-3 font-semibold">${s.badge}</span>
             <h2 class="text-xl sm:text-4xl font-black text-white mb-2 sm:mb-3 max-w-xl leading-snug">${s.title}</h2>
             <p class="text-slate-300 text-xs sm:text-sm max-w-lg mb-4 sm:mb-6 leading-relaxed line-clamp-3 sm:line-clamp-none">${s.desc}</p>
