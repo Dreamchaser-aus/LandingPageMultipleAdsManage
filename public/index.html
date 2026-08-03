@@ -1,68 +1,95 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MEGA88 PARTNERSHIP - Expert Reviews & Smart Play Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
+      /* 禁用移动端点击时的默认灰色/蓝色高亮遮罩 */
+      * { -webkit-tap-highlight-color: transparent; }
+      
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(8px); }
         to { opacity: 1; transform: translateY(0); }
       }
-      .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+      .fade-in { animation: fadeIn 0.35s ease-out forwards; }
+
+      /* 优化移动端 Swiper 分页器位置与样式 */
+      .swiper-pagination-bullet { background: rgba(255,255,255,0.4) !important; }
+      .swiper-pagination-bullet-active { background: #f59e0b !important; width: 16px !important; border-radius: 9999px !important; }
     </style>
 </head>
-<body class="bg-[#0b0f19] text-slate-100 min-h-screen font-sans antialiased">
+<body class="bg-[#0b0f19] text-slate-100 min-h-screen font-sans antialiased selection:bg-amber-500 selection:text-slate-900">
 
   <!-- 顶部导航栏 -->
-  <header class="border-b border-slate-800 bg-[#111827]/80 backdrop-blur-md sticky top-0 z-50">
-    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <span class="font-bold text-lg tracking-wider text-amber-400">MEGA88 PARTNERSHIP</span>
+  <header class="border-b border-slate-800 bg-[#111827]/90 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto px-4 py-3.5 flex items-center justify-between">
+      <div class="flex items-center space-x-2.5">
+        <span class="font-bold text-base sm:text-lg tracking-wider text-amber-400">MEGA88 PARTNERSHIP</span>
       </div>
+
+      <!-- 桌面端导航 -->
       <nav class="hidden md:flex items-center space-x-6 text-sm text-slate-300 font-medium">
         <a href="#Home" class="hover:text-amber-400 transition-colors">Home</a>
         <a href="#Slideshow" class="hover:text-amber-400 transition-colors">Highlights</a>
         <a href="#Casino" class="hover:text-amber-400 transition-colors">Online Casinos</a>
         <a href="#AboutUs" class="hover:text-amber-400 transition-colors">About Us</a>
       </nav>
-      <span class="text-xs text-slate-400 bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700/60">Verified & Secure</span>
+
+      <div class="flex items-center space-x-3">
+        <span class="hidden sm:inline-block text-[11px] text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700/60">Verified & Secure</span>
+        
+        <!-- 移动端汉堡菜单按钮 -->
+        <button id="mobileMenuBtn" aria-label="Toggle Menu" class="md:hidden p-2 text-slate-300 hover:text-amber-400 active:scale-95 transition-transform focus:outline-none">
+          <svg id="menuIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- 移动端下拉菜单 -->
+    <div id="mobileMenu" class="hidden md:hidden border-t border-slate-800/80 bg-[#111827] px-4 py-3 space-y-2.5 text-sm font-medium shadow-2xl">
+      <a href="#Home" class="mobile-nav-link block py-2 text-slate-300 hover:text-amber-400 border-b border-slate-800/50">Home</a>
+      <a href="#Slideshow" class="mobile-nav-link block py-2 text-slate-300 hover:text-amber-400 border-b border-slate-800/50">Highlights</a>
+      <a href="#Casino" class="mobile-nav-link block py-2 text-slate-300 hover:text-amber-400 border-b border-slate-800/50">Online Casinos</a>
+      <a href="#AboutUs" class="mobile-nav-link block py-2 text-slate-300 hover:text-amber-400">About Us</a>
     </div>
   </header>
 
-  <main class="max-w-5xl mx-auto px-4 py-8 space-y-12">
+  <main class="max-w-5xl mx-auto px-3.5 sm:px-6 py-6 sm:py-8 space-y-8 sm:space-y-12">
 
     <!-- 1. Slideshow 动态轮播图 -->
-    <section id="Slideshow" class="pt-4">
-      <div class="swiper mySwiper rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
+    <section id="Slideshow" class="pt-2">
+      <div class="swiper mySwiper rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
         <div class="swiper-wrapper" id="dynamicSlidesWrapper">
           <!-- 动态加载 -->
         </div>
-        <div class="swiper-pagination"></div>
+        <div class="swiper-pagination !bottom-2 sm:!bottom-4"></div>
       </div>
     </section>
 
     <!-- 2. Multiple Companies 多个公司/平台区 -->
-    <section id="Casino" class="space-y-6 pt-4">
-      <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-slate-800/80 pb-4">
+    <section id="Casino" class="space-y-4 sm:space-y-6 pt-2">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between border-b border-slate-800/80 pb-3">
         <div>
-          <span class="text-amber-400 text-xs font-bold uppercase tracking-wider">Trusted Navigation</span>
-          <h2 class="text-xl sm:text-2xl font-bold text-white mt-1">Featured Online Casino Partners</h2>
+          <span class="text-amber-400 text-[11px] sm:text-xs font-bold uppercase tracking-wider">Trusted Navigation</span>
+          <h2 class="text-lg sm:text-2xl font-bold text-white mt-0.5">Featured Online Casino Partners</h2>
         </div>
-        <p class="text-xs text-slate-400 mt-2 md:mt-0">Click any partner below to explore securely with active tracking.</p>
+        <p class="text-[11px] sm:text-xs text-slate-400 mt-1 sm:mt-0">Click any partner below to explore securely with active tracking.</p>
       </div>
 
       <div id="gang-portal-hub">
-        <div id="siteList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div id="siteList" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
           <!-- 动态加载所有卡片 -->
         </div>
       </div>
     </section>
 
     <!-- 3. About Us 关于我们区 -->
-    <section id="AboutUs" class="bg-[#111827] rounded-3xl p-6 sm:p-10 border border-slate-800 shadow-xl space-y-6">
+    <section id="AboutUs" class="bg-[#111827] rounded-2xl sm:rounded-3xl p-5 sm:p-10 border border-slate-800 shadow-xl space-y-6">
       <div class="max-w-2xl" id="aboutContentArea">
         <!-- 动态加载 -->
       </div>
@@ -70,12 +97,24 @@
 
   </main>
 
-  <footer class="border-t border-slate-800 bg-[#111827] mt-16 py-8 text-center text-xs text-slate-500">
+  <footer class="border-t border-slate-800 bg-[#111827] mt-12 py-6 text-center text-[11px] sm:text-xs text-slate-500">
     <p>&copy; 2021 MEGA88 PARTNERSHIP. All Rights Reserved. Play Responsibly.</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script>
+    // 移动端菜单切换
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+      });
+      document.querySelectorAll('.mobile-nav-link').forEach(link => {
+        link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+      });
+    }
+
     // 基础防崩溃默认数据
     const defaultData = {
       companies: [
@@ -129,14 +168,14 @@
       const slideWrapper = document.getElementById('dynamicSlidesWrapper');
       if (slideWrapper && data.slides) {
         slideWrapper.innerHTML = data.slides.map(s => `
-          <div class="swiper-slide bg-gradient-to-r from-slate-900 via-amber-950/40 to-slate-900 p-8 sm:p-12 md:p-16 flex flex-col justify-center min-h-[280px] sm:min-h-[340px] relative">
-            <span class="px-3 py-1 text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full w-max mb-3 font-semibold">${s.badge}</span>
-            <h2 class="text-2xl sm:text-4xl font-black text-white mb-3 max-w-xl">${s.title}</h2>
-            <p class="text-slate-300 text-xs sm:text-sm max-w-lg mb-6 leading-relaxed">${s.desc}</p>
+          <div class="swiper-slide bg-gradient-to-r from-slate-900 via-amber-950/40 to-slate-900 p-6 sm:p-12 md:p-16 flex flex-col justify-center pb-12 sm:pb-12 min-h-[260px] sm:min-h-[340px] relative">
+            <span class="px-2.5 py-0.5 text-[10px] sm:text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full w-max mb-2 sm:mb-3 font-semibold">${s.badge}</span>
+            <h2 class="text-xl sm:text-4xl font-black text-white mb-2 sm:mb-3 max-w-xl leading-snug">${s.title}</h2>
+            <p class="text-slate-300 text-xs sm:text-sm max-w-lg mb-4 sm:mb-6 leading-relaxed line-clamp-3 sm:line-clamp-none">${s.desc}</p>
             <div>
-              <a href="#Casino" class="inline-flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-red-600 text-white font-semibold text-xs sm:text-sm shadow-lg">
+              <a href="#Casino" class="inline-flex items-center space-x-2 px-5 py-2 sm:px-6 sm:py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-red-600 text-white font-semibold text-xs sm:text-sm shadow-lg active:scale-95 transition-transform">
                 <span>${s.btnText}</span>
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
               </a>
             </div>
           </div>
@@ -168,32 +207,32 @@
                  data-name="${encodeURIComponent(safeName)}" 
                  data-url="${encodeURIComponent(safeUrl)}" 
                  style="animation-delay: ${index * 0.04}s"
-                 class="fade-in group bg-[#111827] hover:bg-[#1f2937] p-4.5 sm:p-5 rounded-2xl border border-slate-800 hover:border-amber-500/55 transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-xl relative overflow-hidden">
+                 class="fade-in group bg-[#111827] active:bg-[#1a2332] sm:hover:bg-[#1f2937] p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-800 sm:hover:border-amber-500/55 transition-all duration-200 active:scale-[0.98] cursor-pointer flex flex-col justify-between shadow-xl relative overflow-hidden">
               
               <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-500 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
-              <div class="flex items-start space-x-3.5 mb-4">
+              <div class="flex items-start space-x-3 mb-3">
                 <img src="${safeIcon}" 
                      alt="${safeName}"
-                     class="w-12 h-12 rounded-xl object-cover bg-slate-800 p-1 shrink-0 border border-slate-700/60 group-hover:scale-105 transition-transform"
+                     class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl object-cover bg-slate-800 p-1 shrink-0 border border-slate-700/60 group-hover:scale-105 transition-transform"
                      onerror="this.src='https://api.dicebear.com/7.x/identicon/svg?seed=${siteId}'">
                 <div class="min-w-0 flex-1">
-                  <div class="flex items-center justify-between">
-                    <h3 class="font-bold text-slate-100 text-sm group-hover:text-amber-400 transition-colors truncate">${safeName}</h3>
-                    <span class="px-2 py-0.5 text-[9px] bg-amber-500/15 text-amber-400 border border-amber-500/20 rounded font-semibold shrink-0">Verified</span>
+                  <div class="flex items-center justify-between gap-1">
+                    <h3 class="font-bold text-slate-100 text-xs sm:text-sm group-hover:text-amber-400 transition-colors truncate">${safeName}</h3>
+                    <span class="px-1.5 py-0.5 text-[9px] bg-amber-500/15 text-amber-400 border border-amber-500/20 rounded font-semibold shrink-0">Verified</span>
                   </div>
-                  <p class="text-slate-400 text-xs mt-1.5 line-clamp-2 leading-relaxed">${safeDesc}</p>
+                  <p class="text-slate-400 text-[11px] sm:text-xs mt-1 line-clamp-2 leading-relaxed">${safeDesc}</p>
                 </div>
               </div>
 
-              <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-xs font-medium">
-                <span class="text-slate-400 text-[11px] flex items-center space-x-1">
+              <div class="pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-xs font-medium">
+                <span class="text-slate-400 text-[10px] sm:text-[11px] flex items-center space-x-1">
                   <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                   <span>Tracking Active</span>
                 </span>
-                <div class="px-3 py-1.5 rounded-xl bg-slate-800 group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-red-600 text-slate-300 group-hover:text-white transition-all shadow-sm flex items-center space-x-1">
-                  <span>Visit Site</span>
-                  <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl bg-slate-800 group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-red-600 text-slate-300 group-hover:text-white transition-all shadow-sm flex items-center space-x-1">
+                  <span class="text-[11px] sm:text-xs">Visit Site</span>
+                  <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
                   </svg>
                 </div>
@@ -217,14 +256,14 @@
       const aboutArea = document.getElementById('aboutContentArea');
       if (aboutArea && data.about) {
         aboutArea.innerHTML = `
-          <span class="px-3 py-1 text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-semibold">${data.about.badge}</span>
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3 mb-2">${data.about.title}</h2>
+          <span class="px-2.5 py-0.5 text-[10px] sm:text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-semibold">${data.about.badge}</span>
+          <h2 class="text-xl sm:text-3xl font-extrabold text-white mt-2 mb-2">${data.about.title}</h2>
           <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">${data.about.desc}</p>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-slate-800 mt-6">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 pt-5 border-t border-slate-800/80 mt-5">
             ${data.about.stats.map(st => `
-              <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80">
-                <div class="text-amber-400 font-bold text-lg mb-1">${st.val}</div>
-                <div class="text-slate-300 font-semibold text-xs mb-1">${st.label}</div>
+              <div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 flex sm:flex-col justify-between sm:justify-start items-center sm:items-start">
+                <div class="text-slate-300 font-medium text-xs sm:mb-1 order-1 sm:order-2">${st.label}</div>
+                <div class="text-amber-400 font-bold text-base sm:text-lg order-2 sm:order-1">${st.val}</div>
               </div>
             `).join('')}
           </div>
