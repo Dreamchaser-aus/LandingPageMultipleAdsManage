@@ -27,7 +27,7 @@
   <header class="border-b border-slate-800 bg-[#111827]/90 backdrop-blur-md sticky top-0 z-50">
     <div class="max-w-5xl mx-auto px-4 py-3.5 flex items-center justify-between">
       <div class="flex items-center space-x-2.5">
-        <span class="font-bold text-base sm:text-lg tracking-wider text-amber-400">MEGA88 PARTNERSHIP</span>
+        <span class="font-bold text-base sm:text-lg tracking-wider text-amber-400" id="nav-brand-title">MEGA88 PARTNERSHIP</span>
       </div>
 
       <!-- 桌面端导航 -->
@@ -98,7 +98,7 @@
   </main>
 
   <footer class="border-t border-slate-800 bg-[#111827] mt-12 py-6 text-center text-[11px] sm:text-xs text-slate-500">
-    <p>&copy; 2021 MEGA88 PARTNERSHIP. All Rights Reserved. Play Responsibly.</p>
+    <p>&copy; 2026 MEGA88 PARTNERSHIP. All Rights Reserved. Play Responsibly.</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
@@ -115,22 +115,20 @@
       });
     }
 
-    // 基础防崩溃默认数据
+    // 防崩溃兜底数据
     const defaultData = {
       companies: [
         { id: 1, name: "MegaWin Casino Malaysia", url: "https://google.com", desc_text: "Top-tier verified gaming platform offering safe entertainment and instant bonuses.", icon_url: "" },
-        { id: 2, name: "Lucky4D Partner Hub", url: "https://google.com", desc_text: "Trusted insights and smart play guides curated for professional enthusiasts.", icon_url: "" },
-        { id: 3, name: "Grand Spin Official", url: "https://google.com", desc_text: "Premier destination for modern digital slot reviews and high RTP games.", icon_url: "" },
-        { id: 4, name: "Royal Bet Portal", url: "https://google.com", desc_text: "Fast withdrawals and verified security compliance for regional players.", icon_url: "" }
+        { id: 2, name: "Lucky4D Partner Hub", url: "https://google.com", desc_text: "Trusted insights and smart play guides curated for professional enthusiasts.", icon_url: "" }
       ],
       slides: [
-        { badge: "Hot Bonuses 2026", title: "Expert Reviews & Smart Play Guidance", desc: "Discover trusted platform insights, verified ratings, and responsible play strategies curated by industry professionals.", btnText: "Explore Casinos" },
-        { badge: "100% Verified Partners", title: "Tested Games & Transparent Ratings", desc: "Over 1,380+ games tested and 680+ casino sites reviewed monthly to ensure a safer navigation experience.", btnText: "Learn More About Us" }
+        { badge: "Hot Bonuses 2026", title: "Expert Reviews & Smart Play Guidance", desc: "Discover trusted platform insights, verified ratings, and responsible play strategies curated by industry professionals.", btnText: "Explore Casinos", link: "#Casino" },
+        { badge: "100% Verified Partners", title: "Tested Games & Transparent Ratings", desc: "Over 1,380+ games tested and 680+ casino sites reviewed monthly to ensure a safer navigation experience.", btnText: "Learn More About Us", link: "#AboutUs" }
       ],
       about: {
         badge: "About MEGA88 PARTNERSHIP",
         title: "Dedicated to Safer & Smarter Play",
-        desc: "MEGA88 PARTNERSHIP is built by a team of veteran researchers and analysts. Our mission is to cut through the noise of online platforms, delivering transparent, unbiased information and robust guidance.",
+        description: "MEGA88 PARTNERSHIP is built by a team of veteran researchers and analysts. Our mission is to cut through the noise of online platforms, delivering transparent, unbiased information and robust guidance.",
         stats: [
           { val: "680+", label: "Casino Sites Reviewed" },
           { val: "1,380+", label: "Games Tested" },
@@ -139,47 +137,64 @@
       }
     };
 
-    function loadSiteContent() {
-      const dataStr = localStorage.getItem('gang_site_content');
-      return dataStr ? JSON.parse(dataStr) : defaultData;
-    }
+    // 并行拉取后端最新数据（轮播图、配置、卡片）
+    async function loadAllData() {
+      let slides = defaultData.slides;
+      let about = defaultData.about;
+      let companies = defaultData.companies;
 
-    // 渲染前端动态内容
-    async function renderFrontend() {
-      let data = loadSiteContent();
-
-      // 从后端 API 请求最新的全量卡片数据
       try {
-        const res = await fetch('/api/websites');
-        const json = await res.json();
-        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-          data.companies = json.data;
-          
-          // 强行刷新本地缓存，防止旧卡片缓存滞后
-          const currentData = loadSiteContent();
-          currentData.companies = json.data;
-          localStorage.setItem('gang_site_content', JSON.stringify(currentData));
+        const [configRes, sitesRes] = await Promise.all([
+          fetch('/api/config').then(res => res.json()).catch(() => null),
+          fetch('/api/websites').then(res => res.json()).catch(() => null)
+        ]);
+
+        if (configRes && configRes.success && configRes.data) {
+          if (Array.isArray(configRes.data.slides) && configRes.data.slides.length > 0) {
+            slides = configRes.data.slides;
+          }
+          if (configRes.data.about) {
+            about = configRes.data.about;
+          }
         }
-      } catch (e) {
-        console.warn('从 API 获取最新卡片失败，使用备用/本地数据:', e);
+
+        if (sitesRes && sitesRes.success && Array.isArray(sitesRes.data) && sitesRes.data.length > 0) {
+          companies = sitesRes.data;
+        }
+      } catch (err) {
+        console.warn('从 API 加载实时数据异常，已使用备用数据:', err);
       }
 
+      renderFrontend({ slides, about, companies });
+    }
+
+    // 渲染前端 UI 界面
+    function renderFrontend(data) {
       // 1. 渲染轮播图
       const slideWrapper = document.getElementById('dynamicSlidesWrapper');
       if (slideWrapper && data.slides) {
-        slideWrapper.innerHTML = data.slides.map(s => `
-          <div class="swiper-slide bg-gradient-to-r from-slate-900 via-amber-950/40 to-slate-900 p-6 sm:p-12 md:p-16 flex flex-col justify-center pb-12 sm:pb-12 min-h-[260px] sm:min-h-[340px] relative">
-            <span class="px-2.5 py-0.5 text-[10px] sm:text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full w-max mb-2 sm:mb-3 font-semibold">${s.badge}</span>
-            <h2 class="text-xl sm:text-4xl font-black text-white mb-2 sm:mb-3 max-w-xl leading-snug">${s.title}</h2>
-            <p class="text-slate-300 text-xs sm:text-sm max-w-lg mb-4 sm:mb-6 leading-relaxed line-clamp-3 sm:line-clamp-none">${s.desc}</p>
-            <div>
-              <a href="#Casino" class="inline-flex items-center space-x-2 px-5 py-2 sm:px-6 sm:py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-red-600 text-white font-semibold text-xs sm:text-sm shadow-lg active:scale-95 transition-transform">
-                <span>${s.btnText}</span>
-                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-              </a>
+        slideWrapper.innerHTML = data.slides.map(s => {
+          const badge = s.badge || 'Verified Partner';
+          const title = s.title || 'Official Recommendation';
+          const desc = s.desc || s.description || 'Explore verified sites and top-rated games with maximum safety.';
+          const btnText = s.btnText || 'Explore Now';
+          const targetLink = s.link || s.url || '#Casino';
+          const bgImage = s.image ? `background-image: linear-gradient(to right, rgba(11,15,25,0.9), rgba(11,15,25,0.5)), url('${s.image}'); background-size: cover; background-position: center;` : '';
+
+          return `
+            <div class="swiper-slide bg-gradient-to-r from-slate-900 via-amber-950/40 to-slate-900 p-6 sm:p-12 md:p-16 flex flex-col justify-center pb-12 sm:pb-12 min-h-[260px] sm:min-h-[340px] relative" style="${bgImage}">
+              <span class="px-2.5 py-0.5 text-[10px] sm:text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full w-max mb-2 sm:mb-3 font-semibold">${badge}</span>
+              <h2 class="text-xl sm:text-4xl font-black text-white mb-2 sm:mb-3 max-w-xl leading-snug">${title}</h2>
+              <p class="text-slate-300 text-xs sm:text-sm max-w-lg mb-4 sm:mb-6 leading-relaxed line-clamp-3 sm:line-clamp-none">${desc}</p>
+              <div>
+                <a href="${targetLink}" class="inline-flex items-center space-x-2 px-5 py-2 sm:px-6 sm:py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-red-600 text-white font-semibold text-xs sm:text-sm shadow-lg active:scale-95 transition-transform">
+                  <span>${btnText}</span>
+                  <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </a>
+              </div>
             </div>
-          </div>
-        `).join('');
+          `;
+        }).join('');
 
         if (window.mySwiperInstance) {
           window.mySwiperInstance.destroy(true, true);
@@ -191,15 +206,15 @@
         });
       }
 
-      // 2. 渲染所有卡片列表（全面优化 Logo 容器，保证完美缩放无拉伸裁切）
+      // 2. 渲染落地页卡片
       const siteList = document.getElementById('siteList');
       if (siteList && Array.isArray(data.companies)) {
         siteList.innerHTML = data.companies.map((site, index) => {
           const siteId = site.id || index;
-          const safeName = site.name || 'Verified Partner';
+          const safeName = site.name || site.title || 'Verified Partner';
           const safeUrl = site.url || '#';
           const safeDesc = site.desc_text || site.description || 'Official safe navigation channel & trusted review.';
-          const safeIcon = site.icon_url || site.logo || `https://api.dicebear.com/7.x/identicon/svg?seed=${siteId}`;
+          const safeIcon = site.icon_url || site.icon || `https://api.dicebear.com/7.x/identicon/svg?seed=${siteId}`;
 
           return `
             <div data-id="${siteId}" 
@@ -211,7 +226,6 @@
               <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-500 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
               <div class="flex items-start space-x-3 mb-3">
-                <!-- 优化后的 Logo 容器：固定宽高 + 背景衬底 + 内边距 + object-contain 缩放 -->
                 <div class="w-11 h-11 sm:w-12 sm:h-12 bg-slate-800/90 rounded-xl border border-slate-700/60 p-1 flex items-center justify-center shrink-0 overflow-hidden group-hover:scale-105 transition-transform shadow-inner">
                   <img src="${safeIcon}" 
                        alt="${safeName}"
@@ -244,7 +258,6 @@
           `;
         }).join('');
 
-        // 绑定点击与行为追踪事件
         document.querySelectorAll('#siteList > div').forEach(card => {
           card.addEventListener('click', () => {
             const id = card.getAttribute('data-id');
@@ -258,12 +271,22 @@
       // 3. 渲染 About Us
       const aboutArea = document.getElementById('aboutContentArea');
       if (aboutArea && data.about) {
+        if (data.about.title) {
+          document.getElementById('nav-brand-title').innerText = data.about.title;
+        }
+
+        const stats = data.about.stats || [
+          { val: "680+", label: "Casino Sites Reviewed" },
+          { val: "1,380+", label: "Games Tested" },
+          { val: "376+ Hrs", label: "Monthly Research" }
+        ];
+
         aboutArea.innerHTML = `
-          <span class="px-2.5 py-0.5 text-[10px] sm:text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-semibold">${data.about.badge}</span>
-          <h2 class="text-xl sm:text-3xl font-extrabold text-white mt-2 mb-2">${data.about.title}</h2>
-          <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">${data.about.desc}</p>
+          <span class="px-2.5 py-0.5 text-[10px] sm:text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-semibold">${data.about.badge || 'About Us'}</span>
+          <h2 class="text-xl sm:text-3xl font-extrabold text-white mt-2 mb-2">${data.about.title || 'Dedicated to Safer & Smarter Play'}</h2>
+          <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">${data.about.description || data.about.desc || ''}</p>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 pt-5 border-t border-slate-800/80 mt-5">
-            ${data.about.stats.map(st => `
+            ${stats.map(st => `
               <div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 flex sm:flex-col justify-between sm:justify-start items-center sm:items-start">
                 <div class="text-slate-300 font-medium text-xs sm:mb-1 order-1 sm:order-2">${st.label}</div>
                 <div class="text-amber-400 font-bold text-base sm:text-lg order-2 sm:order-1">${st.val}</div>
@@ -284,7 +307,7 @@
       return vid;
     }
 
-    // UTM 参数解析与全局捕获
+    // UTM 参数捕获
     function captureAndGetUtm() {
       const urlParams = new URLSearchParams(window.location.search);
       const urlSource = urlParams.get('source') || urlParams.get('utm_source');
@@ -299,7 +322,7 @@
       return { source, campaign };
     }
 
-    // 打点追踪与跳转（优先使用 sendBeacon）
+    // 点击打点追踪并跳转
     function trackAndRedirect(siteId, siteName, targetUrl) {
       const visitorId = getVisitorId();
       const { source, campaign } = captureAndGetUtm();
@@ -339,7 +362,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       captureAndGetUtm();
-      renderFrontend();
+      loadAllData();
     });
   </script>
 </body>
