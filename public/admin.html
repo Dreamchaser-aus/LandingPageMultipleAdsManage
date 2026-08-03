@@ -131,7 +131,6 @@
                 <h3 class="text-base font-bold text-slate-900">👥 访客列表与点击轨迹</h3>
                 <p class="text-xs text-slate-500 mt-0.5">点击任意用户行可查看点击路径顺序</p>
               </div>
-              
               <div class="flex items-center gap-2 text-xs text-slate-600">
                 <span>每页显示:</span>
                 <select id="pageSizeSelect" onchange="changePageSize(this.value)" class="border border-slate-200 rounded-lg px-2 py-1 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -163,16 +162,12 @@
 
             <div class="mt-5 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600">
               <div id="pageInfoText">共 0 条数据，显示第 0-0 条</div>
-              
               <div class="flex items-center gap-1.5">
                 <button id="btnFirst" onclick="goToPage(1)" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">首页</button>
                 <button id="btnPrev" onclick="changePage(-1)" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">上一页</button>
-                
                 <span class="px-3 py-1 bg-slate-100 text-slate-700 font-semibold rounded-lg" id="currentPageTag">第 1 / 1 页</span>
-                
                 <button id="btnNext" onclick="changePage(1)" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">下一页</button>
                 <button id="btnLast" onclick="goToLastPage()" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">尾页</button>
-                
                 <div class="flex items-center gap-1 ml-3 pl-3 border-l border-slate-200">
                   <span>跳至</span>
                   <input type="number" id="jumpPageInput" min="1" class="w-12 px-2 py-1 border border-slate-200 rounded-md text-center focus:outline-none" placeholder="1">
@@ -181,7 +176,6 @@
                 </div>
               </div>
             </div>
-
           </div>
         </section>
 
@@ -189,7 +183,6 @@
         <section id="tab-websites" class="tab-content hidden space-y-6">
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
             <h3 class="text-base font-bold text-slate-900 mb-4">🌐 动态添加 / 编辑 index.html 平台卡片</h3>
-            
             <form id="websiteForm" onsubmit="handleWebsiteSubmit(event)" class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
               <input type="hidden" id="editSiteId">
               <div>
@@ -237,7 +230,6 @@
         <section id="tab-slides" class="tab-content hidden space-y-6">
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
             <h3 class="text-base font-bold text-slate-900 mb-4">🖼️ 动态管理 index.html 轮播图 (Slideshow)</h3>
-
             <form id="slideForm" onsubmit="handleSlideSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
               <input type="hidden" id="editSlideId">
               <div>
@@ -285,7 +277,6 @@
         <section id="tab-about" class="tab-content hidden space-y-6">
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60 max-w-4xl">
             <h3 class="text-base font-bold text-slate-900 mb-4">ℹ️ 自定义 index.html 关于我们板块 (About Us)</h3>
-
             <form id="aboutForm" onsubmit="handleAboutSubmit(event)" class="space-y-4">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -403,7 +394,6 @@
     const STORAGE_KEY = 'gang_site_content';
     const TOKEN_KEY = 'admin_jwt_token';
 
-    // 默认基础数据结构
     const defaultSiteContent = {
       companies: [
         { id: 1, name: "MegaWin Casino Malaysia", url: "#", desc_text: "Top-tier verified gaming platform offering safe entertainment and instant bonuses.", icon_url: "" },
@@ -414,9 +404,9 @@
         { id: 2, badge: "100% Verified Partners", title: "Tested Games & Transparent Ratings", desc: "Over 1,380+ games tested and 680+ casino sites reviewed monthly to ensure a safer navigation experience.", btnText: "Learn More About Us" }
       ],
       about: {
-        badge: "About 4D Gang Malaysia",
+        badge: "About MEGA88 PARTNERSHIP",
         title: "Dedicated to Safer & Smarter Play",
-        desc: "4D Gang Malaysia is built by a team of veteran researchers and analysts. Our mission is to cut through the noise of online platforms, delivering transparent, unbiased information and robust guidance.",
+        desc: "MEGA88 PARTNERSHIP is built by a team of veteran researchers and analysts. Our mission is to cut through the noise of online platforms, delivering transparent, unbiased information and robust guidance.",
         stats: [
           { val: "680+", label: "Casino Sites Reviewed" },
           { val: "1,380+", label: "Games Tested" },
@@ -425,7 +415,6 @@
       }
     };
 
-    // ================= JWT 统一请求与授权中间函数 =================
     async function authFetch(url, options = {}) {
       const token = localStorage.getItem(TOKEN_KEY);
       if (!token) {
@@ -500,14 +489,13 @@
       }
     }
 
-    // LocalStorage 配置获取与保存
     function getSiteContent() {
-      const dataStr = localStorage.getItem(STORAGE_KEY);
-      if (!dataStr) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultSiteContent));
-        return defaultSiteContent;
-      }
       try {
+        const dataStr = localStorage.getItem(STORAGE_KEY);
+        if (!dataStr) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultSiteContent));
+          return defaultSiteContent;
+        }
         return JSON.parse(dataStr);
       } catch(e) {
         return defaultSiteContent;
@@ -518,7 +506,6 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     }
 
-    // ================= 分页与 Tab 状态控制 =================
     let currentPage = 1;
     let pageSize = 20;
     let totalRecords = 0;
@@ -569,7 +556,6 @@
       fetchLinksHistory();
     }
 
-    // 1. 数据报表总览
     async function fetchStats() {
       const tbody = document.getElementById('statsTable');
       try {
@@ -595,7 +581,6 @@
       }
     }
 
-    // UA 解析工具函数
     function parseUserAgent(ua) {
       if (!ua || ua === 'Unknown') return { label: '未知设备', icon: '❓' };
       let os = '未知系统';
@@ -616,7 +601,6 @@
       return { label: `${os} · ${browser}`, icon };
     }
 
-    // 2. 用户轨迹列表
     async function fetchUserJourneys() {
       const tbody = document.getElementById('journeysTable');
       tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">加载中...</td></tr>';
@@ -761,7 +745,6 @@
       }
     }
 
-    // ================= 3. 落地页与平台卡片管理 =================
     async function fetchManageWebsites() {
       try {
         const content = getSiteContent();
@@ -815,7 +798,6 @@
       content.companies = companies;
       saveSiteContent(content);
 
-      // 同步推送到服务端 PostgreSQL（已包含 JWT 鉴权）
       try {
         await authFetch(`${baseUrl}/api/websites${id ? '/' + id : ''}`, {
           method: id ? 'PUT' : 'POST',
@@ -868,7 +850,6 @@
       fetchManageWebsites();
     }
 
-    // ================= 4. 首页轮播图管理 =================
     function fetchManageSlides() {
       const content = getSiteContent();
       renderSlidesManageTable(content.slides || []);
@@ -952,7 +933,6 @@
       fetchManageSlides();
     }
 
-    // ================= 5. 关于我们配置 =================
     function loadAboutForm() {
       const content = getSiteContent();
       const about = content.about || defaultSiteContent.about;
@@ -1004,7 +984,6 @@
       alert('“关于我们”信息更新成功！已同步至 index.html');
     }
 
-    // ================= 6. 解析与导入外部 UTM 链接 =================
     async function importExternalUtmLink() {
       const inputUrl = document.getElementById('externalUrlInput').value.trim();
       if (!inputUrl) return alert('请输入完备的 UTM 链接');
@@ -1037,7 +1016,6 @@
       }
     }
 
-    // ================= 7. 历史推广链接 =================
     async function fetchLinksHistory() {
       const tbody = document.getElementById('linksTable');
       try {
