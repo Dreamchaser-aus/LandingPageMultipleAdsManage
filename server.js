@@ -106,7 +106,7 @@ pool.connect((err, client, release) => {
 // 初始化数据库表结构
 async function initDatabase() {
   try {
-    // 用户轨迹表
+    // 1. 用户轨迹表
     await pool.query(`
       CREATE TABLE IF NOT EXISTS user_tracks (
         id SERIAL PRIMARY KEY,
@@ -121,7 +121,7 @@ async function initDatabase() {
     `);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_visitor_active ON user_tracks(visitor_id, created_at)`);
 
-    // 落地页站点卡片表 (包含 icon_url 用于存放上传的图片路径)
+    // 2. 落地页站点卡片表
     await pool.query(`
       CREATE TABLE IF NOT EXISTS websites (
         id SERIAL PRIMARY KEY,
@@ -133,7 +133,7 @@ async function initDatabase() {
       )
     `);
 
-    // 推广链接生成记录表
+    // 3. 推广链接生成记录表
     await pool.query(`
       CREATE TABLE IF NOT EXISTS generated_links (
         id SERIAL PRIMARY KEY,
@@ -145,9 +145,33 @@ async function initDatabase() {
       )
     `);
 
+    // 4. 首页轮播图表
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS slides (
+        id SERIAL PRIMARY KEY,
+        badge TEXT NOT NULL,
+        title TEXT NOT NULL,
+        desc_text TEXT NOT NULL,
+        btn_text TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // 5. 关于我们配置表
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS about_us (
+        id INT PRIMARY KEY DEFAULT 1,
+        badge TEXT,
+        title TEXT,
+        desc_text TEXT,
+        stats JSONB,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     // 初始化默认卡片数据（如果表为空）
-    const checkRes = await pool.query(`SELECT COUNT(*) AS count FROM websites`);
-    if (parseInt(checkRes.rows[0].count, 10) === 0) {
+    const checkWebsites = await pool.query(`SELECT COUNT(*) AS count FROM websites`);
+    if (parseInt(checkWebsites.rows[0].count, 10) === 0) {
       await pool.query(
         `INSERT INTO websites (name, desc_text, url, icon_url) VALUES ($1, $2, $3, $4)`,
         ['MegaWin Casino Malaysia', 'Top-tier verified gaming platform offering safe entertainment and instant bonuses.', 'https://google.com', 'https://api.dicebear.com/7.x/identicon/svg?seed=megawin']
@@ -158,6 +182,32 @@ async function initDatabase() {
       );
       console.log('💡 已初始化默认落地页卡片数据');
     }
+
+    // 初始化默认轮播图数据（如果表为空）
+    const checkSlides = await pool.query(`SELECT COUNT(*) AS count FROM slides`);
+    if (parseInt(checkSlides.rows[0].count, 10) === 0) {
+      await pool.query(
+        `INSERT INTO slides (badge, title, desc_text, btn_text) VALUES ($1, $2, $3, $4)`,
+        ['Hot Bonuses 2026', 'Expert Reviews & Smart Play Guidance', 'Discover trusted platform insights, exclusive bonuses, and data-driven guides.', 'Explore Platform']
+      );
+      console.log('💡 已初始化默认轮播图数据');
+    }
+
+    // 初始化默认关于我们数据（如果表为空）
+    const checkAbout = await pool.query(`SELECT COUNT(*) AS count FROM about_us`);
+    if (parseInt(checkAbout.rows[0].count, 10) === 0) {
+      const defaultStats = JSON.stringify([
+        { val: '680+', label: 'Casino Sites Reviewed' },
+        { val: '1,380+', label: 'Games Tested' },
+        { val: '376+ Hrs', label: 'Monthly Research' }
+      ]);
+      await pool.query(
+        `INSERT INTO about_us (id, badge, title, desc_text, stats) VALUES (1, $1, $2, $3, $4)`,
+        ['Who We Are', 'Independent, Honest & Data-Driven Insights', 'We are a team of iGaming experts dedicated to evaluating platforms, bonus terms, and game fairness.', defaultStats]
+      );
+      console.log('💡 已初始化默认关于我们数据');
+    }
+
   } catch (err) {
     console.error('❌ 初始化数据表失败:', err.message);
   }
@@ -188,14 +238,12 @@ app.post('/api/login', (req, res) => {
 
 /**
  * 图片上传 API (需登录)
- * 用于后台站点管理单独上传图标/Logo
  */
 app.post('/api/upload', authenticateToken, upload.single('icon'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ success: false, message: '请选择要上传的图片文件' });
   }
 
-  // 返回存入数据库的相对访问路径
   const iconUrl = `/uploads/${req.file.filename}`;
   res.json({
     success: true,
@@ -203,7 +251,6 @@ app.post('/api/upload', authenticateToken, upload.single('icon'), (req, res) => 
     icon_url: iconUrl
   });
 }, (err, req, res, next) => {
-  // 捕捉 multer 校验或体积超限错误
   res.status(400).json({ success: false, message: err.message });
 });
 
@@ -243,12 +290,43 @@ app.post('/api/track', async (req, res) => {
 });
 
 /**
- * 获取卡片列表 API (公开：允许前端展示卡片)
+ * 获取卡片列表 API (公开：提供给前端 index.html 渲染)
  */
 app.get('/api/websites', async (req, res) => {
   try {
     const result = await pool.query(`SELECT * FROM websites ORDER BY id DESC`);
     res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * 获取轮播图列表 API (公开：提供给前端 index.html 渲染)
+ */
+app.get('/api/slides', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, badge, title, desc_text AS desc, btn_text AS "btnText" FROM slides ORDER BY id DESC`
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * 获取关于我们 API (公开：提供给前端 index.html 渲染)
+ */
+app.get('/api/about', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT badge, title, desc_text AS desc, stats FROM about_us WHERE id = 1`
+    );
+    if (result.rows.length === 0) {
+      return res.json({ success: true, data: null });
+    }
+    res.json({ success: true, data: result.rows[0] });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -351,6 +429,68 @@ app.delete('/api/websites/:id', authenticateToken, async (req, res) => {
   try {
     await pool.query(`DELETE FROM websites WHERE id = $1`, [req.params.id]);
     res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * 轮播图管理 API (需登录)
+ */
+app.post('/api/slides', authenticateToken, async (req, res) => {
+  const { badge, title, desc, btnText } = req.body;
+  try {
+    const result = await pool.query(
+      `INSERT INTO slides (badge, title, desc_text, btn_text) VALUES ($1, $2, $3, $4) RETURNING id`,
+      [badge, title, desc, btnText]
+    );
+    res.json({ success: true, id: result.rows[0].id });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.put('/api/slides/:id', authenticateToken, async (req, res) => {
+  const { badge, title, desc, btnText } = req.body;
+  try {
+    await pool.query(
+      `UPDATE slides SET badge = $1, title = $2, desc_text = $3, btn_text = $4 WHERE id = $5`,
+      [badge, title, desc, btnText, req.params.id]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.delete('/api/slides/:id', authenticateToken, async (req, res) => {
+  try {
+    await pool.query(`DELETE FROM slides WHERE id = $1`, [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * 保存/更新关于我们 API (需登录)
+ */
+app.post('/api/about', authenticateToken, async (req, res) => {
+  const { badge, title, desc, stats } = req.body;
+  try {
+    const statsJson = JSON.stringify(stats || []);
+    await pool.query(
+      `INSERT INTO about_us (id, badge, title, desc_text, stats, updated_at)
+       VALUES (1, $1, $2, $3, $4, NOW())
+       ON CONFLICT (id) DO UPDATE SET
+         badge = EXCLUDED.badge,
+         title = EXCLUDED.title,
+         desc_text = EXCLUDED.desc_text,
+         stats = EXCLUDED.stats,
+         updated_at = NOW()`,
+      [badge, title, desc, statsJson]
+    );
+    res.json({ success: true, message: '“关于我们”数据更新成功' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
