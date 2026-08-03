@@ -27,15 +27,14 @@
   <header class="border-b border-slate-800 bg-[#111827]/90 backdrop-blur-md sticky top-0 z-50">
     <div class="max-w-5xl mx-auto px-4 py-3.5 flex items-center justify-between">
       <div class="flex items-center space-x-2.5">
-        <span class="font-bold text-base sm:text-lg tracking-wider text-amber-400" id="nav-brand-title">MEGA88 PARTNERSHIP</span>
+        <span class="font-bold text-base sm:text-lg tracking-wider text-amber-400">MEGA88 PARTNERSHIP</span>
       </div>
 
-      <!-- 桌面端导航 -->
-      <nav class="hidden md:flex items-center space-x-6 text-sm text-slate-300 font-medium">
-        <a href="#Home" class="hover:text-amber-400 transition-colors">Home</a>
-        <a href="#Slideshow" class="hover:text-amber-400 transition-colors">Highlights</a>
-        <a href="#Casino" class="hover:text-amber-400 transition-colors">Online Casinos</a>
-        <a href="#AboutUs" class="hover:text-amber-400 transition-colors">About Us</a>
+      <!-- 桌面端导航 (增加了 nav-link 类用于 JS 控制) -->
+      <nav class="hidden md:flex items-center space-x-6 text-sm font-medium">
+        <a href="#Casino" class="nav-link text-amber-400 hover:text-amber-400 transition-colors">Home</a>
+        <a href="#Slideshow" class="nav-link text-slate-300 hover:text-amber-400 transition-colors">Highlights</a>
+        <a href="#AboutUs" class="nav-link text-slate-300 hover:text-amber-400 transition-colors">About Us</a>
       </nav>
 
       <div class="flex items-center space-x-3">
@@ -52,27 +51,16 @@
 
     <!-- 移动端下拉菜单 -->
     <div id="mobileMenu" class="hidden md:hidden border-t border-slate-800/80 bg-[#111827] px-4 py-3 space-y-2.5 text-sm font-medium shadow-2xl">
-      <a href="#Home" class="mobile-nav-link block py-2 text-slate-300 hover:text-amber-400 border-b border-slate-800/50">Home</a>
+      <a href="#Casino" class="mobile-nav-link block py-2 text-amber-400 hover:text-amber-400 border-b border-slate-800/50">Home</a>
       <a href="#Slideshow" class="mobile-nav-link block py-2 text-slate-300 hover:text-amber-400 border-b border-slate-800/50">Highlights</a>
-      <a href="#Casino" class="mobile-nav-link block py-2 text-slate-300 hover:text-amber-400 border-b border-slate-800/50">Online Casinos</a>
       <a href="#AboutUs" class="mobile-nav-link block py-2 text-slate-300 hover:text-amber-400">About Us</a>
     </div>
   </header>
 
-  <main class="max-w-5xl mx-auto px-3.5 sm:px-6 py-6 sm:py-8 space-y-8 sm:space-y-12">
+  <main class="max-w-5xl mx-auto px-3.5 sm:px-6 py-6 sm:py-8 min-h-[70vh]">
 
-    <!-- 1. Slideshow 动态轮播图 -->
-    <section id="Slideshow" class="pt-2">
-      <div class="swiper mySwiper rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
-        <div class="swiper-wrapper" id="dynamicSlidesWrapper">
-          <!-- 动态加载 -->
-        </div>
-        <div class="swiper-pagination !bottom-2 sm:!bottom-4"></div>
-      </div>
-    </section>
-
-    <!-- 2. Multiple Companies 多个公司/平台区 -->
-    <section id="Casino" class="space-y-4 sm:space-y-6 pt-2">
+    <!-- 1. Multiple Companies 多个公司/平台区 (默认显示) -->
+    <section id="Casino" class="view-section space-y-4 sm:space-y-6 pt-2 block">
       <div class="flex flex-col sm:flex-row sm:items-end justify-between border-b border-slate-800/80 pb-3">
         <div>
           <span class="text-amber-400 text-[11px] sm:text-xs font-bold uppercase tracking-wider">Trusted Navigation</span>
@@ -88,8 +76,18 @@
       </div>
     </section>
 
-    <!-- 3. About Us 关于我们区 -->
-    <section id="AboutUs" class="bg-[#111827] rounded-2xl sm:rounded-3xl p-5 sm:p-10 border border-slate-800 shadow-xl space-y-6">
+    <!-- 2. Slideshow 动态轮播图 (默认隐藏) -->
+    <section id="Slideshow" class="view-section pt-2 hidden">
+      <div class="swiper mySwiper rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
+        <div class="swiper-wrapper" id="dynamicSlidesWrapper">
+          <!-- 动态加载 -->
+        </div>
+        <div class="swiper-pagination !bottom-2 sm:!bottom-4"></div>
+      </div>
+    </section>
+
+    <!-- 3. About Us 关于我们区 (默认隐藏) -->
+    <section id="AboutUs" class="view-section bg-[#111827] rounded-2xl sm:rounded-3xl p-5 sm:p-10 border border-slate-800 shadow-xl space-y-6 hidden">
       <div class="max-w-2xl" id="aboutContentArea">
         <!-- 动态加载 -->
       </div>
@@ -103,32 +101,69 @@
 
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script>
-    // 移动端菜单切换
-    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-    const mobileMenu = document.getElementById('mobileMenu');
-    if (mobileMenuBtn && mobileMenu) {
-      mobileMenuBtn.addEventListener('click', () => {
-        mobileMenu.classList.toggle('hidden');
-      });
-      document.querySelectorAll('.mobile-nav-link').forEach(link => {
-        link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+    // ----------------- 新增：Tab 切换逻辑 -----------------
+    function switchSection(targetId) {
+      // 1. 隐藏所有 section
+      document.querySelectorAll('.view-section').forEach(sec => sec.classList.add('hidden'));
+      
+      // 2. 显示目标 section
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) targetEl.classList.remove('hidden');
+
+      // 3. 重新计算 Swiper 尺寸 (解决 Swiper 在 display:none 下初始化会导致宽度为0的bug)
+      if (targetId === 'Slideshow' && window.mySwiperInstance) {
+        window.mySwiperInstance.update();
+      }
+
+      // 4. 更新导航栏高亮状态
+      document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
+        link.classList.remove('text-amber-400');
+        link.classList.add('text-slate-300');
+        
+        if (link.getAttribute('href') === `#${targetId}`) {
+          link.classList.remove('text-slate-300');
+          link.classList.add('text-amber-400');
+        }
       });
     }
 
-    // 防崩溃兜底数据
+    // 监听导航点击事件
+    document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href').replace('#', '');
+        switchSection(targetId);
+        
+        // 如果是移动端菜单，点击后自动收起
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+          mobileMenu.classList.add('hidden');
+        }
+      });
+    });
+
+    // 移动端菜单开关
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    if (mobileMenuBtn) {
+      mobileMenuBtn.addEventListener('click', () => {
+        document.getElementById('mobileMenu').classList.toggle('hidden');
+      });
+    }
+
+    // ----------------- 默认数据与渲染逻辑 -----------------
     const defaultData = {
       companies: [
         { id: 1, name: "MegaWin Casino Malaysia", url: "https://google.com", desc_text: "Top-tier verified gaming platform offering safe entertainment and instant bonuses.", icon_url: "" },
         { id: 2, name: "Lucky4D Partner Hub", url: "https://google.com", desc_text: "Trusted insights and smart play guides curated for professional enthusiasts.", icon_url: "" }
       ],
       slides: [
-        { badge: "Hot Bonuses 2026", title: "Expert Reviews & Smart Play Guidance", desc: "Discover trusted platform insights, verified ratings, and responsible play strategies curated by industry professionals.", btnText: "Explore Casinos", link: "#Casino" },
-        { badge: "100% Verified Partners", title: "Tested Games & Transparent Ratings", desc: "Over 1,380+ games tested and 680+ casino sites reviewed monthly to ensure a safer navigation experience.", btnText: "Learn More About Us", link: "#AboutUs" }
+        { badge: "Hot Bonuses 2026", title: "Expert Reviews & Smart Play Guidance", desc: "Discover trusted platform insights, verified ratings, and responsible play strategies curated by industry professionals.", btnText: "Explore Casinos" },
+        { badge: "100% Verified Partners", title: "Tested Games & Transparent Ratings", desc: "Over 1,380+ games tested and 680+ casino sites reviewed monthly to ensure a safer navigation experience.", btnText: "Learn More About Us" }
       ],
       about: {
         badge: "About MEGA88 PARTNERSHIP",
         title: "Dedicated to Safer & Smarter Play",
-        description: "MEGA88 PARTNERSHIP is built by a team of veteran researchers and analysts. Our mission is to cut through the noise of online platforms, delivering transparent, unbiased information and robust guidance.",
+        desc: "MEGA88 PARTNERSHIP is built by a team of veteran researchers and analysts. Our mission is to cut through the noise of online platforms, delivering transparent, unbiased information and robust guidance.",
         stats: [
           { val: "680+", label: "Casino Sites Reviewed" },
           { val: "1,380+", label: "Games Tested" },
@@ -137,68 +172,42 @@
       }
     };
 
-    // 并行拉取后端最新数据（轮播图、配置、卡片）
-    async function loadAllData() {
-      let slides = defaultData.slides;
-      let about = defaultData.about;
-      let companies = defaultData.companies;
-
-      try {
-        const [configRes, sitesRes] = await Promise.all([
-          fetch('/api/config').then(res => res.json()).catch(() => null),
-          fetch('/api/websites').then(res => res.json()).catch(() => null)
-        ]);
-
-        if (configRes && configRes.success && configRes.data) {
-          if (Array.isArray(configRes.data.slides) && configRes.data.slides.length > 0) {
-            slides = configRes.data.slides;
-          }
-          if (configRes.data.about) {
-            about = configRes.data.about;
-          }
-        }
-
-        if (sitesRes && sitesRes.success && Array.isArray(sitesRes.data) && sitesRes.data.length > 0) {
-          companies = sitesRes.data;
-        }
-      } catch (err) {
-        console.warn('从 API 加载实时数据异常，已使用备用数据:', err);
-      }
-
-      renderFrontend({ slides, about, companies });
+    function loadSiteContent() {
+      const dataStr = localStorage.getItem('gang_site_content');
+      return dataStr ? JSON.parse(dataStr) : defaultData;
     }
 
-    // 渲染前端 UI 界面
-    function renderFrontend(data) {
+    async function renderFrontend() {
+      let data = loadSiteContent();
+
+      try {
+        const res = await fetch('/api/websites');
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          data.companies = json.data;
+        }
+      } catch (e) {
+        console.warn('API 请求失败，使用本地数据:', e);
+      }
+
       // 1. 渲染轮播图
       const slideWrapper = document.getElementById('dynamicSlidesWrapper');
       if (slideWrapper && data.slides) {
-        slideWrapper.innerHTML = data.slides.map(s => {
-          const badge = s.badge || 'Verified Partner';
-          const title = s.title || 'Official Recommendation';
-          const desc = s.desc || s.description || 'Explore verified sites and top-rated games with maximum safety.';
-          const btnText = s.btnText || 'Explore Now';
-          const targetLink = s.link || s.url || '#Casino';
-          const bgImage = s.image ? `background-image: linear-gradient(to right, rgba(11,15,25,0.9), rgba(11,15,25,0.5)), url('${s.image}'); background-size: cover; background-position: center;` : '';
-
-          return `
-            <div class="swiper-slide bg-gradient-to-r from-slate-900 via-amber-950/40 to-slate-900 p-6 sm:p-12 md:p-16 flex flex-col justify-center pb-12 sm:pb-12 min-h-[260px] sm:min-h-[340px] relative" style="${bgImage}">
-              <span class="px-2.5 py-0.5 text-[10px] sm:text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full w-max mb-2 sm:mb-3 font-semibold">${badge}</span>
-              <h2 class="text-xl sm:text-4xl font-black text-white mb-2 sm:mb-3 max-w-xl leading-snug">${title}</h2>
-              <p class="text-slate-300 text-xs sm:text-sm max-w-lg mb-4 sm:mb-6 leading-relaxed line-clamp-3 sm:line-clamp-none">${desc}</p>
-              <div>
-                <a href="${targetLink}" class="inline-flex items-center space-x-2 px-5 py-2 sm:px-6 sm:py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-red-600 text-white font-semibold text-xs sm:text-sm shadow-lg active:scale-95 transition-transform">
-                  <span>${btnText}</span>
-                  <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                </a>
-              </div>
+        slideWrapper.innerHTML = data.slides.map(s => `
+          <div class="swiper-slide bg-gradient-to-r from-slate-900 via-amber-950/40 to-slate-900 p-6 sm:p-12 md:p-16 flex flex-col justify-center pb-12 sm:pb-12 min-h-[260px] sm:min-h-[340px] relative">
+            <span class="px-2.5 py-0.5 text-[10px] sm:text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full w-max mb-2 sm:mb-3 font-semibold">${s.badge}</span>
+            <h2 class="text-xl sm:text-4xl font-black text-white mb-2 sm:mb-3 max-w-xl leading-snug">${s.title}</h2>
+            <p class="text-slate-300 text-xs sm:text-sm max-w-lg mb-4 sm:mb-6 leading-relaxed line-clamp-3 sm:line-clamp-none">${s.desc}</p>
+            <div>
+              <button onclick="switchSection('Casino')" class="inline-flex items-center space-x-2 px-5 py-2 sm:px-6 sm:py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-red-600 text-white font-semibold text-xs sm:text-sm shadow-lg active:scale-95 transition-transform">
+                <span>${s.btnText}</span>
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+              </button>
             </div>
-          `;
-        }).join('');
+          </div>
+        `).join('');
 
-        if (window.mySwiperInstance) {
-          window.mySwiperInstance.destroy(true, true);
-        }
+        if (window.mySwiperInstance) window.mySwiperInstance.destroy(true, true);
         window.mySwiperInstance = new Swiper(".mySwiper", {
           loop: true,
           autoplay: { delay: 4500, disableOnInteraction: false },
@@ -206,33 +215,25 @@
         });
       }
 
-      // 2. 渲染落地页卡片
+      // 2. 渲染所有卡片列表
       const siteList = document.getElementById('siteList');
       if (siteList && Array.isArray(data.companies)) {
         siteList.innerHTML = data.companies.map((site, index) => {
           const siteId = site.id || index;
-          const safeName = site.name || site.title || 'Verified Partner';
+          const safeName = site.name || 'Verified Partner';
           const safeUrl = site.url || '#';
           const safeDesc = site.desc_text || site.description || 'Official safe navigation channel & trusted review.';
-          const safeIcon = site.icon_url || site.icon || `https://api.dicebear.com/7.x/identicon/svg?seed=${siteId}`;
+          const safeIcon = site.icon_url || site.logo || `https://api.dicebear.com/7.x/identicon/svg?seed=${siteId}`;
 
           return `
-            <div data-id="${siteId}" 
-                 data-name="${encodeURIComponent(safeName)}" 
-                 data-url="${encodeURIComponent(safeUrl)}" 
+            <div data-id="${siteId}" data-name="${encodeURIComponent(safeName)}" data-url="${encodeURIComponent(safeUrl)}" 
                  style="animation-delay: ${index * 0.04}s"
                  class="fade-in group bg-[#111827] active:bg-[#1a2332] sm:hover:bg-[#1f2937] p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-800 sm:hover:border-amber-500/55 transition-all duration-200 active:scale-[0.98] cursor-pointer flex flex-col justify-between shadow-xl relative overflow-hidden">
-              
               <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-500 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
               <div class="flex items-start space-x-3 mb-3">
                 <div class="w-11 h-11 sm:w-12 sm:h-12 bg-slate-800/90 rounded-xl border border-slate-700/60 p-1 flex items-center justify-center shrink-0 overflow-hidden group-hover:scale-105 transition-transform shadow-inner">
-                  <img src="${safeIcon}" 
-                       alt="${safeName}"
-                       class="w-full h-full object-contain"
-                       onerror="this.src='https://api.dicebear.com/7.x/identicon/svg?seed=${siteId}'">
+                  <img src="${safeIcon}" alt="${safeName}" class="w-full h-full object-contain" onerror="this.src='https://api.dicebear.com/7.x/identicon/svg?seed=${siteId}'">
                 </div>
-
                 <div class="min-w-0 flex-1">
                   <div class="flex items-center justify-between gap-1">
                     <h3 class="font-bold text-slate-100 text-xs sm:text-sm group-hover:text-amber-400 transition-colors truncate">${safeName}</h3>
@@ -241,7 +242,6 @@
                   <p class="text-slate-400 text-[11px] sm:text-xs mt-1 line-clamp-2 leading-relaxed">${safeDesc}</p>
                 </div>
               </div>
-
               <div class="pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-xs font-medium">
                 <span class="text-slate-400 text-[10px] sm:text-[11px] flex items-center space-x-1">
                   <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
@@ -271,22 +271,12 @@
       // 3. 渲染 About Us
       const aboutArea = document.getElementById('aboutContentArea');
       if (aboutArea && data.about) {
-        if (data.about.title) {
-          document.getElementById('nav-brand-title').innerText = data.about.title;
-        }
-
-        const stats = data.about.stats || [
-          { val: "680+", label: "Casino Sites Reviewed" },
-          { val: "1,380+", label: "Games Tested" },
-          { val: "376+ Hrs", label: "Monthly Research" }
-        ];
-
         aboutArea.innerHTML = `
-          <span class="px-2.5 py-0.5 text-[10px] sm:text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-semibold">${data.about.badge || 'About Us'}</span>
-          <h2 class="text-xl sm:text-3xl font-extrabold text-white mt-2 mb-2">${data.about.title || 'Dedicated to Safer & Smarter Play'}</h2>
-          <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">${data.about.description || data.about.desc || ''}</p>
+          <span class="px-2.5 py-0.5 text-[10px] sm:text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-semibold">${data.about.badge}</span>
+          <h2 class="text-xl sm:text-3xl font-extrabold text-white mt-2 mb-2">${data.about.title}</h2>
+          <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">${data.about.desc}</p>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 pt-5 border-t border-slate-800/80 mt-5">
-            ${stats.map(st => `
+            ${data.about.stats.map(st => `
               <div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 flex sm:flex-col justify-between sm:justify-start items-center sm:items-start">
                 <div class="text-slate-300 font-medium text-xs sm:mb-1 order-1 sm:order-2">${st.label}</div>
                 <div class="text-amber-400 font-bold text-base sm:text-lg order-2 sm:order-1">${st.val}</div>
@@ -297,7 +287,7 @@
       }
     }
 
-    // 访客 ID 管理
+    // ----------------- 追踪与跳转逻辑 -----------------
     function getVisitorId() {
       let vid = localStorage.getItem('gang_visitor_id');
       if (!vid) {
@@ -307,7 +297,6 @@
       return vid;
     }
 
-    // UTM 参数捕获
     function captureAndGetUtm() {
       const urlParams = new URLSearchParams(window.location.search);
       const urlSource = urlParams.get('source') || urlParams.get('utm_source');
@@ -318,51 +307,34 @@
 
       const source = urlSource || sessionStorage.getItem('gang_utm_source') || 'direct';
       const campaign = urlCampaign || sessionStorage.getItem('gang_utm_campaign') || 'none';
-
       return { source, campaign };
     }
 
-    // 点击打点追踪并跳转
     function trackAndRedirect(siteId, siteName, targetUrl) {
-      const visitorId = getVisitorId();
-      const { source, campaign } = captureAndGetUtm();
-
       const payload = {
-        visitor_id: visitorId,
+        visitor_id: getVisitorId(),
         target_domain: siteName || targetUrl,
-        source: source,
-        campaign: campaign
+        ...captureAndGetUtm()
       };
-
       const endpoint = '/api/track';
+      
       let isSent = false;
-
       if (navigator.sendBeacon) {
-        const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-        isSent = navigator.sendBeacon(endpoint, blob);
+        isSent = navigator.sendBeacon(endpoint, new Blob([JSON.stringify(payload)], { type: 'application/json' }));
       }
-
       if (!isSent) {
-        fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-          keepalive: true
-        }).catch(err => console.error('Tracking failed:', err));
+        fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), keepalive: true });
       }
 
       setTimeout(() => {
-        if (targetUrl && targetUrl !== '#') {
-          window.location.href = targetUrl;
-        } else {
-          alert('该平台暂未配置有效的跳转链接。');
-        }
+        if (targetUrl && targetUrl !== '#') window.location.href = targetUrl;
+        else alert('该平台暂未配置有效的跳转链接。');
       }, 150);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       captureAndGetUtm();
-      loadAllData();
+      renderFrontend();
     });
   </script>
 </body>
