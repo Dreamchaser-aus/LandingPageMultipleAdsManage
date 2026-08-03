@@ -8,6 +8,35 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased font-sans">
 
+  <!-- ================= 登录弹窗 (JWT 鉴权) ================= -->
+  <div id="loginModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-100 p-8">
+      <div class="text-center mb-6">
+        <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-2xl mx-auto mb-3 shadow-lg shadow-blue-500/30">
+          🔐
+        </div>
+        <h2 class="text-xl font-bold text-slate-900">管理员登录</h2>
+        <p class="text-xs text-slate-500 mt-1">请输入后台管理凭证以继续操作</p>
+      </div>
+
+      <form onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">账号</label>
+          <input type="text" id="loginUsername" required placeholder="admin" class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">密码</label>
+          <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <p id="loginError" class="text-xs text-red-500 hidden text-center"></p>
+        <button type="submit" id="loginBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-md shadow-blue-500/20">
+          立即登录
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= 主界面布局 ================= -->
   <div class="flex min-h-screen">
 
     <!-- 左侧 Sidebar 导航栏 -->
@@ -52,6 +81,13 @@
             📋 历史生成记录
           </button>
         </nav>
+      </div>
+
+      <!-- 底部退出登录 -->
+      <div class="pt-4 border-t border-slate-800">
+        <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 hover:bg-red-600/20 text-slate-400 hover:text-red-400 rounded-xl text-xs font-medium transition-all">
+          🚪 退出当前登录
+        </button>
       </div>
     </aside>
 
@@ -197,7 +233,7 @@
           </div>
         </section>
 
-        <!-- Tab 4: 首页轮播图管理 (NEW) -->
+        <!-- Tab 4: 首页轮播图管理 -->
         <section id="tab-slides" class="tab-content hidden space-y-6">
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
             <h3 class="text-base font-bold text-slate-900 mb-4">🖼️ 动态管理 index.html 轮播图 (Slideshow)</h3>
@@ -245,7 +281,7 @@
           </div>
         </section>
 
-        <!-- Tab 5: 关于我们配置 (NEW) -->
+        <!-- Tab 5: 关于我们配置 -->
         <section id="tab-about" class="tab-content hidden space-y-6">
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60 max-w-4xl">
             <h3 class="text-base font-bold text-slate-900 mb-4">ℹ️ 自定义 index.html 关于我们板块 (About Us)</h3>
@@ -270,19 +306,16 @@
               <div class="border-t border-slate-100 pt-4">
                 <h4 class="text-sm font-bold text-slate-800 mb-3">📊 核心数据指标 (Stats)</h4>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <!-- Indicator 1 -->
                   <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
                     <span class="text-xs font-bold text-amber-600">指标 1</span>
                     <input type="text" id="statVal1" placeholder="例如: 680+" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white" required>
                     <input type="text" id="statLabel1" placeholder="例如: Casino Sites Reviewed" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white" required>
                   </div>
-                  <!-- Indicator 2 -->
                   <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
                     <span class="text-xs font-bold text-amber-600">指标 2</span>
                     <input type="text" id="statVal2" placeholder="例如: 1,380+" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white" required>
                     <input type="text" id="statLabel2" placeholder="例如: Games Tested" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white" required>
                   </div>
-                  <!-- Indicator 3 -->
                   <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
                     <span class="text-xs font-bold text-amber-600">指标 3</span>
                     <input type="text" id="statVal3" placeholder="例如: 376+ Hrs" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white" required>
@@ -368,8 +401,9 @@
   <script>
     const baseUrl = window.location.origin;
     const STORAGE_KEY = 'gang_site_content';
+    const TOKEN_KEY = 'admin_jwt_token';
 
-    // 默认基础数据结构，与 index.html 匹配
+    // 默认基础数据结构
     const defaultSiteContent = {
       companies: [
         { id: 1, name: "MegaWin Casino Malaysia", url: "#", desc_text: "Top-tier verified gaming platform offering safe entertainment and instant bonuses.", icon_url: "" },
@@ -391,7 +425,82 @@
       }
     };
 
-    // 获取 LocalStorage 中的最新全局数据
+    // ================= JWT 统一请求与授权中间函数 =================
+    async function authFetch(url, options = {}) {
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (!token) {
+        showLoginModal();
+        throw new Error('未登录');
+      }
+
+      options.headers = {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`
+      };
+
+      const res = await fetch(url, options);
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem(TOKEN_KEY);
+        showLoginModal();
+        throw new Error('登录凭证已失效，请重新登录');
+      }
+      return res;
+    }
+
+    function showLoginModal() {
+      document.getElementById('loginModal').classList.remove('hidden');
+    }
+
+    function hideLoginModal() {
+      document.getElementById('loginModal').classList.add('hidden');
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const usernameInput = document.getElementById('loginUsername').value.trim();
+      const passwordInput = document.getElementById('loginPassword').value.trim();
+      const errorEl = document.getElementById('loginError');
+      const btn = document.getElementById('loginBtn');
+
+      errorEl.classList.add('hidden');
+      btn.disabled = true;
+      btn.innerText = '正在验证...';
+
+      try {
+        const res = await fetch(`${baseUrl}/api/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: usernameInput, password: passwordInput })
+        });
+        const json = await res.json();
+
+        if (json.success && json.token) {
+          localStorage.setItem(TOKEN_KEY, json.token);
+          hideLoginModal();
+          document.getElementById('loginUsername').value = '';
+          document.getElementById('loginPassword').value = '';
+          fetchAllData();
+        } else {
+          errorEl.innerText = json.message || '登录失败，账号或密码错误';
+          errorEl.classList.remove('hidden');
+        }
+      } catch (err) {
+        errorEl.innerText = '网络请求失败，请重试';
+        errorEl.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = '立即登录';
+      }
+    }
+
+    function handleLogout() {
+      if (confirm('确定要退出后台管理系统吗？')) {
+        localStorage.removeItem(TOKEN_KEY);
+        showLoginModal();
+      }
+    }
+
+    // LocalStorage 配置获取与保存
     function getSiteContent() {
       const dataStr = localStorage.getItem(STORAGE_KEY);
       if (!dataStr) {
@@ -405,12 +514,11 @@
       }
     }
 
-    // 保存至 LocalStorage 供 index.html 实时渲染
     function saveSiteContent(data) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     }
 
-    // ================= 分页全局变量管理 =================
+    // ================= 分页与 Tab 状态控制 =================
     let currentPage = 1;
     let pageSize = 20;
     let totalRecords = 0;
@@ -428,7 +536,13 @@
 
     window.onload = () => {
       document.getElementById('targetUrl').value = baseUrl;
-      fetchAllData();
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (!token) {
+        showLoginModal();
+      } else {
+        hideLoginModal();
+        fetchAllData();
+      }
     };
 
     function switchTab(tabId) {
@@ -459,7 +573,7 @@
     async function fetchStats() {
       const tbody = document.getElementById('statsTable');
       try {
-        const res = await fetch(`${baseUrl}/api/stats`);
+        const res = await authFetch(`${baseUrl}/api/stats`);
         const json = await res.json();
         if (json.success) {
           if (!json.data || json.data.length === 0) {
@@ -475,11 +589,13 @@
           `).join('');
         }
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-red-500">获取失败: ${err.message}</td></tr>`;
+        if (err.message !== '未登录') {
+          tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-red-500">获取失败: ${err.message}</td></tr>`;
+        }
       }
     }
 
-    // UA 解析
+    // UA 解析工具函数
     function parseUserAgent(ua) {
       if (!ua || ua === 'Unknown') return { label: '未知设备', icon: '❓' };
       let os = '未知系统';
@@ -500,13 +616,13 @@
       return { label: `${os} · ${browser}`, icon };
     }
 
-    // 2. 用户轨迹
+    // 2. 用户轨迹列表
     async function fetchUserJourneys() {
       const tbody = document.getElementById('journeysTable');
       tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">加载中...</td></tr>';
 
       try {
-        const res = await fetch(`${baseUrl}/api/user-journeys?page=${currentPage}&limit=${pageSize}`);
+        const res = await authFetch(`${baseUrl}/api/user-journeys?page=${currentPage}&limit=${pageSize}`);
         const json = await res.json();
 
         if (json.success) {
@@ -523,7 +639,9 @@
           updatePaginationUI();
         }
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-red-500">获取失败: ${err.message}</td></tr>`;
+        if (err.message !== '未登录') {
+          tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-red-500">获取失败: ${err.message}</td></tr>`;
+        }
       }
     }
 
@@ -609,7 +727,6 @@
       }
     }
 
-    // 分页控制逻辑
     function updatePaginationUI() {
       const startRecord = totalRecords === 0 ? 0 : (currentPage - 1) * pageSize + 1;
       const endRecord = Math.min(currentPage * pageSize, totalRecords);
@@ -644,7 +761,7 @@
       }
     }
 
-    // ================= 3. 落地页与平台卡片管理 (对应 index.html companies) =================
+    // ================= 3. 落地页与平台卡片管理 =================
     async function fetchManageWebsites() {
       try {
         const content = getSiteContent();
@@ -677,7 +794,7 @@
       `).join('');
     }
 
-    function handleWebsiteSubmit(e) {
+    async function handleWebsiteSubmit(e) {
       e.preventDefault();
       const id = document.getElementById('editSiteId').value;
       const name = document.getElementById('siteName').value.trim();
@@ -698,12 +815,16 @@
       content.companies = companies;
       saveSiteContent(content);
 
-      // 可同时推送至后端 API (兼容现有逻辑)
-      fetch(`${baseUrl}/api/websites${id ? '/' + id : ''}`, {
-        method: id ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, desc_text, url, icon_url })
-      }).catch(() => {});
+      // 同步推送到服务端 PostgreSQL（已包含 JWT 鉴权）
+      try {
+        await authFetch(`${baseUrl}/api/websites${id ? '/' + id : ''}`, {
+          method: id ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, desc_text, url, icon_url })
+        });
+      } catch (err) {
+        console.warn('API Sync Warning:', err.message);
+      }
 
       resetWebsiteForm();
       fetchManageWebsites();
@@ -734,17 +855,20 @@
       document.getElementById('cancelBtn').classList.add('hidden');
     }
 
-    function deleteSite(id) {
+    async function deleteSite(id) {
       if (!confirm('确定删除该站点卡片？')) return;
       const content = getSiteContent();
       content.companies = (content.companies || []).filter(s => s.id != id);
       saveSiteContent(content);
 
-      fetch(`${baseUrl}/api/websites/${id}`, { method: 'DELETE' }).catch(() => {});
+      try {
+        await authFetch(`${baseUrl}/api/websites/${id}`, { method: 'DELETE' });
+      } catch (err) {}
+
       fetchManageWebsites();
     }
 
-    // ================= 4. 首页轮播图管理 (对应 index.html slides) =================
+    // ================= 4. 首页轮播图管理 =================
     function fetchManageSlides() {
       const content = getSiteContent();
       renderSlidesManageTable(content.slides || []);
@@ -828,7 +952,7 @@
       fetchManageSlides();
     }
 
-    // ================= 5. 关于我们配置 (对应 index.html about) =================
+    // ================= 5. 关于我们配置 =================
     function loadAboutForm() {
       const content = getSiteContent();
       const about = content.about || defaultSiteContent.about;
@@ -890,7 +1014,7 @@
         const source = urlObj.searchParams.get('utm_source') || 'imported_source';
         const campaign = urlObj.searchParams.get('utm_campaign') || 'none';
 
-        const res = await fetch(`${baseUrl}/api/links`, {
+        const res = await authFetch(`${baseUrl}/api/links`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -909,7 +1033,7 @@
           switchTab('history');
         }
       } catch (err) {
-        alert('链接格式不正确！请确保包含 http:// 或 https://');
+        if (err.message !== '未登录') alert('链接格式不正确！请确保包含 http:// 或 https://');
       }
     }
 
@@ -917,7 +1041,7 @@
     async function fetchLinksHistory() {
       const tbody = document.getElementById('linksTable');
       try {
-        const res = await fetch(`${baseUrl}/api/links`);
+        const res = await authFetch(`${baseUrl}/api/links`);
         const json = await res.json();
         if (json.success) {
           renderLinksTable(json.data);
@@ -959,7 +1083,7 @@
         urlObj.searchParams.set('utm_campaign', campaign);
         const fullLink = urlObj.toString();
 
-        const res = await fetch(`${baseUrl}/api/links`, {
+        const res = await authFetch(`${baseUrl}/api/links`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -977,7 +1101,7 @@
           switchTab('history');
         }
       } catch (err) {
-        alert('请输入包含 https:// 的完整网址');
+        if (err.message !== '未登录') alert('请输入包含 https:// 的完整网址');
       }
     }
 
