@@ -278,41 +278,14 @@
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60 max-w-4xl">
             <h3 class="text-base font-bold text-slate-900 mb-4">ℹ️ 自定义 index.html 关于我们板块 (About Us)</h3>
             <form id="aboutForm" onsubmit="handleAboutSubmit(event)" class="space-y-4">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">板块角标 (Badge)</label>
-                  <input type="text" id="aboutBadge" required class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">大标题 (Title)</label>
-                  <input type="text" id="aboutTitle" required class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">大标题 (Title)</label>
+                <input type="text" id="aboutTitle" required class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">主体介绍文字 (Description)</label>
-                <textarea id="aboutDesc" rows="3" required class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-              </div>
-
-              <div class="border-t border-slate-100 pt-4">
-                <h4 class="text-sm font-bold text-slate-800 mb-3">📊 核心数据指标 (Stats)</h4>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
-                    <span class="text-xs font-bold text-amber-600">指标 1</span>
-                    <input type="text" id="statVal1" placeholder="例如: 680+" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white" required>
-                    <input type="text" id="statLabel1" placeholder="例如: Casino Sites Reviewed" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white" required>
-                  </div>
-                  <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
-                    <span class="text-xs font-bold text-amber-600">指标 2</span>
-                    <input type="text" id="statVal2" placeholder="例如: 1,380+" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white" required>
-                    <input type="text" id="statLabel2" placeholder="例如: Games Tested" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white" required>
-                  </div>
-                  <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
-                    <span class="text-xs font-bold text-amber-600">指标 3</span>
-                    <input type="text" id="statVal3" placeholder="例如: 376+ Hrs" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white" required>
-                    <input type="text" id="statLabel3" placeholder="例如: Monthly Research" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white" required>
-                  </div>
-                </div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">主体介绍内容 (Content)</label>
+                <textarea id="aboutContent" rows="4" required class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="请输入关于我们的详细介绍文案..."></textarea>
               </div>
 
               <div class="pt-2 flex justify-end">
@@ -391,29 +364,7 @@
 
   <script>
     const baseUrl = window.location.origin;
-    const STORAGE_KEY = 'gang_site_content';
     const TOKEN_KEY = 'admin_jwt_token';
-
-    const defaultSiteContent = {
-      companies: [
-        { id: 1, name: "MegaWin Casino Malaysia", url: "#", desc_text: "Top-tier verified gaming platform offering safe entertainment and instant bonuses.", icon_url: "" },
-        { id: 2, name: "Lucky4D Partner Hub", url: "#", desc_text: "Trusted insights and smart play guides curated for professional enthusiasts.", icon_url: "" }
-      ],
-      slides: [
-        { id: 1, badge: "Hot Bonuses 2026", title: "Expert Reviews & Smart Play Guidance", desc: "Discover trusted platform insights, verified ratings, and responsible play strategies curated by industry professionals.", btnText: "Explore Casinos" },
-        { id: 2, badge: "100% Verified Partners", title: "Tested Games & Transparent Ratings", desc: "Over 1,380+ games tested and 680+ casino sites reviewed monthly to ensure a safer navigation experience.", btnText: "Learn More About Us" }
-      ],
-      about: {
-        badge: "About MEGA88 PARTNERSHIP",
-        title: "Dedicated to Safer & Smarter Play",
-        desc: "MEGA88 PARTNERSHIP is built by a team of veteran researchers and analysts. Our mission is to cut through the noise of online platforms, delivering transparent, unbiased information and robust guidance.",
-        stats: [
-          { val: "680+", label: "Casino Sites Reviewed" },
-          { val: "1,380+", label: "Games Tested" },
-          { val: "376+ Hrs", label: "Monthly Research" }
-        ]
-      }
-    };
 
     async function authFetch(url, options = {}) {
       const token = localStorage.getItem(TOKEN_KEY);
@@ -487,23 +438,6 @@
         localStorage.removeItem(TOKEN_KEY);
         showLoginModal();
       }
-    }
-
-    function getSiteContent() {
-      try {
-        const dataStr = localStorage.getItem(STORAGE_KEY);
-        if (!dataStr) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultSiteContent));
-          return defaultSiteContent;
-        }
-        return JSON.parse(dataStr);
-      } catch(e) {
-        return defaultSiteContent;
-      }
-    }
-
-    function saveSiteContent(data) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     }
 
     let currentPage = 1;
@@ -745,24 +679,19 @@
       }
     }
 
+    // ================= 数据库：落地页卡片管理 =================
     async function fetchManageWebsites() {
       const tbody = document.getElementById('websiteManageTable');
       try {
-        // 调用后端接口获取 PostgreSQL 数据库中的实时数据
-        const res = await authFetch(`${baseUrl}/api/websites`);
+        const res = await fetch(`${baseUrl}/api/websites`);
         const json = await res.json();
-    
         if (json.success) {
-      // 将数据库返回的数据渲染到表格中
           renderManageWebsitesTable(json.data || []);
         } else {
           tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-500">获取失败: ${json.message}</td></tr>`;
         }
       } catch (err) {
-        if (err.message !== '未登录') {
-          tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-500">网络请求错误: ${err.message}</td></tr>`;
-        }
-        console.error(err);
+        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-500">网络请求错误: ${err.message}</td></tr>`;
       }
     }
 
@@ -782,7 +711,7 @@
           <td class="p-3.5 text-xs text-slate-500">${site.desc_text || '-'}</td>
           <td class="p-3.5 text-xs text-blue-600 max-w-xs truncate"><a href="${site.url}" target="_blank">${site.url}</a></td>
           <td class="p-3.5 space-x-2">
-            <button onclick="editSite(${site.id})" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md font-medium">修改</button>
+            <button onclick="editSite(${site.id}, '${encodeURIComponent(site.name)}', '${encodeURIComponent(site.desc_text || '')}', '${encodeURIComponent(site.url)}', '${encodeURIComponent(site.icon_url || '')}')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md font-medium">修改</button>
             <button onclick="deleteSite(${site.id})" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1 rounded-md font-medium">删除</button>
           </td>
         </tr>
@@ -797,44 +726,31 @@
       const url = document.getElementById('siteUrl').value.trim();
       const icon_url = document.getElementById('siteIcon').value.trim();
 
-      const content = getSiteContent();
-      let companies = content.companies || [];
-
-      if (id) {
-        companies = companies.map(s => s.id == id ? { ...s, name, desc_text, url, icon_url } : s);
-      } else {
-        const newId = Date.now();
-        companies.push({ id: newId, name, desc_text, url, icon_url });
-      }
-
-      content.companies = companies;
-      saveSiteContent(content);
-
       try {
-        await authFetch(`${baseUrl}/api/websites${id ? '/' + id : ''}`, {
+        const res = await authFetch(`${baseUrl}/api/websites${id ? '/' + id : ''}`, {
           method: id ? 'PUT' : 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, desc_text, url, icon_url })
         });
+        const json = await res.json();
+        if (json.success) {
+          resetWebsiteForm();
+          fetchManageWebsites();
+          alert('落地页/平台卡片已同步保存至数据库！');
+        } else {
+          alert('保存失败: ' + json.message);
+        }
       } catch (err) {
-        console.warn('API Sync Warning:', err.message);
+        if (err.message !== '未登录') alert('操作异常: ' + err.message);
       }
-
-      resetWebsiteForm();
-      fetchManageWebsites();
-      alert('落地页/平台卡片保存成功！已同步至 index.html');
     }
 
-    function editSite(id) {
-      const content = getSiteContent();
-      const site = (content.companies || []).find(s => s.id == id);
-      if (!site) return;
-
-      document.getElementById('editSiteId').value = site.id;
-      document.getElementById('siteName').value = site.name;
-      document.getElementById('siteDesc').value = site.desc_text || '';
-      document.getElementById('siteUrl').value = site.url;
-      document.getElementById('siteIcon').value = site.icon_url || '';
+    function editSite(id, name, desc, url, icon) {
+      document.getElementById('editSiteId').value = id;
+      document.getElementById('siteName').value = decodeURIComponent(name);
+      document.getElementById('siteDesc').value = decodeURIComponent(desc);
+      document.getElementById('siteUrl').value = decodeURIComponent(url);
+      document.getElementById('siteIcon').value = decodeURIComponent(icon);
 
       document.getElementById('submitBtn').innerText = '保存修改';
       document.getElementById('submitBtn').className = 'w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition';
@@ -851,20 +767,26 @@
 
     async function deleteSite(id) {
       if (!confirm('确定删除该站点卡片？')) return;
-      const content = getSiteContent();
-      content.companies = (content.companies || []).filter(s => s.id != id);
-      saveSiteContent(content);
-
       try {
         await authFetch(`${baseUrl}/api/websites/${id}`, { method: 'DELETE' });
+        fetchManageWebsites();
       } catch (err) {}
-
-      fetchManageWebsites();
     }
 
-    function fetchManageSlides() {
-      const content = getSiteContent();
-      renderSlidesManageTable(content.slides || []);
+    // ================= 数据库：首页轮播图管理 =================
+    async function fetchManageSlides() {
+      const tbody = document.getElementById('slidesManageTable');
+      try {
+        const res = await fetch(`${baseUrl}/api/slides`);
+        const json = await res.json();
+        if (json.success) {
+          renderSlidesManageTable(json.data || []);
+        } else {
+          tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-500">加载失败</td></tr>`;
+        }
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-500">网络错误</td></tr>`;
+      }
     }
 
     function renderSlidesManageTable(slides) {
@@ -876,19 +798,19 @@
 
       tbody.innerHTML = slides.map(slide => `
         <tr class="hover:bg-slate-50">
-          <td class="p-3.5"><span class="px-2 py-1 bg-amber-50 text-amber-700 rounded text-xs font-semibold">${slide.badge}</span></td>
+          <td class="p-3.5"><span class="px-2 py-1 bg-amber-50 text-amber-700 rounded text-xs font-semibold">${slide.badge || ''}</span></td>
           <td class="p-3.5 font-bold text-slate-800 max-w-xs truncate">${slide.title}</td>
-          <td class="p-3.5 text-xs text-slate-500 max-w-sm truncate">${slide.desc}</td>
-          <td class="p-3.5 text-xs text-slate-600">${slide.btnText}</td>
+          <td class="p-3.5 text-xs text-slate-500 max-w-sm truncate">${slide.desc_text || ''}</td>
+          <td class="p-3.5 text-xs text-slate-600">${slide.btn_text || ''}</td>
           <td class="p-3.5 space-x-2">
-            <button onclick="editSlide(${slide.id})" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md font-medium">修改</button>
+            <button onclick="editSlide(${slide.id}, '${encodeURIComponent(slide.badge || '')}', '${encodeURIComponent(slide.title)}', '${encodeURIComponent(slide.desc_text || '')}', '${encodeURIComponent(slide.btn_text || '')}')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md font-medium">修改</button>
             <button onclick="deleteSlide(${slide.id})" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1 rounded-md font-medium">删除</button>
           </td>
         </tr>
       `).join('');
     }
 
-    function handleSlideSubmit(e) {
+    async function handleSlideSubmit(e) {
       e.preventDefault();
       const id = document.getElementById('editSlideId').value;
       const badge = document.getElementById('slideBadge').value.trim();
@@ -896,33 +818,31 @@
       const desc = document.getElementById('slideDesc').value.trim();
       const btnText = document.getElementById('slideBtnText').value.trim();
 
-      const content = getSiteContent();
-      let slides = content.slides || [];
-
-      if (id) {
-        slides = slides.map(s => s.id == id ? { ...s, badge, title, desc, btnText } : s);
-      } else {
-        slides.push({ id: Date.now(), badge, title, desc, btnText });
+      try {
+        const res = await authFetch(`${baseUrl}/api/slides${id ? '/' + id : ''}`, {
+          method: id ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ badge, title, desc, btnText })
+        });
+        const json = await res.json();
+        if (json.success) {
+          resetSlideForm();
+          fetchManageSlides();
+          alert('轮播图已成功同步至数据库！');
+        } else {
+          alert('保存失败: ' + json.message);
+        }
+      } catch (err) {
+        if (err.message !== '未登录') alert('操作异常: ' + err.message);
       }
-
-      content.slides = slides;
-      saveSiteContent(content);
-
-      resetSlideForm();
-      fetchManageSlides();
-      alert('轮播图保存成功！已更新 index.html');
     }
 
-    function editSlide(id) {
-      const content = getSiteContent();
-      const slide = (content.slides || []).find(s => s.id == id);
-      if (!slide) return;
-
-      document.getElementById('editSlideId').value = slide.id;
-      document.getElementById('slideBadge').value = slide.badge;
-      document.getElementById('slideTitle').value = slide.title;
-      document.getElementById('slideDesc').value = slide.desc;
-      document.getElementById('slideBtnText').value = slide.btnText;
+    function editSlide(id, badge, title, desc, btnText) {
+      document.getElementById('editSlideId').value = id;
+      document.getElementById('slideBadge').value = decodeURIComponent(badge);
+      document.getElementById('slideTitle').value = decodeURIComponent(title);
+      document.getElementById('slideDesc').value = decodeURIComponent(desc);
+      document.getElementById('slideBtnText').value = decodeURIComponent(btnText);
 
       document.getElementById('submitSlideBtn').innerText = '保存修改';
       document.getElementById('submitSlideBtn').className = 'bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition';
@@ -937,65 +857,52 @@
       document.getElementById('cancelSlideBtn').classList.add('hidden');
     }
 
-    function deleteSlide(id) {
+    async function deleteSlide(id) {
       if (!confirm('确定删除该轮播图？')) return;
-      const content = getSiteContent();
-      content.slides = (content.slides || []).filter(s => s.id != id);
-      saveSiteContent(content);
-      fetchManageSlides();
+      try {
+        await authFetch(`${baseUrl}/api/slides/${id}`, { method: 'DELETE' });
+        fetchManageSlides();
+      } catch (err) {}
     }
 
-    function loadAboutForm() {
-      const content = getSiteContent();
-      const about = content.about || defaultSiteContent.about;
-
-      document.getElementById('aboutBadge').value = about.badge || '';
-      document.getElementById('aboutTitle').value = about.title || '';
-      document.getElementById('aboutDesc').value = about.desc || '';
-
-      const stats = about.stats || [];
-      if (stats[0]) {
-        document.getElementById('statVal1').value = stats[0].val || '';
-        document.getElementById('statLabel1').value = stats[0].label || '';
-      }
-      if (stats[1]) {
-        document.getElementById('statVal2').value = stats[1].val || '';
-        document.getElementById('statLabel2').value = stats[1].label || '';
-      }
-      if (stats[2]) {
-        document.getElementById('statVal3').value = stats[2].val || '';
-        document.getElementById('statLabel3').value = stats[2].label || '';
+    // ================= 数据库：关于我们面板配置 =================
+    async function loadAboutForm() {
+      try {
+        const res = await fetch(`${baseUrl}/api/about`);
+        const json = await res.json();
+        if (json.success && json.data) {
+          document.getElementById('aboutTitle').value = json.data.title || '';
+          document.getElementById('aboutContent').value = json.data.content || '';
+        }
+      } catch (err) {
+        console.error('加载关于我们失败', err);
       }
     }
 
-    function handleAboutSubmit(e) {
+    async function handleAboutSubmit(e) {
       e.preventDefault();
-      const content = getSiteContent();
+      const title = document.getElementById('aboutTitle').value.trim();
+      const content = document.getElementById('aboutContent').value.trim();
 
-      content.about = {
-        badge: document.getElementById('aboutBadge').value.trim(),
-        title: document.getElementById('aboutTitle').value.trim(),
-        desc: document.getElementById('aboutDesc').value.trim(),
-        stats: [
-          {
-            val: document.getElementById('statVal1').value.trim(),
-            label: document.getElementById('statLabel1').value.trim()
-          },
-          {
-            val: document.getElementById('statVal2').value.trim(),
-            label: document.getElementById('statLabel2').value.trim()
-          },
-          {
-            val: document.getElementById('statVal3').value.trim(),
-            label: document.getElementById('statLabel3').value.trim()
-          }
-        ]
-      };
-
-      saveSiteContent(content);
-      alert('“关于我们”信息更新成功！已同步至 index.html');
+      try {
+        const res = await authFetch(`${baseUrl}/api/about`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, content })
+        });
+        const json = await res.json();
+        if (json.success) {
+          alert('“关于我们”信息已成功同步至数据库！');
+          loadAboutForm();
+        } else {
+          alert('保存失败: ' + json.message);
+        }
+      } catch (err) {
+        if (err.message !== '未登录') alert('操作异常: ' + err.message);
+      }
     }
 
+    // ================= 推广链接相关 =================
     async function importExternalUtmLink() {
       const inputUrl = document.getElementById('externalUrlInput').value.trim();
       if (!inputUrl) return alert('请输入完备的 UTM 链接');
