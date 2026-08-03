@@ -399,120 +399,14 @@
   </div>
 
   <script>
-    // ================= 常量与全局状态 =================
     const baseUrl = window.location.origin;
-    const STORAGE_KEY = 'gang_site_content';
     const TOKEN_KEY = 'admin_jwt_token';
 
-    let currentPage = 1;
-    let pageSize = 20;
-    let totalRecords = 0;
-    let totalPages = 1;
+    // 缓存数据模型供修改时表单回显
+    let cacheWebsites = [];
+    let cacheSlides = [];
 
-    const tabTitles = {
-      'stats': '数据报表总览',
-      'journeys': '用户轨迹与 IP 设备',
-      'websites': '落地页与平台卡片管理',
-      'slides': '首页轮播图管理',
-      'about': '关于我们面板配置',
-      'generator': '链接生成与导入',
-      'history': '历史生成记录'
-    };
-
-    const defaultSiteContent = {
-      companies: [
-        { id: 1, name: "MegaWin Casino Malaysia", url: "#", desc_text: "Top-tier verified gaming platform offering safe entertainment and instant bonuses.", icon_url: "" },
-        { id: 2, name: "Lucky4D Partner Hub", url: "#", desc_text: "Trusted insights and smart play guides curated for professional enthusiasts.", icon_url: "" }
-      ],
-      slides: [
-        { id: 1, badge: "Hot Bonuses 2026", title: "Expert Reviews & Smart Play Guidance", desc: "Discover trusted platform insights, verified ratings, and responsible play strategies curated by industry professionals.", btnText: "Explore Casinos" },
-        { id: 2, badge: "100% Verified Partners", title: "Tested Games & Transparent Ratings", desc: "Over 1,380+ games tested and 680+ casino sites reviewed monthly to ensure a safer navigation experience.", btnText: "Learn More About Us" }
-      ],
-      about: {
-        badge: "About 4D Gang Malaysia",
-        title: "Dedicated to Safer & Smarter Play",
-        desc: "4D Gang Malaysia is built by a team of veteran researchers and analysts. Our mission is to cut through the noise of online platforms, delivering transparent, unbiased information and robust guidance.",
-        stats: [
-          { val: "680+", label: "Casino Sites Reviewed" },
-          { val: "1,380+", label: "Games Tested" },
-          { val: "376+ Hrs", label: "Monthly Research" }
-        ]
-      }
-    };
-
-    // ================= 安全防护与通用工具函数 =================
-    // 转义 HTML 特殊字符，彻底防御 XSS 漏洞
-    function escapeHtml(str) {
-      if (str === null || str === undefined) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-    // User-Agent 智能解析
-    function parseUserAgent(ua) {
-      if (!ua || ua === 'Unknown') return { label: '未知设备', icon: '❓' };
-      let os = '未知系统';
-      let browser = '未知浏览器';
-      let icon = '💻';
-
-      if (/iphone|ipad|ipod/i.test(ua)) { os = 'iOS'; icon = '📱'; }
-      else if (/android/i.test(ua)) { os = 'Android'; icon = '📱'; }
-      else if (/macintosh|mac os x/i.test(ua)) { os = 'macOS'; icon = '💻'; }
-      else if (/windows/i.test(ua)) { os = 'Windows'; icon = '💻'; }
-
-      if (/micromessenger/i.test(ua)) { browser = '微信'; }
-      else if (/tiktok|bytedance/i.test(ua)) { browser = 'TikTok App'; }
-      else if (/chrome/i.test(ua) && !/edg/i.test(ua)) { browser = 'Chrome'; }
-      else if (/safari/i.test(ua) && !/chrome/i.test(ua)) { browser = 'Safari'; }
-      else if (/edg/i.test(ua)) { browser = 'Edge'; }
-
-      return { label: `${os} · ${browser}`, icon };
-    }
-
-    // 兼容非 HTTPS 环境的一键复制
-    async function copyToClipboard(text) {
-      try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(text);
-        } else {
-          const textarea = document.createElement('textarea');
-          textarea.value = text;
-          textarea.style.position = 'fixed';
-          textarea.style.opacity = '0';
-          document.body.appendChild(textarea);
-          textarea.select();
-          document.execCommand('copy');
-          document.body.removeChild(textarea);
-        }
-        alert('链接已成功复制到剪贴板！');
-      } catch (err) {
-        alert('复制失败，请手动复制：' + text);
-      }
-    }
-
-    // LocalStorage 配置持久化管理
-    function getSiteContent() {
-      const dataStr = localStorage.getItem(STORAGE_KEY);
-      if (!dataStr) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultSiteContent));
-        return defaultSiteContent;
-      }
-      try {
-        return JSON.parse(dataStr);
-      } catch (e) {
-        return defaultSiteContent;
-      }
-    }
-
-    function saveSiteContent(data) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    }
-
-    // ================= JWT 鉴权与网络请求 =================
+    // ================= JWT 统一请求与授权中间函数 =================
     async function authFetch(url, options = {}) {
       const token = localStorage.getItem(TOKEN_KEY);
       if (!token) {
@@ -521,7 +415,6 @@
       }
 
       options.headers = {
-        'Content-Type': 'application/json',
         ...options.headers,
         'Authorization': `Bearer ${token}`
       };
@@ -536,11 +429,11 @@
     }
 
     function showLoginModal() {
-      document.getElementById('loginModal')?.classList.remove('hidden');
+      document.getElementById('loginModal').classList.remove('hidden');
     }
 
     function hideLoginModal() {
-      document.getElementById('loginModal')?.classList.add('hidden');
+      document.getElementById('loginModal').classList.add('hidden');
     }
 
     async function handleLogin(e) {
@@ -573,7 +466,7 @@
           errorEl.classList.remove('hidden');
         }
       } catch (err) {
-        errorEl.innerText = '网络请求失败，请检查网络连接';
+        errorEl.innerText = '网络请求失败，请重试';
         errorEl.classList.remove('hidden');
       } finally {
         btn.disabled = false;
@@ -588,11 +481,24 @@
       }
     }
 
-    // ================= 初始化与 Tab 导航控制 =================
-    window.addEventListener('DOMContentLoaded', () => {
-      const targetInput = document.getElementById('targetUrl');
-      if (targetInput) targetInput.value = baseUrl;
+    // ================= 分页与 Tab 状态控制 =================
+    let currentPage = 1;
+    let pageSize = 20;
+    let totalRecords = 0;
+    let totalPages = 1;
 
+    const tabTitles = {
+      'stats': '数据报表总览',
+      'journeys': '用户轨迹与 IP 设备',
+      'websites': '落地页与平台卡片管理',
+      'slides': '首页轮播图管理',
+      'about': '关于我们面板配置',
+      'generator': '链接生成与导入',
+      'history': '历史生成记录'
+    };
+
+    window.onload = () => {
+      document.getElementById('targetUrl').value = baseUrl;
       const token = localStorage.getItem(TOKEN_KEY);
       if (!token) {
         showLoginModal();
@@ -600,7 +506,7 @@
         hideLoginModal();
         fetchAllData();
       }
-    });
+    };
 
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
@@ -608,16 +514,13 @@
         btn.className = "nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all";
       });
 
-      const activeTab = document.getElementById(`tab-${tabId}`);
-      if (activeTab) activeTab.classList.remove('hidden');
-
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
       const activeNav = document.getElementById(`nav-${tabId}`);
       if (activeNav) {
         activeNav.className = "nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-sm shadow-blue-600/20";
       }
 
-      const pageTitle = document.getElementById('page-title');
-      if (pageTitle) pageTitle.innerText = tabTitles[tabId] || '后台管理';
+      document.getElementById('page-title').innerText = tabTitles[tabId] || '后台管理';
     }
 
     function fetchAllData() {
@@ -629,12 +532,11 @@
       fetchLinksHistory();
     }
 
-    // ================= 1. 数据报表总览 =================
+    // 1. 数据报表总览
     async function fetchStats() {
       const tbody = document.getElementById('statsTable');
-      if (!tbody) return;
       try {
-        const res = await authFetch(`${baseUrl}/api/stats`);
+        const res = await authFetch(`${baseUrl}/api/stats?t=${Date.now()}`);
         const json = await res.json();
         if (json.success) {
           if (!json.data || json.data.length === 0) {
@@ -643,27 +545,47 @@
           }
           tbody.innerHTML = json.data.map(row => `
             <tr class="hover:bg-slate-50">
-              <td class="p-3.5 font-medium text-slate-800">${escapeHtml(row.domain)}</td>
-              <td class="p-3.5"><span class="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-md text-xs font-semibold">${escapeHtml(row.source)}</span></td>
-              <td class="p-3.5 font-semibold text-emerald-600">${escapeHtml(row.leads)}</td>
+              <td class="p-3.5 font-medium text-slate-800">${row.domain}</td>
+              <td class="p-3.5"><span class="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-md text-xs font-semibold">${row.source}</span></td>
+              <td class="p-3.5 font-semibold text-emerald-600">${row.leads}</td>
             </tr>
           `).join('');
         }
       } catch (err) {
         if (err.message !== '未登录') {
-          tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-red-500">获取失败: ${escapeHtml(err.message)}</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-red-500">获取失败: ${err.message}</td></tr>`;
         }
       }
     }
 
-    // ================= 2. 用户轨迹与 IP 管理 =================
+    // UA 解析工具函数
+    function parseUserAgent(ua) {
+      if (!ua || ua === 'Unknown') return { label: '未知设备', icon: '❓' };
+      let os = '未知系统';
+      let browser = '未知浏览器';
+      let icon = '💻';
+
+      if (/iphone|ipad|ipod/i.test(ua)) { os = 'iOS'; icon = '📱'; }
+      else if (/android/i.test(ua)) { os = 'Android'; icon = '📱'; }
+      else if (/macintosh|mac os x/i.test(ua)) { os = 'macOS'; icon = '💻'; }
+      else if (/windows/i.test(ua)) { os = 'Windows'; icon = '💻'; }
+
+      if (/micromessenger/i.test(ua)) { browser = '微信'; }
+      else if (/tiktok|bytedance/i.test(ua)) { browser = 'TikTok App'; }
+      else if (/chrome/i.test(ua) && !/edg/i.test(ua)) { browser = 'Chrome'; }
+      else if (/safari/i.test(ua) && !/chrome/i.test(ua)) { browser = 'Safari'; }
+      else if (/edg/i.test(ua)) { browser = 'Edge'; }
+
+      return { label: `${os} · ${browser}`, icon };
+    }
+
+    // 2. 用户轨迹列表
     async function fetchUserJourneys() {
       const tbody = document.getElementById('journeysTable');
-      if (!tbody) return;
       tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">加载中...</td></tr>';
 
       try {
-        const res = await authFetch(`${baseUrl}/api/user-journeys?page=${currentPage}&limit=${pageSize}`);
+        const res = await authFetch(`${baseUrl}/api/user-journeys?page=${currentPage}&limit=${pageSize}&t=${Date.now()}`);
         const json = await res.json();
 
         if (json.success) {
@@ -681,14 +603,13 @@
         }
       } catch (err) {
         if (err.message !== '未登录') {
-          tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-red-500">获取失败: ${escapeHtml(err.message)}</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-red-500">获取失败: ${err.message}</td></tr>`;
         }
       }
     }
 
     function renderJourneysTable(pageData) {
       const tbody = document.getElementById('journeysTable');
-      if (!tbody) return;
       if (!pageData || pageData.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">当前页无轨迹数据</td></tr>';
         return;
@@ -703,26 +624,26 @@
 
         return `
           <tr class="hover:bg-slate-50 cursor-pointer transition-colors" onclick="togglePathRow('${rowId}', '${btnId}')">
-            <td class="p-3.5 font-mono text-xs text-slate-600">${escapeHtml(row.visitor_id)}</td>
+            <td class="p-3.5 font-mono text-xs text-slate-600">${row.visitor_id}</td>
             <td class="p-3.5 font-mono text-xs text-slate-700">
-              <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-600 border border-slate-200/60">${escapeHtml(ipDisplay)}</span>
+              <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-600 border border-slate-200/60">${ipDisplay}</span>
             </td>
             <td class="p-3.5 text-xs text-slate-700">
-              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 rounded border border-slate-200/60" title="${escapeHtml(row.user_agent || '')}">
+              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 rounded border border-slate-200/60" title="${row.user_agent || ''}">
                 <span>${uaInfo.icon}</span>
-                <span class="font-medium">${escapeHtml(uaInfo.label)}</span>
+                <span class="font-medium">${uaInfo.label}</span>
               </span>
             </td>
             <td class="p-3.5">
-              <span class="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs font-semibold">${escapeHtml(row.source)}</span>
-              <span class="text-xs text-slate-400 ml-1">${escapeHtml(row.campaign)}</span>
+              <span class="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs font-semibold">${row.source}</span>
+              <span class="text-xs text-slate-400 ml-1">${row.campaign}</span>
             </td>
             <td class="p-3.5">
               <span class="px-2.5 py-1 ${row.total_clicks > 1 ? 'bg-amber-100 text-amber-700 font-bold' : 'bg-slate-100 text-slate-600'} rounded-full text-xs">
-                ${Number(row.total_clicks) || 0} 次点击
+                ${row.total_clicks} 次点击
               </span>
             </td>
-            <td class="p-3.5 text-xs text-slate-500">${row.last_active ? new Date(row.last_active).toLocaleString() : '-'}</td>
+            <td class="p-3.5 text-xs text-slate-500">${new Date(row.last_active).toLocaleString()}</td>
             <td class="p-3.5 text-center">
               <button id="${btnId}" class="px-2.5 py-1 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-medium transition-colors border border-blue-200/60">
                 展开轨迹 🔽
@@ -740,7 +661,7 @@
                   ${pathSteps.map((site, i) => `
                     <div class="flex-shrink-0 flex items-center gap-2">
                       <span class="px-3 py-1.5 bg-slate-100 text-slate-800 font-medium rounded-lg border border-slate-200 shadow-sm">
-                        <span class="text-slate-400 mr-1 font-mono">${i + 1}.</span>${escapeHtml(site)}
+                        <span class="text-slate-400 mr-1 font-mono">${i + 1}.</span>${site}
                       </span>
                       ${i < pathSteps.length - 1 ? '<span class="text-slate-400 font-bold">➔</span>' : ''}
                     </div>
@@ -758,12 +679,15 @@
       const btn = document.getElementById(btnId);
       if (!row || !btn) return;
 
-      const isHidden = row.classList.contains('hidden');
-      row.classList.toggle('hidden', !isHidden);
-      btn.innerHTML = isHidden ? '收起轨迹 🔼' : '展开轨迹 🔽';
-      btn.className = isHidden 
-        ? 'px-2.5 py-1 text-xs bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg font-medium transition-colors border border-amber-200/60'
-        : 'px-2.5 py-1 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-medium transition-colors border border-blue-200/60';
+      if (row.classList.contains('hidden')) {
+        row.classList.remove('hidden');
+        btn.innerHTML = '收起轨迹 🔼';
+        btn.className = 'px-2.5 py-1 text-xs bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg font-medium transition-colors border border-amber-200/60';
+      } else {
+        row.classList.add('hidden');
+        btn.innerHTML = '展开轨迹 🔽';
+        btn.className = 'px-2.5 py-1 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-medium transition-colors border border-blue-200/60';
+      }
     }
 
     function updatePaginationUI() {
@@ -781,7 +705,7 @@
 
     function changePage(delta) { goToPage(currentPage + delta); }
     function goToPage(targetPage) {
-      if (targetPage < 1 || (totalPages > 0 && targetPage > totalPages) || targetPage === currentPage) return;
+      if (targetPage < 1 || targetPage > totalPages || targetPage === currentPage) return;
       currentPage = targetPage;
       fetchUserJourneys();
     }
@@ -800,43 +724,46 @@
       }
     }
 
-    // ================= 3. 落地页与平台卡片管理 =================
+    // ================= 3. 落地页与平台卡片管理 (完全基于 DB 数据库) =================
     async function fetchManageWebsites() {
+      const tbody = document.getElementById('websiteManageTable');
       try {
-        const content = getSiteContent();
-        renderManageWebsitesTable(content.companies || []);
+        const res = await authFetch(`${baseUrl}/api/websites?t=${Date.now()}`);
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          cacheWebsites = json.data;
+          renderManageWebsitesTable(json.data);
+        } else {
+          tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">未能加载到站点数据</td></tr>';
+        }
       } catch (err) {
-        console.error('获取落地页数据异常:', err);
+        if (err.message !== '未登录') {
+          tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-500">请求后端失败: ${err.message}</td></tr>`;
+        }
       }
     }
 
     function renderManageWebsitesTable(data) {
       const tbody = document.getElementById('websiteManageTable');
-      if (!tbody) return;
       if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">尚未配置站点，请在上方添加</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">数据库中尚未配置站点，请在上方添加</td></tr>';
         return;
       }
 
-      tbody.innerHTML = data.map(site => {
-        const iconSrc = site.icon_url || `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(site.id)}`;
-        return `
-          <tr class="hover:bg-slate-50">
-            <td class="p-3.5">
-              <img src="${escapeHtml(iconSrc)}" class="w-8 h-8 rounded-lg object-cover bg-slate-100" onerror="this.src='https://api.dicebear.com/7.x/identicon/svg?seed=fallback'">
-            </td>
-            <td class="p-3.5 font-semibold text-slate-800">${escapeHtml(site.name)}</td>
-            <td class="p-3.5 text-xs text-slate-500">${escapeHtml(site.desc_text || '-')}</td>
-            <td class="p-3.5 text-xs text-blue-600 max-w-xs truncate">
-              <a href="${escapeHtml(site.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(site.url)}</a>
-            </td>
-            <td class="p-3.5 space-x-2">
-              <button onclick="editSite('${site.id}')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md font-medium transition">修改</button>
-              <button onclick="deleteSite('${site.id}')" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1 rounded-md font-medium transition">删除</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
+      tbody.innerHTML = data.map(site => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-3.5">
+            <img src="${site.icon_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + site.id}" class="w-8 h-8 rounded-lg object-cover bg-slate-100">
+          </td>
+          <td class="p-3.5 font-semibold text-slate-800">${site.name}</td>
+          <td class="p-3.5 text-xs text-slate-500">${site.desc_text || '-'}</td>
+          <td class="p-3.5 text-xs text-blue-600 max-w-xs truncate"><a href="${site.url}" target="_blank">${site.url}</a></td>
+          <td class="p-3.5 space-x-2">
+            <button onclick="editSite(${site.id})" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md font-medium">修改</button>
+            <button onclick="deleteSite(${site.id})" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1 rounded-md font-medium">删除</button>
+          </td>
+        </tr>
+      `).join('');
     }
 
     async function handleWebsiteSubmit(e) {
@@ -847,36 +774,30 @@
       const url = document.getElementById('siteUrl').value.trim();
       const icon_url = document.getElementById('siteIcon').value.trim();
 
-      const content = getSiteContent();
-      let companies = content.companies || [];
-
-      if (id) {
-        companies = companies.map(s => String(s.id) === String(id) ? { ...s, name, desc_text, url, icon_url } : s);
-      } else {
-        const newId = Date.now();
-        companies.push({ id: newId, name, desc_text, url, icon_url });
-      }
-
-      content.companies = companies;
-      saveSiteContent(content);
+      const payload = { name, desc_text, url, icon_url };
 
       try {
-        await authFetch(`${baseUrl}/api/websites${id ? '/' + id : ''}`, {
+        const res = await authFetch(`${baseUrl}/api/websites${id ? '/' + id : ''}`, {
           method: id ? 'PUT' : 'POST',
-          body: JSON.stringify({ name, desc_text, url, icon_url })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
+        const json = await res.json();
+        
+        if (json.success) {
+          alert('落地页/平台卡片成功同步到数据库！');
+          resetWebsiteForm();
+          fetchManageWebsites();
+        } else {
+          alert('保存失败：' + (json.message || '服务端异常'));
+        }
       } catch (err) {
-        console.warn('API 同步异常:', err.message);
+        if (err.message !== '未登录') alert('提交失败: ' + err.message);
       }
-
-      resetWebsiteForm();
-      fetchManageWebsites();
-      alert('落地页/平台卡片保存成功！已同步至 index.html');
     }
 
     function editSite(id) {
-      const content = getSiteContent();
-      const site = (content.companies || []).find(s => String(s.id) === String(id));
+      const site = cacheWebsites.find(s => s.id == id);
       if (!site) return;
 
       document.getElementById('editSiteId').value = site.id;
@@ -885,45 +806,54 @@
       document.getElementById('siteUrl').value = site.url || '';
       document.getElementById('siteIcon').value = site.icon_url || '';
 
-      const submitBtn = document.getElementById('submitBtn');
-      submitBtn.innerText = '保存修改';
-      submitBtn.className = 'w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition';
+      document.getElementById('submitBtn').innerText = '保存修改';
+      document.getElementById('submitBtn').className = 'w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition';
       document.getElementById('cancelBtn').classList.remove('hidden');
     }
 
     function resetWebsiteForm() {
       document.getElementById('websiteForm').reset();
       document.getElementById('editSiteId').value = '';
-      const submitBtn = document.getElementById('submitBtn');
-      submitBtn.innerText = '保存站点';
-      submitBtn.className = 'w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg text-sm font-medium transition';
+      document.getElementById('submitBtn').innerText = '保存站点';
+      document.getElementById('submitBtn').className = 'w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg text-sm font-medium transition';
       document.getElementById('cancelBtn').classList.add('hidden');
     }
 
     async function deleteSite(id) {
-      if (!confirm('确定删除该站点卡片？')) return;
-      const content = getSiteContent();
-      content.companies = (content.companies || []).filter(s => String(s.id) !== String(id));
-      saveSiteContent(content);
+      if (!confirm('确定在数据库中删除该站点卡片？')) return;
 
       try {
-        await authFetch(`${baseUrl}/api/websites/${id}`, { method: 'DELETE' });
+        const res = await authFetch(`${baseUrl}/api/websites/${id}`, { method: 'DELETE' });
+        const json = await res.json();
+        if (json.success) {
+          fetchManageWebsites();
+        } else {
+          alert('删除失败: ' + (json.message || '服务端未响应'));
+        }
       } catch (err) {
-        console.warn('删除 API 异常:', err.message);
+        if (err.message !== '未登录') alert('删除失败: ' + err.message);
       }
-
-      fetchManageWebsites();
     }
 
     // ================= 4. 首页轮播图管理 =================
-    function fetchManageSlides() {
-      const content = getSiteContent();
-      renderSlidesManageTable(content.slides || []);
+    async function fetchManageSlides() {
+      const tbody = document.getElementById('slidesManageTable');
+      try {
+        const res = await authFetch(`${baseUrl}/api/slides?t=${Date.now()}`);
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          cacheSlides = json.data;
+          renderSlidesManageTable(json.data);
+        } else {
+          tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">暂无轮播图，请在上方添加</td></tr>';
+        }
+      } catch (err) {
+        console.warn('轮播图拉取失败，提示：请确认后端已提供 /api/slides 接口', err);
+      }
     }
 
     function renderSlidesManageTable(slides) {
       const tbody = document.getElementById('slidesManageTable');
-      if (!tbody) return;
       if (!slides || slides.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">暂无轮播图，请在上方添加</td></tr>';
         return;
@@ -931,19 +861,19 @@
 
       tbody.innerHTML = slides.map(slide => `
         <tr class="hover:bg-slate-50">
-          <td class="p-3.5"><span class="px-2 py-1 bg-amber-50 text-amber-700 rounded text-xs font-semibold">${escapeHtml(slide.badge)}</span></td>
-          <td class="p-3.5 font-bold text-slate-800 max-w-xs truncate">${escapeHtml(slide.title)}</td>
-          <td class="p-3.5 text-xs text-slate-500 max-w-sm truncate">${escapeHtml(slide.desc)}</td>
-          <td class="p-3.5 text-xs text-slate-600">${escapeHtml(slide.btnText)}</td>
+          <td class="p-3.5"><span class="px-2 py-1 bg-amber-50 text-amber-700 rounded text-xs font-semibold">${slide.badge}</span></td>
+          <td class="p-3.5 font-bold text-slate-800 max-w-xs truncate">${slide.title}</td>
+          <td class="p-3.5 text-xs text-slate-500 max-w-sm truncate">${slide.desc}</td>
+          <td class="p-3.5 text-xs text-slate-600">${slide.btnText}</td>
           <td class="p-3.5 space-x-2">
-            <button onclick="editSlide('${slide.id}')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md font-medium transition">修改</button>
-            <button onclick="deleteSlide('${slide.id}')" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1 rounded-md font-medium transition">删除</button>
+            <button onclick="editSlide(${slide.id})" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md font-medium">修改</button>
+            <button onclick="deleteSlide(${slide.id})" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1 rounded-md font-medium">删除</button>
           </td>
         </tr>
       `).join('');
     }
 
-    function handleSlideSubmit(e) {
+    async function handleSlideSubmit(e) {
       e.preventDefault();
       const id = document.getElementById('editSlideId').value;
       const badge = document.getElementById('slideBadge').value.trim();
@@ -951,26 +881,27 @@
       const desc = document.getElementById('slideDesc').value.trim();
       const btnText = document.getElementById('slideBtnText').value.trim();
 
-      const content = getSiteContent();
-      let slides = content.slides || [];
+      const payload = { badge, title, desc, btnText };
 
-      if (id) {
-        slides = slides.map(s => String(s.id) === String(id) ? { ...s, badge, title, desc, btnText } : s);
-      } else {
-        slides.push({ id: Date.now(), badge, title, desc, btnText });
+      try {
+        const res = await authFetch(`${baseUrl}/api/slides${id ? '/' + id : ''}`, {
+          method: id ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (json.success) {
+          alert('轮播图成功保存在数据库！');
+          resetSlideForm();
+          fetchManageSlides();
+        }
+      } catch (err) {
+        if (err.message !== '未登录') alert('轮播图更新失败：请检查 /api/slides 接口实现');
       }
-
-      content.slides = slides;
-      saveSiteContent(content);
-
-      resetSlideForm();
-      fetchManageSlides();
-      alert('轮播图保存成功！已更新 index.html');
     }
 
     function editSlide(id) {
-      const content = getSiteContent();
-      const slide = (content.slides || []).find(s => String(s.id) === String(id));
+      const slide = cacheSlides.find(s => s.id == id);
       if (!slide) return;
 
       document.getElementById('editSlideId').value = slide.id;
@@ -979,70 +910,95 @@
       document.getElementById('slideDesc').value = slide.desc || '';
       document.getElementById('slideBtnText').value = slide.btnText || '';
 
-      const submitBtn = document.getElementById('submitSlideBtn');
-      submitBtn.innerText = '保存修改';
-      submitBtn.className = 'bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition';
+      document.getElementById('submitSlideBtn').innerText = '保存修改';
+      document.getElementById('submitSlideBtn').className = 'bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition';
       document.getElementById('cancelSlideBtn').classList.remove('hidden');
     }
 
     function resetSlideForm() {
       document.getElementById('slideForm').reset();
       document.getElementById('editSlideId').value = '';
-      const submitBtn = document.getElementById('submitSlideBtn');
-      submitBtn.innerText = '添加轮播图';
-      submitBtn.className = 'bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition';
+      document.getElementById('submitSlideBtn').innerText = '添加轮播图';
+      document.getElementById('submitSlideBtn').className = 'bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition';
       document.getElementById('cancelSlideBtn').classList.add('hidden');
     }
 
-    function deleteSlide(id) {
+    async function deleteSlide(id) {
       if (!confirm('确定删除该轮播图？')) return;
-      const content = getSiteContent();
-      content.slides = (content.slides || []).filter(s => String(s.id) !== String(id));
-      saveSiteContent(content);
-      fetchManageSlides();
+      try {
+        const res = await authFetch(`${baseUrl}/api/slides/${id}`, { method: 'DELETE' });
+        const json = await res.json();
+        if (json.success) fetchManageSlides();
+      } catch (err) {
+        if (err.message !== '未登录') alert('删除轮播图失败');
+      }
     }
 
     // ================= 5. 关于我们配置 =================
-    function loadAboutForm() {
-      const content = getSiteContent();
-      const about = content.about || defaultSiteContent.about;
+    async function loadAboutForm() {
+      try {
+        const res = await authFetch(`${baseUrl}/api/about?t=${Date.now()}`);
+        const json = await res.json();
+        if (json.success && json.data) {
+          const about = json.data;
+          document.getElementById('aboutBadge').value = about.badge || '';
+          document.getElementById('aboutTitle').value = about.title || '';
+          document.getElementById('aboutDesc').value = about.desc || '';
 
-      document.getElementById('aboutBadge').value = about.badge || '';
-      document.getElementById('aboutTitle').value = about.title || '';
-      document.getElementById('aboutDesc').value = about.desc || '';
-
-      const stats = about.stats || [];
-      if (stats[0]) {
-        document.getElementById('statVal1').value = stats[0].val || '';
-        document.getElementById('statLabel1').value = stats[0].label || '';
-      }
-      if (stats[1]) {
-        document.getElementById('statVal2').value = stats[1].val || '';
-        document.getElementById('statLabel2').value = stats[1].label || '';
-      }
-      if (stats[2]) {
-        document.getElementById('statVal3').value = stats[2].val || '';
-        document.getElementById('statLabel3').value = stats[2].label || '';
+          const stats = about.stats || [];
+          if (stats[0]) {
+            document.getElementById('statVal1').value = stats[0].val || '';
+            document.getElementById('statLabel1').value = stats[0].label || '';
+          }
+          if (stats[1]) {
+            document.getElementById('statVal2').value = stats[1].val || '';
+            document.getElementById('statLabel2').value = stats[1].label || '';
+          }
+          if (stats[2]) {
+            document.getElementById('statVal3').value = stats[2].val || '';
+            document.getElementById('statLabel3').value = stats[2].label || '';
+          }
+        }
+      } catch (err) {
+        console.warn('关于我们获取失败，提示：请确认后端已提供 /api/about 接口', err);
       }
     }
 
-    function handleAboutSubmit(e) {
+    async function handleAboutSubmit(e) {
       e.preventDefault();
-      const content = getSiteContent();
-
-      content.about = {
+      const payload = {
         badge: document.getElementById('aboutBadge').value.trim(),
         title: document.getElementById('aboutTitle').value.trim(),
         desc: document.getElementById('aboutDesc').value.trim(),
         stats: [
-          { val: document.getElementById('statVal1').value.trim(), label: document.getElementById('statLabel1').value.trim() },
-          { val: document.getElementById('statVal2').value.trim(), label: document.getElementById('statLabel2').value.trim() },
-          { val: document.getElementById('statVal3').value.trim(), label: document.getElementById('statLabel3').value.trim() }
+          {
+            val: document.getElementById('statVal1').value.trim(),
+            label: document.getElementById('statLabel1').value.trim()
+          },
+          {
+            val: document.getElementById('statVal2').value.trim(),
+            label: document.getElementById('statLabel2').value.trim()
+          },
+          {
+            val: document.getElementById('statVal3').value.trim(),
+            label: document.getElementById('statLabel3').value.trim()
+          }
         ]
       };
 
-      saveSiteContent(content);
-      alert('“关于我们”信息更新成功！已同步至 index.html');
+      try {
+        const res = await authFetch(`${baseUrl}/api/about`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (json.success) {
+          alert('“关于我们”数据库记录已更新！');
+        }
+      } catch (err) {
+        if (err.message !== '未登录') alert('关于我们更新失败');
+      }
     }
 
     // ================= 6. 解析与导入外部 UTM 链接 =================
@@ -1057,6 +1013,7 @@
 
         const res = await authFetch(`${baseUrl}/api/links`, {
           method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             target_url: urlObj.origin + urlObj.pathname,
             source: source,
@@ -1071,8 +1028,6 @@
           fetchLinksHistory();
           alert(`导入成功！\n识别渠道(source): ${source}\n识别活动(campaign): ${campaign}`);
           switchTab('history');
-        } else {
-          alert(json.message || '导入链接失败');
         }
       } catch (err) {
         if (err.message !== '未登录') alert('链接格式不正确！请确保包含 http:// 或 https://');
@@ -1082,21 +1037,19 @@
     // ================= 7. 历史推广链接 =================
     async function fetchLinksHistory() {
       const tbody = document.getElementById('linksTable');
-      if (!tbody) return;
       try {
-        const res = await authFetch(`${baseUrl}/api/links`);
+        const res = await authFetch(`${baseUrl}/api/links?t=${Date.now()}`);
         const json = await res.json();
         if (json.success) {
           renderLinksTable(json.data);
         }
       } catch (err) {
-        console.error('获取历史链接异常:', err);
+        console.error(err);
       }
     }
 
     function renderLinksTable(data) {
       const tbody = document.getElementById('linksTable');
-      if (!tbody) return;
       if (!data || data.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400">尚未生成或导入过历史链接</td></tr>';
         return;
@@ -1104,11 +1057,11 @@
 
       tbody.innerHTML = data.map(row => `
         <tr class="hover:bg-slate-50">
-          <td class="p-3.5"><span class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-md text-xs font-semibold">${escapeHtml(row.source)}</span></td>
-          <td class="p-3.5 text-slate-600">${escapeHtml(row.campaign)}</td>
-          <td class="p-3.5 text-xs text-slate-500 max-w-xs truncate" title="${escapeHtml(row.full_link)}">${escapeHtml(row.full_link)}</td>
+          <td class="p-3.5"><span class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-md text-xs font-semibold">${row.source}</span></td>
+          <td class="p-3.5 text-slate-600">${row.campaign}</td>
+          <td class="p-3.5 text-xs text-slate-500 max-w-xs truncate" title="${row.full_link}">${row.full_link}</td>
           <td class="p-3.5">
-            <button onclick="copyToClipboard('${escapeHtml(row.full_link)}')" class="text-xs bg-slate-100 hover:bg-blue-50 text-blue-600 px-3 py-1.5 rounded-md border border-slate-200 font-medium transition">一键复制</button>
+            <button onclick="copyToClipboard('${row.full_link}')" class="text-xs bg-slate-100 hover:bg-blue-50 text-blue-600 px-3 py-1.5 rounded-md border border-slate-200 font-medium transition">一键复制</button>
           </td>
         </tr>
       `).join('');
@@ -1129,6 +1082,7 @@
 
         const res = await authFetch(`${baseUrl}/api/links`, {
           method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             target_url: targetUrl,
             source: channel,
@@ -1142,12 +1096,16 @@
           fetchLinksHistory();
           alert('链接生成成功！');
           switchTab('history');
-        } else {
-          alert(json.message || '生成链接失败');
         }
       } catch (err) {
-        if (err.message !== '未登录') alert('请输入包含 https:// 或 http:// 的完整网址');
+        if (err.message !== '未登录') alert('请输入包含 https:// 的完整网址');
       }
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('链接已成功复制到剪贴板！');
+      });
     }
   </script>
 </body>
