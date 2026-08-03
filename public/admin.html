@@ -746,10 +746,22 @@
     }
 
     async function fetchManageWebsites() {
+      const tbody = document.getElementById('websiteManageTable');
       try {
-        const content = getSiteContent();
-        renderManageWebsitesTable(content.companies || []);
+        // 调用后端接口获取 PostgreSQL 数据库中的实时数据
+        const res = await authFetch(`${baseUrl}/api/websites`);
+        const json = await res.json();
+    
+        if (json.success) {
+      // 将数据库返回的数据渲染到表格中
+          renderManageWebsitesTable(json.data || []);
+        } else {
+          tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-500">获取失败: ${json.message}</td></tr>`;
+        }
       } catch (err) {
+        if (err.message !== '未登录') {
+          tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-500">网络请求错误: ${err.message}</td></tr>`;
+        }
         console.error(err);
       }
     }
