@@ -155,16 +155,47 @@
     async function renderFrontend() {
       let data = loadSiteContent();
 
+      // 1. 尝试从后端 API 同步平台卡片数据 (companies)
       try {
-        const res = await fetch('/api/websites');
-        const json = await res.json();
-        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-          data.companies = json.data;
+        const resWebsites = await fetch('/api/websites');
+        const jsonWebsites = await resWebsites.json();
+        if (jsonWebsites.success && Array.isArray(jsonWebsites.data) && jsonWebsites.data.length > 0) {
+          data.companies = jsonWebsites.data;
         }
       } catch (e) {
-        console.warn('API request failed, using local storage fallback:', e);
+        console.warn('API request for websites failed, using local storage fallback:', e);
       }
 
+      // 2. 尝试从后端 API 同步轮播图数据 (slides) —— 【新增同步逻辑】
+      try {
+        const resSlides = await fetch('/api/slides');
+        const jsonSlides = await resSlides.json();
+        if (jsonSlides.success && Array.isArray(jsonSlides.data) && jsonSlides.data.length > 0) {
+          // 将数据库字段映射为前端渲染需要的字段格式
+          data.slides = jsonSlides.data.map(item => ({
+            badge: item.badge,
+            title: item.title,
+            desc: item.desc_text,     // 后端字段是 desc_text，前端模板需要 desc
+            btnText: item.btn_text    // 后端字段是 btn_text，前端模板需要 btnText
+          }));
+        }
+      } catch (e) {
+        console.warn('API request for slides failed, using local storage fallback:', e);
+      }
+
+      // 3. 尝试从后端 API 同步关于我们数据 (about) —— 【新增同步逻辑】
+      try {
+        const resAbout = await fetch('/api/about');
+        const jsonAbout = await resAbout.json();
+        if (jsonAbout.success && jsonAbout.data) {
+          data.about.title = jsonAbout.data.title || data.about.title;
+          data.about.desc = jsonAbout.data.content || jsonAbout.data.desc || data.about.desc;
+        }
+      } catch (e) {
+        console.warn('API request for about failed, using local storage fallback:', e);
+      }
+
+      // 4. 渲染轮播图到页面
       const slideWrapper = document.getElementById('dynamicSlidesWrapper');
       if (slideWrapper && data.slides) {
         slideWrapper.innerHTML = data.slides.map(s => `
@@ -189,6 +220,7 @@
         });
       }
 
+      // 5. 渲染平台列表
       const siteList = document.getElementById('siteList');
       if (siteList && Array.isArray(data.companies)) {
         siteList.innerHTML = data.companies.map((site, index) => {
@@ -238,6 +270,7 @@
         });
       }
 
+      // 6. 渲染关于我们
       const aboutArea = document.getElementById('aboutContentArea');
       if (aboutArea && data.about) {
         aboutArea.innerHTML = `
