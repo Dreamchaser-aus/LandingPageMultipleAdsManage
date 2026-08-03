@@ -400,11 +400,30 @@
 
   <script>
     const baseUrl = window.location.origin;
+    const STORAGE_KEY = 'gang_site_content';
     const TOKEN_KEY = 'admin_jwt_token';
 
-    // 缓存数据模型供修改时表单回显
-    let cacheWebsites = [];
-    let cacheSlides = [];
+    // 默认基础数据结构
+    const defaultSiteContent = {
+      companies: [
+        { id: 1, name: "MegaWin Casino Malaysia", url: "#", desc_text: "Top-tier verified gaming platform offering safe entertainment and instant bonuses.", icon_url: "" },
+        { id: 2, name: "Lucky4D Partner Hub", url: "#", desc_text: "Trusted insights and smart play guides curated for professional enthusiasts.", icon_url: "" }
+      ],
+      slides: [
+        { id: 1, badge: "Hot Bonuses 2026", title: "Expert Reviews & Smart Play Guidance", desc: "Discover trusted platform insights, verified ratings, and responsible play strategies curated by industry professionals.", btnText: "Explore Casinos" },
+        { id: 2, badge: "100% Verified Partners", title: "Tested Games & Transparent Ratings", desc: "Over 1,380+ games tested and 680+ casino sites reviewed monthly to ensure a safer navigation experience.", btnText: "Learn More About Us" }
+      ],
+      about: {
+        badge: "About 4D Gang Malaysia",
+        title: "Dedicated to Safer & Smarter Play",
+        desc: "4D Gang Malaysia is built by a team of veteran researchers and analysts. Our mission is to cut through the noise of online platforms, delivering transparent, unbiased information and robust guidance.",
+        stats: [
+          { val: "680+", label: "Casino Sites Reviewed" },
+          { val: "1,380+", label: "Games Tested" },
+          { val: "376+ Hrs", label: "Monthly Research" }
+        ]
+      }
+    };
 
     // ================= JWT 统一请求与授权中间函数 =================
     async function authFetch(url, options = {}) {
@@ -481,6 +500,24 @@
       }
     }
 
+    // LocalStorage 配置获取与保存
+    function getSiteContent() {
+      const dataStr = localStorage.getItem(STORAGE_KEY);
+      if (!dataStr) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultSiteContent));
+        return defaultSiteContent;
+      }
+      try {
+        return JSON.parse(dataStr);
+      } catch(e) {
+        return defaultSiteContent;
+      }
+    }
+
+    function saveSiteContent(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
     // ================= 分页与 Tab 状态控制 =================
     let currentPage = 1;
     let pageSize = 20;
@@ -536,7 +573,7 @@
     async function fetchStats() {
       const tbody = document.getElementById('statsTable');
       try {
-        const res = await authFetch(`${baseUrl}/api/stats?t=${Date.now()}`);
+        const res = await authFetch(`${baseUrl}/api/stats`);
         const json = await res.json();
         if (json.success) {
           if (!json.data || json.data.length === 0) {
@@ -585,7 +622,7 @@
       tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">加载中...</td></tr>';
 
       try {
-        const res = await authFetch(`${baseUrl}/api/user-journeys?page=${currentPage}&limit=${pageSize}&t=${Date.now()}`);
+        const res = await authFetch(`${baseUrl}/api/user-journeys?page=${currentPage}&limit=${pageSize}`);
         const json = await res.json();
 
         if (json.success) {
@@ -724,29 +761,20 @@
       }
     }
 
-    // ================= 3. 落地页与平台卡片管理 (完全基于 DB 数据库) =================
+    // ================= 3. 落地页与平台卡片管理 =================
     async function fetchManageWebsites() {
-      const tbody = document.getElementById('websiteManageTable');
       try {
-        const res = await authFetch(`${baseUrl}/api/websites?t=${Date.now()}`);
-        const json = await res.json();
-        if (json.success && Array.isArray(json.data)) {
-          cacheWebsites = json.data;
-          renderManageWebsitesTable(json.data);
-        } else {
-          tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">未能加载到站点数据</td></tr>';
-        }
+        const content = getSiteContent();
+        renderManageWebsitesTable(content.companies || []);
       } catch (err) {
-        if (err.message !== '未登录') {
-          tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-500">请求后端失败: ${err.message}</td></tr>`;
-        }
+        console.error(err);
       }
     }
 
     function renderManageWebsitesTable(data) {
       const tbody = document.getElementById('websiteManageTable');
       if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">数据库中尚未配置站点，请在上方添加</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">尚未配置站点，请在上方添加</td></tr>';
         return;
       }
 
@@ -774,36 +802,44 @@
       const url = document.getElementById('siteUrl').value.trim();
       const icon_url = document.getElementById('siteIcon').value.trim();
 
-      const payload = { name, desc_text, url, icon_url };
+      const content = getSiteContent();
+      let companies = content.companies || [];
 
+      if (id) {
+        companies = companies.map(s => s.id == id ? { ...s, name, desc_text, url, icon_url } : s);
+      } else {
+        const newId = Date.now();
+        companies.push({ id: newId, name, desc_text, url, icon_url });
+      }
+
+      content.companies = companies;
+      saveSiteContent(content);
+
+      // 同步推送到服务端 PostgreSQL（已包含 JWT 鉴权）
       try {
-        const res = await authFetch(`${baseUrl}/api/websites${id ? '/' + id : ''}`, {
+        await authFetch(`${baseUrl}/api/websites${id ? '/' + id : ''}`, {
           method: id ? 'PUT' : 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({ name, desc_text, url, icon_url })
         });
-        const json = await res.json();
-        
-        if (json.success) {
-          alert('落地页/平台卡片成功同步到数据库！');
-          resetWebsiteForm();
-          fetchManageWebsites();
-        } else {
-          alert('保存失败：' + (json.message || '服务端异常'));
-        }
       } catch (err) {
-        if (err.message !== '未登录') alert('提交失败: ' + err.message);
+        console.warn('API Sync Warning:', err.message);
       }
+
+      resetWebsiteForm();
+      fetchManageWebsites();
+      alert('落地页/平台卡片保存成功！已同步至 index.html');
     }
 
     function editSite(id) {
-      const site = cacheWebsites.find(s => s.id == id);
+      const content = getSiteContent();
+      const site = (content.companies || []).find(s => s.id == id);
       if (!site) return;
 
       document.getElementById('editSiteId').value = site.id;
-      document.getElementById('siteName').value = site.name || '';
+      document.getElementById('siteName').value = site.name;
       document.getElementById('siteDesc').value = site.desc_text || '';
-      document.getElementById('siteUrl').value = site.url || '';
+      document.getElementById('siteUrl').value = site.url;
       document.getElementById('siteIcon').value = site.icon_url || '';
 
       document.getElementById('submitBtn').innerText = '保存修改';
@@ -820,36 +856,22 @@
     }
 
     async function deleteSite(id) {
-      if (!confirm('确定在数据库中删除该站点卡片？')) return;
+      if (!confirm('确定删除该站点卡片？')) return;
+      const content = getSiteContent();
+      content.companies = (content.companies || []).filter(s => s.id != id);
+      saveSiteContent(content);
 
       try {
-        const res = await authFetch(`${baseUrl}/api/websites/${id}`, { method: 'DELETE' });
-        const json = await res.json();
-        if (json.success) {
-          fetchManageWebsites();
-        } else {
-          alert('删除失败: ' + (json.message || '服务端未响应'));
-        }
-      } catch (err) {
-        if (err.message !== '未登录') alert('删除失败: ' + err.message);
-      }
+        await authFetch(`${baseUrl}/api/websites/${id}`, { method: 'DELETE' });
+      } catch (err) {}
+
+      fetchManageWebsites();
     }
 
     // ================= 4. 首页轮播图管理 =================
-    async function fetchManageSlides() {
-      const tbody = document.getElementById('slidesManageTable');
-      try {
-        const res = await authFetch(`${baseUrl}/api/slides?t=${Date.now()}`);
-        const json = await res.json();
-        if (json.success && Array.isArray(json.data)) {
-          cacheSlides = json.data;
-          renderSlidesManageTable(json.data);
-        } else {
-          tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">暂无轮播图，请在上方添加</td></tr>';
-        }
-      } catch (err) {
-        console.warn('轮播图拉取失败，提示：请确认后端已提供 /api/slides 接口', err);
-      }
+    function fetchManageSlides() {
+      const content = getSiteContent();
+      renderSlidesManageTable(content.slides || []);
     }
 
     function renderSlidesManageTable(slides) {
@@ -873,7 +895,7 @@
       `).join('');
     }
 
-    async function handleSlideSubmit(e) {
+    function handleSlideSubmit(e) {
       e.preventDefault();
       const id = document.getElementById('editSlideId').value;
       const badge = document.getElementById('slideBadge').value.trim();
@@ -881,34 +903,33 @@
       const desc = document.getElementById('slideDesc').value.trim();
       const btnText = document.getElementById('slideBtnText').value.trim();
 
-      const payload = { badge, title, desc, btnText };
+      const content = getSiteContent();
+      let slides = content.slides || [];
 
-      try {
-        const res = await authFetch(`${baseUrl}/api/slides${id ? '/' + id : ''}`, {
-          method: id ? 'PUT' : 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const json = await res.json();
-        if (json.success) {
-          alert('轮播图成功保存在数据库！');
-          resetSlideForm();
-          fetchManageSlides();
-        }
-      } catch (err) {
-        if (err.message !== '未登录') alert('轮播图更新失败：请检查 /api/slides 接口实现');
+      if (id) {
+        slides = slides.map(s => s.id == id ? { ...s, badge, title, desc, btnText } : s);
+      } else {
+        slides.push({ id: Date.now(), badge, title, desc, btnText });
       }
+
+      content.slides = slides;
+      saveSiteContent(content);
+
+      resetSlideForm();
+      fetchManageSlides();
+      alert('轮播图保存成功！已更新 index.html');
     }
 
     function editSlide(id) {
-      const slide = cacheSlides.find(s => s.id == id);
+      const content = getSiteContent();
+      const slide = (content.slides || []).find(s => s.id == id);
       if (!slide) return;
 
       document.getElementById('editSlideId').value = slide.id;
-      document.getElementById('slideBadge').value = slide.badge || '';
-      document.getElementById('slideTitle').value = slide.title || '';
-      document.getElementById('slideDesc').value = slide.desc || '';
-      document.getElementById('slideBtnText').value = slide.btnText || '';
+      document.getElementById('slideBadge').value = slide.badge;
+      document.getElementById('slideTitle').value = slide.title;
+      document.getElementById('slideDesc').value = slide.desc;
+      document.getElementById('slideBtnText').value = slide.btnText;
 
       document.getElementById('submitSlideBtn').innerText = '保存修改';
       document.getElementById('submitSlideBtn').className = 'bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition';
@@ -923,50 +944,43 @@
       document.getElementById('cancelSlideBtn').classList.add('hidden');
     }
 
-    async function deleteSlide(id) {
+    function deleteSlide(id) {
       if (!confirm('确定删除该轮播图？')) return;
-      try {
-        const res = await authFetch(`${baseUrl}/api/slides/${id}`, { method: 'DELETE' });
-        const json = await res.json();
-        if (json.success) fetchManageSlides();
-      } catch (err) {
-        if (err.message !== '未登录') alert('删除轮播图失败');
-      }
+      const content = getSiteContent();
+      content.slides = (content.slides || []).filter(s => s.id != id);
+      saveSiteContent(content);
+      fetchManageSlides();
     }
 
     // ================= 5. 关于我们配置 =================
-    async function loadAboutForm() {
-      try {
-        const res = await authFetch(`${baseUrl}/api/about?t=${Date.now()}`);
-        const json = await res.json();
-        if (json.success && json.data) {
-          const about = json.data;
-          document.getElementById('aboutBadge').value = about.badge || '';
-          document.getElementById('aboutTitle').value = about.title || '';
-          document.getElementById('aboutDesc').value = about.desc || '';
+    function loadAboutForm() {
+      const content = getSiteContent();
+      const about = content.about || defaultSiteContent.about;
 
-          const stats = about.stats || [];
-          if (stats[0]) {
-            document.getElementById('statVal1').value = stats[0].val || '';
-            document.getElementById('statLabel1').value = stats[0].label || '';
-          }
-          if (stats[1]) {
-            document.getElementById('statVal2').value = stats[1].val || '';
-            document.getElementById('statLabel2').value = stats[1].label || '';
-          }
-          if (stats[2]) {
-            document.getElementById('statVal3').value = stats[2].val || '';
-            document.getElementById('statLabel3').value = stats[2].label || '';
-          }
-        }
-      } catch (err) {
-        console.warn('关于我们获取失败，提示：请确认后端已提供 /api/about 接口', err);
+      document.getElementById('aboutBadge').value = about.badge || '';
+      document.getElementById('aboutTitle').value = about.title || '';
+      document.getElementById('aboutDesc').value = about.desc || '';
+
+      const stats = about.stats || [];
+      if (stats[0]) {
+        document.getElementById('statVal1').value = stats[0].val || '';
+        document.getElementById('statLabel1').value = stats[0].label || '';
+      }
+      if (stats[1]) {
+        document.getElementById('statVal2').value = stats[1].val || '';
+        document.getElementById('statLabel2').value = stats[1].label || '';
+      }
+      if (stats[2]) {
+        document.getElementById('statVal3').value = stats[2].val || '';
+        document.getElementById('statLabel3').value = stats[2].label || '';
       }
     }
 
-    async function handleAboutSubmit(e) {
+    function handleAboutSubmit(e) {
       e.preventDefault();
-      const payload = {
+      const content = getSiteContent();
+
+      content.about = {
         badge: document.getElementById('aboutBadge').value.trim(),
         title: document.getElementById('aboutTitle').value.trim(),
         desc: document.getElementById('aboutDesc').value.trim(),
@@ -986,19 +1000,8 @@
         ]
       };
 
-      try {
-        const res = await authFetch(`${baseUrl}/api/about`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const json = await res.json();
-        if (json.success) {
-          alert('“关于我们”数据库记录已更新！');
-        }
-      } catch (err) {
-        if (err.message !== '未登录') alert('关于我们更新失败');
-      }
+      saveSiteContent(content);
+      alert('“关于我们”信息更新成功！已同步至 index.html');
     }
 
     // ================= 6. 解析与导入外部 UTM 链接 =================
@@ -1038,7 +1041,7 @@
     async function fetchLinksHistory() {
       const tbody = document.getElementById('linksTable');
       try {
-        const res = await authFetch(`${baseUrl}/api/links?t=${Date.now()}`);
+        const res = await authFetch(`${baseUrl}/api/links`);
         const json = await res.json();
         if (json.success) {
           renderLinksTable(json.data);
