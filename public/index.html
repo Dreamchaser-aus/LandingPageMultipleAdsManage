@@ -155,7 +155,7 @@
         if (json.success && Array.isArray(json.data) && json.data.length > 0) {
           data.companies = json.data;
           
-          // 强行刷新本地缓存，防止旧的 2 卡片缓存滞后
+          // 强行刷新本地缓存，防止旧卡片缓存滞后
           const currentData = loadSiteContent();
           currentData.companies = json.data;
           localStorage.setItem('gang_site_content', JSON.stringify(currentData));
@@ -191,11 +191,10 @@
         });
       }
 
-      // 2. 渲染所有卡片列表（包含字段空缺清洗容错，确保全部无阻展示）
+      // 2. 渲染所有卡片列表（全面优化 Logo 容器，保证完美缩放无拉伸裁切）
       const siteList = document.getElementById('siteList');
       if (siteList && Array.isArray(data.companies)) {
         siteList.innerHTML = data.companies.map((site, index) => {
-          // 容错清洗：防止后端存在 null 导致循环报错中断
           const siteId = site.id || index;
           const safeName = site.name || 'Verified Partner';
           const safeUrl = site.url || '#';
@@ -212,10 +211,14 @@
               <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-500 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
               <div class="flex items-start space-x-3 mb-3">
-                <img src="${safeIcon}" 
-                     alt="${safeName}"
-                     class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl object-cover bg-slate-800 p-1 shrink-0 border border-slate-700/60 group-hover:scale-105 transition-transform"
-                     onerror="this.src='https://api.dicebear.com/7.x/identicon/svg?seed=${siteId}'">
+                <!-- 优化后的 Logo 容器：固定宽高 + 背景衬底 + 内边距 + object-contain 缩放 -->
+                <div class="w-11 h-11 sm:w-12 sm:h-12 bg-slate-800/90 rounded-xl border border-slate-700/60 p-1 flex items-center justify-center shrink-0 overflow-hidden group-hover:scale-105 transition-transform shadow-inner">
+                  <img src="${safeIcon}" 
+                       alt="${safeName}"
+                       class="w-full h-full object-contain"
+                       onerror="this.src='https://api.dicebear.com/7.x/identicon/svg?seed=${siteId}'">
+                </div>
+
                 <div class="min-w-0 flex-1">
                   <div class="flex items-center justify-between gap-1">
                     <h3 class="font-bold text-slate-100 text-xs sm:text-sm group-hover:text-amber-400 transition-colors truncate">${safeName}</h3>
@@ -241,7 +244,7 @@
           `;
         }).join('');
 
-        // 为每个卡片绑定点击与追踪事件
+        // 绑定点击与行为追踪事件
         document.querySelectorAll('#siteList > div').forEach(card => {
           card.addEventListener('click', () => {
             const id = card.getAttribute('data-id');
@@ -281,7 +284,7 @@
       return vid;
     }
 
-    // UTM 参数解析
+    // UTM 参数解析与全局捕获
     function captureAndGetUtm() {
       const urlParams = new URLSearchParams(window.location.search);
       const urlSource = urlParams.get('source') || urlParams.get('utm_source');
@@ -296,7 +299,7 @@
       return { source, campaign };
     }
 
-    // 打点追踪与跳转
+    // 打点追踪与跳转（优先使用 sendBeacon）
     function trackAndRedirect(siteId, siteName, targetUrl) {
       const visitorId = getVisitorId();
       const { source, campaign } = captureAndGetUtm();
