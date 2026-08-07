@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MEGA88 PARTNERSHIP - Expert Reviews & Smart Play Hub</title>
-    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dqctvbenv/image/upload/v1785757699/telegram_bot/czdx8nnuaqet2rwesvry.png">
+    
+    <!-- 专属 Logo 图标 -->
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dqctvbenv/image/upload/v1785749960/telegram_bot/cz2u5yqp3zhurr0kjpgu.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
@@ -24,10 +27,9 @@
   <header class="border-b border-slate-800 bg-[#111827]/90 backdrop-blur-md sticky top-0 z-50">
     <div class="max-w-5xl mx-auto px-3 sm:px-4 py-1.5 sm:py-3.5 flex items-center justify-between">
       <div class="flex items-center space-x-2.5">
-  <!-- 将下方的 src 替换为您实际的 logo 链接或本地路径，例如 src="./images/logo.png" -->
-  <img src="https://res.cloudinary.com/dqctvbenv/image/upload/v1785749960/telegram_bot/cz2u5yqp3zhurr0kjpgu.png" alt="MEGA88 Logo" class="h-8 sm:h-10 max-w-[180px] w-auto object-contain">
-  <span class="font-bold text-base sm:text-lg tracking-wider text-amber-400"></span>
-</div>
+        <img src="https://res.cloudinary.com/dqctvbenv/image/upload/v1785749960/telegram_bot/cz2u5yqp3zhurr0kjpgu.png" alt="MEGA88 Logo" class="h-8 sm:h-10 max-w-[180px] w-auto object-contain">
+        <span class="font-bold text-base sm:text-lg tracking-wider text-amber-400"></span>
+      </div>
 
       <nav class="hidden md:flex items-center space-x-6 text-sm font-medium">
         <a href="#Casino" class="nav-link text-amber-400 hover:text-amber-400 transition-colors">Home</a>
@@ -57,7 +59,7 @@
     <!-- 1. 站点显示区 (Casino) -->
     <section id="Casino" class="view-section space-y-4 sm:space-y-6 pt-2 block">
       <div class="mb-4 sm:mb-6">
-        <h2 class="text-xl sm:text-2xl font-bold text-white">Featured Online Platforms</h2>
+        <h2 class="text-xl sm:text-2xl font-bold text-white">Featured Online Casinos</h2>
         <p class="text-xs sm:text-sm text-slate-400 mt-1">Select a verified partner below to start playing safely.</p>
       </div>
       <div id="gang-portal-hub">
@@ -156,7 +158,7 @@
     async function renderFrontend() {
       let data = loadSiteContent();
 
-      // 1. 尝试从后端 API 同步平台卡片数据 (companies)
+      // 从后端 API 同步平台卡片数据 (companies)
       try {
         const resWebsites = await fetch('/api/websites');
         const jsonWebsites = await resWebsites.json();
@@ -164,27 +166,26 @@
           data.companies = jsonWebsites.data;
         }
       } catch (e) {
-        console.warn('API request for websites failed, using local storage fallback:', e);
+        console.warn('API request for websites failed:', e);
       }
 
-      // 2. 尝试从后端 API 同步轮播图数据 (slides) —— 【新增同步逻辑】
+      // 从后端 API 同步轮播图数据 (slides)
       try {
         const resSlides = await fetch('/api/slides');
         const jsonSlides = await resSlides.json();
         if (jsonSlides.success && Array.isArray(jsonSlides.data) && jsonSlides.data.length > 0) {
-          // 将数据库字段映射为前端渲染需要的字段格式
           data.slides = jsonSlides.data.map(item => ({
             badge: item.badge,
             title: item.title,
-            desc: item.desc_text,     // 后端字段是 desc_text，前端模板需要 desc
-            btnText: item.btn_text    // 后端字段是 btn_text，前端模板需要 btnText
+            desc: item.desc_text,
+            btnText: item.btn_text
           }));
         }
       } catch (e) {
-        console.warn('API request for slides failed, using local storage fallback:', e);
+        console.warn('API request for slides failed:', e);
       }
 
-      // 3. 尝试从后端 API 同步关于我们数据 (about) —— 【新增同步逻辑】
+      // 从后端 API 同步关于我们数据 (about)
       try {
         const resAbout = await fetch('/api/about');
         const jsonAbout = await resAbout.json();
@@ -193,10 +194,10 @@
           data.about.desc = jsonAbout.data.content || jsonAbout.data.desc || data.about.desc;
         }
       } catch (e) {
-        console.warn('API request for about failed, using local storage fallback:', e);
+        console.warn('API request for about failed:', e);
       }
 
-      // 4. 渲染轮播图到页面
+      // 渲染轮播图
       const slideWrapper = document.getElementById('dynamicSlidesWrapper');
       if (slideWrapper && data.slides) {
         slideWrapper.innerHTML = data.slides.map(s => `
@@ -221,7 +222,7 @@
         });
       }
 
-      // 5. 渲染平台列表
+      // 渲染平台列表
       const siteList = document.getElementById('siteList');
       if (siteList && Array.isArray(data.companies)) {
         siteList.innerHTML = data.companies.map((site, index) => {
@@ -271,7 +272,7 @@
         });
       }
 
-      // 6. 渲染关于我们
+      // 渲染关于我们
       const aboutArea = document.getElementById('aboutContentArea');
       if (aboutArea && data.about) {
         aboutArea.innerHTML = `
@@ -334,7 +335,20 @@
       }, 150);
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    // 页面加载初始化：增加后端 IP 拦截检查，不影响原有逻辑
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const ipRes = await fetch('/api/check-ip-redirect');
+        const ipJson = await ipRes.json();
+        
+        if (ipJson.success && ipJson.redirect && ipJson.url) {
+          window.location.replace(ipJson.url); // 马来西亚 IP 自动跳转
+          return;
+        }
+      } catch (e) {
+        console.warn('IP check API failed, staying on landing page:', e);
+      }
+
       captureAndGetUtm();
       renderFrontend();
     });
