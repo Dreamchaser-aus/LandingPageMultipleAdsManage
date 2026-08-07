@@ -72,6 +72,11 @@
             ℹ️ 关于我们面板配置
           </button>
 
+          <!-- 新增：IP 自动跳转控制按钮[cite: 5] -->
+          <button id="nav-ip" onclick="switchTab('ip')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
+            🌍 IP 自动跳转控制
+          </button>
+
           <div class="pt-2 pb-1 px-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">推广工具</div>
 
           <button id="nav-generator" onclick="switchTab('generator')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
@@ -297,7 +302,40 @@
           </div>
         </section>
 
-        <!-- Tab 6: 链接生成与直接导入 -->
+        <!-- Tab 6: 【新增】IP 自动跳转配置面板 -->
+        <section id="tab-ip" class="tab-content hidden space-y-6">
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60 max-w-2xl">
+            <h3 class="text-base font-bold text-slate-900 mb-1">🌍 IP 归属地自动跳转控制</h3>
+            <p class="text-xs text-slate-500 mb-6">开启后，访客访问首页时若被识别为特定地区（如马来西亚 IP），系统将自动将其强制重定向至目标网址。</p>
+            
+            <form onsubmit="handleIpSettingsSubmit(event)" class="space-y-5">
+              <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <div>
+                  <label class="block text-sm font-semibold text-slate-800">启用 IP 自动跳转功能</label>
+                  <span class="text-xs text-slate-500">当符合地区判定时生效</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="ipEnabledToggle" class="sr-only peer">
+                  <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">目标重定向主页网址 (Target Homepage URL)</label>
+                <input type="url" id="targetHomepageUrl" placeholder="https://example.com" required class="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <span class="text-[11px] text-slate-400 mt-1 block">提示：请填写带 http:// 或 https:// 的完整网址。</span>
+              </div>
+
+              <div class="pt-2 flex justify-end">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition shadow-md shadow-blue-500/20">
+                  💾 保存 IP 跳转配置
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- Tab 7: 链接生成与直接导入 -->
         <section id="tab-generator" class="tab-content hidden space-y-6">
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-200 bg-blue-50/20 max-w-2xl">
             <h3 class="text-base font-bold text-slate-900 mb-1">📥 快捷导入已有 UTM 链接</h3>
@@ -336,7 +374,7 @@
           </div>
         </section>
 
-        <!-- Tab 7: 历史生成与导入记录 -->
+        <!-- Tab 8: 历史生成与导入记录 -->
         <section id="tab-history" class="tab-content hidden space-y-6">
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
             <h3 class="text-base font-bold text-slate-900 mb-4">📋 推广链接历史记录</h3>
@@ -451,6 +489,7 @@
       'websites': '落地页与平台卡片管理',
       'slides': '首页轮播图管理',
       'about': '关于我们面板配置',
+      'ip': 'IP 自动跳转控制',
       'generator': '链接生成与导入',
       'history': '历史生成记录'
     };
@@ -487,6 +526,7 @@
       fetchManageWebsites();
       fetchManageSlides();
       loadAboutForm();
+      loadIpSettingsForm(); // 加载 IP 跳转配置
       fetchLinksHistory();
     }
 
@@ -894,6 +934,43 @@
         if (json.success) {
           alert('“关于我们”信息已成功同步至数据库！');
           loadAboutForm();
+        } else {
+          alert('保存失败: ' + json.message);
+        }
+      } catch (err) {
+        if (err.message !== '未登录') alert('操作异常: ' + err.message);
+      }
+    }
+
+    // ================= 【新增】IP 跳转配置相关函数 =================
+    async function loadIpSettingsForm() {
+      try {
+        const res = await authFetch(`${baseUrl}/api/admin/ip-settings`);
+        const json = await res.json();
+        if (json.success && json.data) {
+          document.getElementById('ipEnabledToggle').checked = json.data.enabled;
+          document.getElementById('targetHomepageUrl').value = json.data.url || '';
+        }
+      } catch (err) {
+        console.error('加载 IP 跳转设置失败', err);
+      }
+    }
+
+    async function handleIpSettingsSubmit(e) {
+      e.preventDefault();
+      const enabled = document.getElementById('ipEnabledToggle').checked;
+      const url = document.getElementById('targetHomepageUrl').value.trim();
+
+      try {
+        const res = await authFetch(`${baseUrl}/api/admin/ip-settings`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled, url })
+        });
+        const json = await res.json();
+        if (json.success) {
+          alert('IP 自动跳转配置已成功保存！');
+          loadIpSettingsForm();
         } else {
           alert('保存失败: ' + json.message);
         }
