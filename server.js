@@ -5,6 +5,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const fs = require('fs');
+const geoip = require('geoip-lite'); // 引入 IP 归属地判断库
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -145,7 +146,7 @@ async function initDatabase() {
       )
     `);
 
-    // 4. 【新增】轮播图表
+    // 4. 轮播图表
     await pool.query(`
       CREATE TABLE IF NOT EXISTS slides (
         id SERIAL PRIMARY KEY,
@@ -157,7 +158,7 @@ async function initDatabase() {
       )
     `);
 
-    // 5. 【新增】关于我们配置表
+    // 5. 关于我们配置表
     await pool.query(`
       CREATE TABLE IF NOT EXISTS about_info (
         id SERIAL PRIMARY KEY,
@@ -166,6 +167,18 @@ async function initDatabase() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    // 6. 【新增】系统设置表（用于存储 IP 跳转开关和目标主页网址）
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS system_settings (
+        key TEXT PRIMARY KEY,
+        value TEXT
+      )
+    `);
+
+    // 插入默认的 IP 跳转设置项（如果不存在）
+    await pool.query(`INSERT INTO system_settings (key, value) VALUES ('ip_redirect_enabled', 'false') ON CONFLICT (key) DO NOTHING`);
+    await pool.query(`INSERT INTO system_settings (key, value) VALUES ('target_homepage_url', 'https://example.com') ON CONFLICT (key) DO NOTHING`);
 
     // 初始化默认卡片数据（如果表为空）
     const checkRes = await pool.query(`SELECT COUNT(*) AS count FROM websites`);
@@ -226,6 +239,54 @@ app.post('/api/upload', authenticateToken, upload.single('icon'), (req, res) => 
 });
 
 /**
+ * 【新增】IP 自动跳转检查 API (公开：前端加载时调用)
+ */
+app.get('/api/check-ip-redirect', async (req, res) => {
+  try {
+    // 从系统设置表中读取开关与网址配置
+    const enabledRes = await pool.query(`SELECT value FROM system_settings WHERE key = 'ip_redirect_enabled'`);
+    const urlRes = await pool.query(`SELECT value FROM system_settings WHERE key = 'target_homepage_url'`);
+
+    const isEnabled = enabledRes.rows[0]?.value === 'true';
+    const targetUrl = urlRes.rows[0]?.value || '';
+
+    // 如果未开启或没有配网址，直接返回不跳转
+    if (!isEnabled || !targetUrl) {
+      return res.json({ success: true, redirect: false });
+    }
+
+    // 获取用户真实 IP（兼容代理、CDN 如 Cloudflare）
+    let clientIp = '127.0.0.1';
+    const rawIp = req.headers['x-forwarded-for'];
+    if (rawIp) {
+      clientIp = rawIp.split(',')[0].trim();
+    } else if (req.headers['x-real-ip']) {
+      clientIp = req.headers['x-real-ip'];
+    } else if (req.socket.remoteAddress) {
+      clientIp = req.socket.remoteAddress;
+    }
+
+    // 使用 geoip-lite 解析 IP 归属地
+    const geo = geoip.lookup(clientIp);
+    const country = geo ? geo.country : ''; // 马来西亚的国家代码为 'MY'
+
+    // 如果是马来西亚 IP，下发跳转指令
+    if (country === 'MY') {
+      return res.json({
+        success: true,
+        redirect: true,
+        url: targetUrl
+      });
+    }
+
+    return res.json({ success: true, redirect: false });
+  } catch (err) {
+    console.error('❌ IP 检查失败:', err.message);
+    return res.json({ success: true, redirect: false });
+  }
+});
+
+/**
  * 轨迹打点 API (公开)
  */
 app.post('/api/track', async (req, res) => {
@@ -273,7 +334,7 @@ app.get('/api/websites', async (req, res) => {
 });
 
 /**
- * 【新增】获取轮播图 API (公开：允许前端展示)
+ * 获取轮播图 API (公开：允许前端展示)
  */
 app.get('/api/slides', async (req, res) => {
   try {
@@ -285,7 +346,7 @@ app.get('/api/slides', async (req, res) => {
 });
 
 /**
- * 【新增】获取关于我们信息 API (公开：允许前端展示)
+ * 获取关于我们信息 API (公开：允许前端展示)
  */
 app.get('/api/about', async (req, res) => {
   try {
@@ -399,7 +460,7 @@ app.delete('/api/websites/:id', authenticateToken, async (req, res) => {
 });
 
 /**
- * 【新增】轮播图管理 CRUD (需登录)
+ * 轮播图管理 CRUD (需登录)
  */
 app.post('/api/slides', authenticateToken, async (req, res) => {
   const { badge, title, desc, btnText } = req.body;
@@ -437,7 +498,7 @@ app.delete('/api/slides/:id', authenticateToken, async (req, res) => {
 });
 
 /**
- * 【新增】关于我们管理 API (需登录)
+ * 关于我们管理 API (需登录)
  */
 app.post('/api/about', authenticateToken, async (req, res) => {
   const { title, content } = req.body;
@@ -449,6 +510,46 @@ app.post('/api/about', authenticateToken, async (req, res) => {
       await pool.query(`UPDATE about_info SET title = $1, content = $2, updated_at = CURRENT_TIMESTAMP WHERE id = 1`, [title, content]);
     }
     res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * 【新增】后台获取 IP 跳转设置 API (需登录)
+ */
+app.get('/api/admin/ip-settings', authenticateToken, async (req, res) => {
+  try {
+    const enabledRes = await pool.query(`SELECT value FROM system_settings WHERE key = 'ip_redirect_enabled'`);
+    const urlRes = await pool.query(`SELECT value FROM system_settings WHERE key = 'target_homepage_url'`);
+
+    res.json({
+      success: true,
+      data: {
+        enabled: enabledRes.rows[0]?.value === 'true',
+        url: urlRes.rows[0]?.value || ''
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * 【新增】后台保存 IP 跳转设置 API (需登录)
+ */
+app.post('/api/admin/ip-settings', authenticateToken, async (req, res) => {
+  const { enabled, url } = req.body;
+  try {
+    await pool.query(
+      `INSERT INTO system_settings (key, value) VALUES ('ip_redirect_enabled', $1) ON CONFLICT (key) DO UPDATE SET value = $1`,
+      [enabled ? 'true' : 'false']
+    );
+    await pool.query(
+      `INSERT INTO system_settings (key, value) VALUES ('target_homepage_url', $1) ON CONFLICT (key) DO UPDATE SET value = $1`,
+      [url || '']
+    );
+    res.json({ success: true, message: 'IP 设置保存成功' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
